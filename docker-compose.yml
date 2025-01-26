@@ -1,0 +1,17 @@
+services:
+  myccet_infyfix_com_nextjs:
+    image: myccet.infyfix.com
+    container_name: myccet.infyfix.com
+    working_dir: /app
+    ports:
+      - "3005:3000"
+    expose:
+      - "3000"
+    command: "npm start"
+    environment:
+      NODE_ENV: production
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
