@@ -7,7 +7,7 @@ services:
       - "3006:3000"
     expose:
       - "3000"
-    command: "start:prod"
+    command: "npm start"
     environment:
       NODE_ENV: production
     build:
