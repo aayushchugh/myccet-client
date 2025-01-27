@@ -1,5 +1,6 @@
+"use client";
 import * as React from "react";
-
+import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -9,32 +10,74 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Logo from "@/components/common/logo";
+
+interface FormInput {
+	email: string;
+	password: string;
+}
 
 export default function LoginPage() {
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+	} = useForm<FormInput>();
+	const onSubmit: SubmitHandler<FormInput> = (data) => console.log(data);
+
 	return (
-		<section className="min-h-dvh flex flex-col justify-center items-center ">
-			<Card className="w-1/3 ">
-				<CardHeader className="w-[300px] flex justify-center">
-					<img src="/logo.svg" alt="" className="" />
+		<form
+			onSubmit={handleSubmit(onSubmit)}
+			className="min-h-dvh flex flex-col justify-center items-center"
+		>
+			<Card className="max-w-xl w-full">
+				<CardHeader className="flex items-center justify-center mx-auto">
+					<Logo />
 				</CardHeader>
 				<CardContent>
-					<form>
-						<div className="grid w-full items-center gap-4">
-							<div className="flex flex-col space-y-1.5">
-								<Label htmlFor="name">Email</Label>
-								<Input id="name" placeholder="email address" />
-							</div>
-							<div className="flex flex-col space-y-1.5">
-								<Label htmlFor="framework">Password</Label>
-								<Input id="name" placeholder="password" />
-							</div>
+					<div className="grid w-full items-center gap-4">
+						<div className="flex flex-col space-y-1.5">
+							<Label htmlFor="email">Email</Label>
+							<Input
+								id="email"
+								type="email"
+								placeholder="Enter your email"
+								{...register("email", {
+									required: "Email is required",
+									pattern: {
+										value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+										message: "Enter a valid email address",
+									},
+								})}
+							/>
+							{errors.email && (
+								<span style={{ color: "red" }}>{errors.email.message}</span>
+							)}
 						</div>
-					</form>
+						<div className="flex flex-col space-y-1.5">
+							<Label htmlFor="password">Password</Label>
+							<Input
+								id="password"
+								type="password"
+								placeholder="Password"
+								{...register("password", {
+									required: "Password is required",
+									minLength: {
+										value: 6,
+										message: "Password must be at least 6 characters long",
+									},
+								})}
+							/>
+							{errors.password && (
+								<span style={{ color: "red" }}>{errors.password.message}</span>
+							)}
+						</div>
+					</div>
 				</CardContent>
 				<CardFooter className="flex justify-center">
-					<Button>Login</Button>
+					<Button type="submit">Login</Button>
 				</CardFooter>
 			</Card>
-		</section>
+		</form>
 	);
 }
