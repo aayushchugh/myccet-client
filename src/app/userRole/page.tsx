@@ -17,9 +17,9 @@ export default function userRole() {
           <CardTitle>
             <img src="/logo.svg" alt="" />
           </CardTitle>
-          <CardDescription className="flex items-center">
+          {/* <CardDescription className="flex items-center">
             Your Role
-          </CardDescription>
+          </CardDescription> */}
         </CardHeader>
 
         <CardFooter className="flex justify-between">
