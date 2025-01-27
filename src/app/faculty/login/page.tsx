@@ -2,12 +2,7 @@
 import * as React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Logo from "@/components/common/logo";
@@ -41,6 +36,7 @@ export default function LoginPage() {
 							<Input
 								id="email"
 								type="email"
+								error={errors.email?.message}
 								placeholder="Enter your email"
 								{...register("email", {
 									required: "Email is required",
@@ -50,9 +46,6 @@ export default function LoginPage() {
 									},
 								})}
 							/>
-							{errors.email && (
-								<span style={{ color: "red" }}>{errors.email.message}</span>
-							)}
 						</div>
 						<div className="flex flex-col space-y-1.5">
 							<Label htmlFor="password">Password</Label>
@@ -60,6 +53,7 @@ export default function LoginPage() {
 								id="password"
 								type="password"
 								placeholder="Password"
+								error={errors.password?.message}
 								{...register("password", {
 									required: "Password is required",
 									minLength: {
@@ -68,9 +62,6 @@ export default function LoginPage() {
 									},
 								})}
 							/>
-							{errors.password && (
-								<span style={{ color: "red" }}>{errors.password.message}</span>
-							)}
 						</div>
 					</div>
 				</CardContent>
