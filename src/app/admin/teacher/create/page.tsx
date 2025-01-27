@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-interface IFormInput {
+interface FormInput {
   avatar: FileList;
   firstName: string;
   middleName: string;
@@ -21,8 +21,8 @@ export default function TeacherRegistrationForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<IFormInput>();
-  const onSubmit: SubmitHandler<IFormInput> = (data) => console.log(data);
+  } = useForm<FormInput>();
+  const onSubmit: SubmitHandler<FormInput> = (data) => console.log(data);
 
   return (
     <form
@@ -32,19 +32,16 @@ export default function TeacherRegistrationForm() {
       <div className="grid gap-4 w-full max-w-3xl">
         <div className="flex flex-col space-y-1.5">
           <Label htmlFor="avatar">Avatar</Label>
-          <Input
-            required
-            id="avatar"
-            type="file"
-            {...register("avatar", { required: "Avatar is required" })}
-          />
+          <Input required id="avatar" type="file" {...register("avatar")} />
           {errors.avatar && (
             <span style={{ color: "red" }}>{errors.avatar.message}</span>
           )}
         </div>
         <div className="grid grid-cols-3 gap-4">
           <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="firstName">First Name</Label>
+            <Label required htmlFor="firstName">
+              First Name
+            </Label>
             <Input
               id="firstName"
               placeholder="First Name"
@@ -75,7 +72,9 @@ export default function TeacherRegistrationForm() {
           </div>
         </div>
         <div className="flex flex-col space-y-1.5">
-          <Label htmlFor="email">Email</Label>
+          <Label required htmlFor="email">
+            Email
+          </Label>
           <Input
             id="email"
             type="email"
@@ -93,7 +92,9 @@ export default function TeacherRegistrationForm() {
           )}
         </div>
         <div className="flex flex-col space-y-1.5">
-          <Label htmlFor="phoneNumber">Phone Number</Label>
+          <Label required htmlFor="phoneNumber">
+            Phone Number
+          </Label>
           <Input
             id="phoneNumber"
             type="tel"
@@ -107,7 +108,9 @@ export default function TeacherRegistrationForm() {
           )}
         </div>
         <div className="flex flex-col space-y-1.5">
-          <Label htmlFor="password">Password</Label>
+          <Label required htmlFor="password">
+            Password
+          </Label>
           <Input
             id="password"
             type="password"
@@ -125,7 +128,9 @@ export default function TeacherRegistrationForm() {
           )}
         </div>
         <div className="flex flex-col space-y-1.5">
-          <Label htmlFor="teacherRole">Teacher Role</Label>
+          <Label required htmlFor="teacherRole">
+            Teacher Role
+          </Label>
           <Input
             id="teacherRole"
             placeholder="Enter your role"
