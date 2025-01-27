@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Button } from "../components/ui";
 import { Card, CardContent, CardHeader } from "../components/ui/card";
 import { Typography } from "../components/ui/typography";
+import Link from "next/link";
 
 export default function Home() {
 	return (
@@ -17,8 +18,13 @@ export default function Home() {
 						Please select your role
 					</Typography>
 					<div className="flex items-center justify-evenly mt-6">
-						<Button>Faculty</Button>
-						<Button>Admin</Button>
+						<Link href={"/faculty"}>
+							<Button>Faculty</Button>
+						</Link>
+
+						<Link href={"/admin"}>
+							<Button>Admin</Button>
+						</Link>
 					</div>
 				</CardContent>
 			</Card>
