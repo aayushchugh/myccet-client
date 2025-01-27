@@ -2,12 +2,7 @@
 import * as React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Logo from "@/components/common/logo";
@@ -23,7 +18,7 @@ export default function LoginPage() {
 		handleSubmit,
 		formState: { errors },
 	} = useForm<FormInput>();
-	const onSubmit: SubmitHandler<FormInput> = data => console.log(data);
+	const onSubmit: SubmitHandler<FormInput> = (data) => console.log(data);
 
 	return (
 		<form
