@@ -1,23 +1,26 @@
+import Image from "next/image";
 import { Button } from "../components/ui";
-import { Card, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
+import { Card, CardContent, CardHeader } from "../components/ui/card";
+import { Typography } from "../components/ui/typography";
 
 export default function Home() {
 	return (
 		<section className="min-h-dvh flex items-center justify-center">
-			<Card className="w-[350px] ">
-				<CardHeader>
-					<CardTitle>
-						<img src="/logo.svg" alt="" />
-					</CardTitle>
-					{/* <CardDescription className="flex items-center">
-            Your Role
-          </CardDescription> */}
+			<Card className="max-w-2xl w-full">
+				<CardHeader className="flex items-center justify-center p-0">
+					<div className="w-60 h-60 relative">
+						<Image src="/logo.svg" alt="logo" fill />
+					</div>
 				</CardHeader>
-
-				<CardFooter className="flex justify-between">
-					<Button>Faculty</Button>
-					<Button>Admin</Button>
-				</CardFooter>
+				<CardContent>
+					<Typography variant={"h2"} className="text-center">
+						Please select your role
+					</Typography>
+					<div className="flex items-center justify-evenly mt-6">
+						<Button>Faculty</Button>
+						<Button>Admin</Button>
+					</div>
+				</CardContent>
 			</Card>
 		</section>
 	);
