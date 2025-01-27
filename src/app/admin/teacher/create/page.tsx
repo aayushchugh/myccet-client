@@ -30,13 +30,6 @@ export default function TeacherRegistrationForm() {
       className="min-h-dvh flex flex-col justify-center items-center"
     >
       <div className="grid gap-4 w-full max-w-3xl">
-        <div className="flex flex-col space-y-1.5">
-          <Label htmlFor="avatar">Avatar</Label>
-          <Input required id="avatar" type="file" {...register("avatar")} />
-          {errors.avatar && (
-            <span style={{ color: "red" }}>{errors.avatar.message}</span>
-          )}
-        </div>
         <div className="grid grid-cols-3 gap-4">
           <div className="flex flex-col space-y-1.5">
             <Label required htmlFor="firstName">
