@@ -11,6 +11,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+// import Link from "next/link";
 
 interface FormInput {
 	avatar: FileList;
@@ -21,12 +22,14 @@ interface FormInput {
 	phoneNumber: string;
 	fatherName: string;
 	motherName: string;
+	category: string;
 }
 
 export default function TeacherRegistrationForm() {
 	const {
 		register,
 		handleSubmit,
+		setValue,
 		formState: { errors },
 	} = useForm<FormInput>();
 	const onSubmit: SubmitHandler<FormInput> = (data) => console.log(data);
@@ -45,11 +48,9 @@ export default function TeacherRegistrationForm() {
 						<Input
 							id="firstName"
 							placeholder="First Name"
+							error={errors.firstName?.message}
 							{...register("firstName", { required: "First name is required" })}
 						/>
-						{errors.firstName && (
-							<span style={{ color: "red" }}>{errors.firstName.message}</span>
-						)}
 					</div>
 					<div className="flex flex-col space-y-1.5">
 						<Label htmlFor="middleName">Middle Name</Label>
@@ -61,10 +62,12 @@ export default function TeacherRegistrationForm() {
 					</div>
 					<div className="flex flex-col space-y-1.5">
 						<Label htmlFor="lastName">Last Name</Label>
-						<Input id="lastName" placeholder="Last Name" {...register("lastName")} />
-						{errors.lastName && (
-							<span style={{ color: "red" }}>{errors.lastName.message}</span>
-						)}
+						<Input
+							id="lastName"
+							placeholder="Last Name"
+							error={errors.lastName?.message}
+							{...register("lastName")}
+						/>
 					</div>
 				</div>
 				<div className="flex flex-col space-y-1.5">
@@ -75,6 +78,7 @@ export default function TeacherRegistrationForm() {
 						id="email"
 						type="email"
 						placeholder="Enter your email"
+						error={errors.email?.message}
 						{...register("email", {
 							required: "Email is required",
 							pattern: {
@@ -83,7 +87,6 @@ export default function TeacherRegistrationForm() {
 							},
 						})}
 					/>
-					{errors.email && <span style={{ color: "red" }}>{errors.email.message}</span>}
 				</div>
 
 				<div className="flex flex-col space-y-1.5">
@@ -94,13 +97,11 @@ export default function TeacherRegistrationForm() {
 						id="phoneNumber"
 						type="tel"
 						placeholder="Phone Number"
+						error={errors.phoneNumber?.message}
 						{...register("phoneNumber", {
 							required: "Phone number is required",
 						})}
 					/>
-					{errors.phoneNumber && (
-						<span style={{ color: "red" }}>{errors.phoneNumber.message}</span>
-					)}
 				</div>
 				<div className="flex flex-col space-y-1.5">
 					<Label required htmlFor="fatherName">
@@ -109,11 +110,9 @@ export default function TeacherRegistrationForm() {
 					<Input
 						id="fatherName"
 						placeholder="Fathers Name"
+						error={errors.fatherName?.message}
 						{...register("fatherName", { required: "Role is required" })}
 					/>
-					{errors.fatherName && (
-						<span style={{ color: "red" }}>{errors.fatherName.message}</span>
-					)}
 				</div>
 				<div className="flex flex-col space-y-1.5">
 					<Label required htmlFor="motherName">
@@ -122,27 +121,36 @@ export default function TeacherRegistrationForm() {
 					<Input
 						id="motherName"
 						placeholder="Mothers Name"
+						error={errors.motherName?.message}
 						{...register("motherName", { required: "Role is required" })}
 					/>
-					{errors.motherName && (
-						<span style={{ color: "red" }}>{errors.motherName.message}</span>
-					)}
 				</div>
 				<div className="grid grid-cols-4 gap-2">
-					<div>
-						<Select>
-							<SelectTrigger>
-								<SelectValue placeholder="Category" />
+					<div className="flex flex-col space-y-1.5">
+						<Label required htmlFor="category">
+							Category
+						</Label>
+						<Select
+							onValueChange={(value) => {
+								setValue("category", value);
+							}}
+						>
+							<SelectTrigger error={errors?.category?.message}>
+								<SelectValue
+									placeholder={"Select Category"}
+									{...register("category", { required: "Category is required" })}
+								/>
 							</SelectTrigger>
 
 							<SelectContent>
 								<SelectItem value="GEN">General</SelectItem>
-								<SelectItem value="SC">SC(Scheduled Caste)</SelectItem>
-								<SelectItem value="ST">SC(Scheduled Tribe)</SelectItem>
-								<SelectItem value="OBC">OBC(Other Backward Caste)</SelectItem>
+								<SelectItem value="SC">SC (Scheduled Caste)</SelectItem>
+								<SelectItem value="ST">ST (Scheduled Tribe)</SelectItem>
+								<SelectItem value="OBC">OBC (Other Backward Caste)</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
+
 					<div>
 						<Select>
 							<SelectTrigger>
@@ -195,6 +203,9 @@ export default function TeacherRegistrationForm() {
 			</div>
 			<div className="flex justify-center mt-4">
 				<Button type="submit">Register</Button>
+				{/* <Link href={"/admin"}>
+					<Button>Register</Button>
+				</Link> */}
 			</div>
 		</form>
 	);
