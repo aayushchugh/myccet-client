@@ -26,13 +26,6 @@ interface TableRowData {
 
 const data: TableRowData[] = [
 	{
-		registrationNumber: "220099510648",
-		name: "Aditya Pant",
-		fathersName: "Ramesh Chandra Pant",
-		semester: "6",
-		branch: "Computer Science Engineering",
-	},
-	{
 		registrationNumber: "220099510649",
 		name: "John Doe",
 		fathersName: "Richard Doe",
@@ -225,38 +218,42 @@ export default function TableDemo() {
 					))}
 				</TableBody>
 			</Table>
-			<Pagination>
-				<PaginationContent>
-					{/* Previous Button */}
-					<PaginationItem>
-						<PaginationPrevious
-							href="#"
-							onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
-						/>
-					</PaginationItem>
-
-					{/* Page Numbers */}
-					{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-						<PaginationItem key={page}>
-							<PaginationLink
+			<div className=" mt-10">
+				<Pagination>
+					<PaginationContent>
+						{/* Previous Button */}
+						<PaginationItem>
+							<PaginationPrevious
 								href="#"
-								isActive={page === currentPage}
-								onClick={() => handlePageChange(page)}
-							>
-								{page}
-							</PaginationLink>
+								onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+							/>
 						</PaginationItem>
-					))}
 
-					{/* Next Button */}
-					<PaginationItem>
-						<PaginationNext
-							href="#"
-							onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
-						/>
-					</PaginationItem>
-				</PaginationContent>
-			</Pagination>
+						{/* Page Numbers */}
+						{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+							<PaginationItem key={page}>
+								<PaginationLink
+									href="#"
+									isActive={page === currentPage}
+									onClick={() => handlePageChange(page)}
+								>
+									{page}
+								</PaginationLink>
+							</PaginationItem>
+						))}
+
+						{/* Next Button */}
+						<PaginationItem>
+							<PaginationNext
+								href="#"
+								onClick={() =>
+									handlePageChange(Math.min(currentPage + 1, totalPages))
+								}
+							/>
+						</PaginationItem>
+					</PaginationContent>
+				</Pagination>
+			</div>
 		</div>
 	);
 }
