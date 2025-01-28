@@ -10,7 +10,7 @@ export default function AdminLayout({
 		<div>
 			<SidebarProvider>
 				<AppSidebar />
-				<main>
+				<main className="flex-1">
 					<SidebarTrigger />
 
 					{children}

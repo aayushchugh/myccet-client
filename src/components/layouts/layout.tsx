@@ -45,7 +45,6 @@ export function AppSidebar() {
 						alt="Logo"
 						className="mx-auto h-32" // Increased width and height
 					/>
-					<h2 className="text-2xl font-bold ">MY CCET</h2> {/* Adjusted font size */}
 				</div>
 
 				{/* Navigation Menu */}
