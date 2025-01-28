@@ -1,6 +1,6 @@
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layouts/layout";
-
+import { BreadcrumbDemo } from "@/components/layouts/breadcrumb";
 export default function AdminLayout({
 	children,
 }: Readonly<{
@@ -10,10 +10,10 @@ export default function AdminLayout({
 		<div>
 			<SidebarProvider>
 				<AppSidebar />
-				<main className="flex-1 px-10">
-					<SidebarTrigger />
-
-					{children}
+				<main className="flex-1 px-10 pt-4">
+					{/* <SidebarTrigger /> */}
+					<BreadcrumbDemo />
+					<div className="pt-4">{children}</div>
 				</main>
 			</SidebarProvider>
 		</div>
