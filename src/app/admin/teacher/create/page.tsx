@@ -53,9 +53,6 @@ export default function TeacherRegistrationForm() {
 					<div className="flex flex-col space-y-1.5">
 						<Label htmlFor="lastName">Last Name</Label>
 						<Input id="lastName" placeholder="Last Name" {...register("lastName")} />
-						{errors.lastName && (
-							<span style={{ color: "red" }}>{errors.lastName.message}</span>
-						)}
 					</div>
 				</div>
 				<div className="flex flex-col space-y-1.5">
