@@ -27,7 +27,7 @@ export default function TeacherRegistrationForm() {
 	return (
 		<form
 			onSubmit={handleSubmit(onSubmit)}
-			className="min-h-dvh flex flex-col  w-full place-items-center px-10"
+			className="min-h-dvh flex flex-col  w-full place-items-center "
 		>
 			<div className="grid gap-4 w-full ">
 				<div className="grid grid-cols-3 gap-4">
