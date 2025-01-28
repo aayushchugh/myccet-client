@@ -18,11 +18,15 @@ interface FormInput {
 	firstName: string;
 	middleName: string;
 	lastName: string;
+	allotment: string;
 	email: string;
 	phoneNumber: string;
 	fatherName: string;
 	motherName: string;
 	category: string;
+	branch: string;
+	semester: string;
+	courseType: string;
 }
 
 export default function TeacherRegistrationForm() {
@@ -69,6 +73,24 @@ export default function TeacherRegistrationForm() {
 							{...register("lastName")}
 						/>
 					</div>
+				</div>
+				<div className="flex flex-col space-y-1.5">
+					<Label required htmlFor="allotment">
+						Allotment number
+					</Label>
+					<Input
+						id="allotment"
+						type="text"
+						placeholder="Enter your allotment number"
+						error={errors.allotment?.message}
+						{...register("allotment", {
+							required: "allotment number is required",
+							pattern: {
+								value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+								message: "Enter a valid allotment number",
+							},
+						})}
+					/>
 				</div>
 				<div className="flex flex-col space-y-1.5">
 					<Label required htmlFor="email">
@@ -151,10 +173,20 @@ export default function TeacherRegistrationForm() {
 						</Select>
 					</div>
 
-					<div>
-						<Select>
-							<SelectTrigger>
-								<SelectValue placeholder="Branch" />
+					<div className="flex flex-col space-y-1.5">
+						<Label required htmlFor="Branch">
+							Branch
+						</Label>
+						<Select
+							onValueChange={(value) => {
+								setValue("branch", value);
+							}}
+						>
+							<SelectTrigger error={errors?.branch?.message}>
+								<SelectValue
+									placeholder={"Select Branch"}
+									{...register("branch", { required: "Branch is required" })}
+								/>
 							</SelectTrigger>
 
 							<SelectContent>
@@ -170,10 +202,20 @@ export default function TeacherRegistrationForm() {
 							</SelectContent>
 						</Select>
 					</div>
-					<div>
-						<Select>
-							<SelectTrigger>
-								<SelectValue placeholder="Semester" />
+					<div className="flex flex-col space-y-1.5">
+						<Label required htmlFor="semester">
+							Semester
+						</Label>
+						<Select
+							onValueChange={(value) => {
+								setValue("semester", value);
+							}}
+						>
+							<SelectTrigger error={errors?.semester?.message}>
+								<SelectValue
+									placeholder={"Select Semester"}
+									{...register("semester", { required: "Semester is required" })}
+								/>
 							</SelectTrigger>
 
 							<SelectContent>
@@ -188,11 +230,24 @@ export default function TeacherRegistrationForm() {
 							</SelectContent>
 						</Select>
 					</div>
-					<div>
-						<Select>
-							<SelectTrigger>
-								<SelectValue placeholder="Type" />
+					<div className="flex flex-col space-y-1.5">
+						<Label required htmlFor="courseType">
+							Course Type
+						</Label>
+						<Select
+							onValueChange={(value) => {
+								setValue("courseType", value);
+							}}
+						>
+							<SelectTrigger error={errors?.courseType?.message}>
+								<SelectValue
+									placeholder={"Select Course Type"}
+									{...register("courseType", {
+										required: "Course Type is required",
+									})}
+								/>
 							</SelectTrigger>
+
 							<SelectContent>
 								<SelectItem value="m@example.com">Full Time Diploma</SelectItem>
 								<SelectItem value="m@google.com">Part Time Diploma</SelectItem>
