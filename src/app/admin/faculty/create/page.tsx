@@ -25,101 +25,119 @@ export default function TeacherRegistrationForm() {
 	const onSubmit: SubmitHandler<FormInput> = (data) => console.log(data);
 
 	return (
-		<form
-			onSubmit={handleSubmit(onSubmit)}
-			className="min-h-dvh flex flex-col  w-full place-items-center "
-		>
-			<div className="grid gap-4 w-full ">
-				<div className="grid grid-cols-3 gap-4">
+		<div>
+			<div className="flex flex-col space-y-1.5 pb-3">
+				<Label htmlFor="avatar" required>
+					Avatar
+				</Label>
+				<Input
+					required
+					id="avatar"
+					type="file"
+					error={errors.avatar?.message}
+					{...register("avatar", { required: "Avatar is required" })}
+				/>
+			</div>
+			<form
+				onSubmit={handleSubmit(onSubmit)}
+				className="min-h-dvh flex flex-col  w-full place-items-center "
+			>
+				<div className="grid gap-4 w-full ">
+					<div className="grid grid-cols-3 gap-4">
+						<div className="flex flex-col space-y-1.5">
+							<Label required htmlFor="firstName">
+								First Name
+							</Label>
+							<Input
+								id="firstName"
+								placeholder="First Name"
+								error={errors.firstName?.message}
+								{...register("firstName", { required: "First name is required" })}
+							/>
+						</div>
+						<div className="flex flex-col space-y-1.5">
+							<Label htmlFor="middleName">Middle Name</Label>
+							<Input
+								id="middleName"
+								placeholder="Middle Name"
+								{...register("middleName")}
+							/>
+						</div>
+						<div className="flex flex-col space-y-1.5">
+							<Label htmlFor="lastName">Last Name</Label>
+							<Input
+								id="lastName"
+								placeholder="Last Name"
+								{...register("lastName")}
+							/>
+						</div>
+					</div>
 					<div className="flex flex-col space-y-1.5">
-						<Label required htmlFor="firstName">
-							First Name
+						<Label required htmlFor="email">
+							Email
 						</Label>
 						<Input
-							id="firstName"
-							placeholder="First Name"
-							error={errors.firstName?.message}
-							{...register("firstName", { required: "First name is required" })}
+							id="email"
+							type="email"
+							placeholder="Enter your email"
+							error={errors.email?.message}
+							{...register("email", {
+								required: "Email is required",
+								pattern: {
+									value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+									message: "Enter a valid email address",
+								},
+							})}
 						/>
 					</div>
 					<div className="flex flex-col space-y-1.5">
-						<Label htmlFor="middleName">Middle Name</Label>
+						<Label required htmlFor="phoneNumber">
+							Phone Number
+						</Label>
 						<Input
-							id="middleName"
-							placeholder="Middle Name"
-							{...register("middleName")}
+							id="phoneNumber"
+							type="tel"
+							placeholder="Phone Number"
+							error={errors.phoneNumber?.message}
+							{...register("phoneNumber", {
+								required: "Phone number is required",
+							})}
 						/>
 					</div>
 					<div className="flex flex-col space-y-1.5">
-						<Label htmlFor="lastName">Last Name</Label>
-						<Input id="lastName" placeholder="Last Name" {...register("lastName")} />
+						<Label required htmlFor="password">
+							Password
+						</Label>
+						<Input
+							id="password"
+							type="password"
+							placeholder="Password"
+							error={errors.password?.message}
+							{...register("password", {
+								required: "Password is required",
+								minLength: {
+									value: 6,
+									message: "Password must be at least 6 characters long",
+								},
+							})}
+						/>
+					</div>
+					<div className="flex flex-col space-y-1.5">
+						<Label required htmlFor="teacherRole">
+							Teacher Role
+						</Label>
+						<Input
+							id="teacherRole"
+							placeholder="Enter your role"
+							error={errors.teacherRole?.message}
+							{...register("teacherRole", { required: "Role is required" })}
+						/>
 					</div>
 				</div>
-				<div className="flex flex-col space-y-1.5">
-					<Label required htmlFor="email">
-						Email
-					</Label>
-					<Input
-						id="email"
-						type="email"
-						placeholder="Enter your email"
-						error={errors.email?.message}
-						{...register("email", {
-							required: "Email is required",
-							pattern: {
-								value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-								message: "Enter a valid email address",
-							},
-						})}
-					/>
+				<div className="flex justify-center mt-4">
+					<Button type="submit">Register</Button>
 				</div>
-				<div className="flex flex-col space-y-1.5">
-					<Label required htmlFor="phoneNumber">
-						Phone Number
-					</Label>
-					<Input
-						id="phoneNumber"
-						type="tel"
-						placeholder="Phone Number"
-						error={errors.phoneNumber?.message}
-						{...register("phoneNumber", {
-							required: "Phone number is required",
-						})}
-					/>
-				</div>
-				<div className="flex flex-col space-y-1.5">
-					<Label required htmlFor="password">
-						Password
-					</Label>
-					<Input
-						id="password"
-						type="password"
-						placeholder="Password"
-						error={errors.password?.message}
-						{...register("password", {
-							required: "Password is required",
-							minLength: {
-								value: 6,
-								message: "Password must be at least 6 characters long",
-							},
-						})}
-					/>
-				</div>
-				<div className="flex flex-col space-y-1.5">
-					<Label required htmlFor="teacherRole">
-						Teacher Role
-					</Label>
-					<Input
-						id="teacherRole"
-						placeholder="Enter your role"
-						error={errors.teacherRole?.message}
-						{...register("teacherRole", { required: "Role is required" })}
-					/>
-				</div>
-			</div>
-			<div className="flex justify-center mt-4">
-				<Button type="submit">Register</Button>
-			</div>
-		</form>
+			</form>
+		</div>
 	);
 }
