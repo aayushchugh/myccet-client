@@ -18,7 +18,7 @@ interface FormInput {
 	firstName: string;
 	middleName: string;
 	lastName: string;
-	allotment: string;
+	registration: string;
 	email: string;
 	phoneNumber: string;
 	fatherName: string;
@@ -75,19 +75,19 @@ export default function TeacherRegistrationForm() {
 					</div>
 				</div>
 				<div className="flex flex-col space-y-1.5">
-					<Label required htmlFor="allotment">
-						Allotment number
+					<Label required htmlFor="registration">
+						Registration number
 					</Label>
 					<Input
-						id="allotment"
+						id="registration"
 						type="text"
-						placeholder="Enter your allotment number"
-						error={errors.allotment?.message}
-						{...register("allotment", {
-							required: "allotment number is required",
+						placeholder="Enter your registration number"
+						error={errors.registration?.message}
+						{...register("registration", {
+							required: "registration number is required",
 							pattern: {
 								value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-								message: "Enter a valid allotment number",
+								message: "Enter a valid registration number",
 							},
 						})}
 					/>
