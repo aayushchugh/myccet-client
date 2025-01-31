@@ -8,6 +8,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { GoPencil } from "react-icons/go";
 
 interface TableRowData {
 	studentName: string;
@@ -163,6 +164,9 @@ export default function TableDemo() {
 							<TableCell className="text-center">
 								{row.subjectMarksSemester}
 							</TableCell>
+							<TableCell className="text-center">
+								<GoPencil />
+							</TableCell>
 						</TableRow>
 					))}
 
@@ -187,7 +191,9 @@ export default function TableDemo() {
 					</TableRow>
 					{/* Total Marks Row */}
 					<TableRow className="bg-gray-200">
-						<TableCell className="text-center font-semibold">Total Marks</TableCell>
+						<TableCell className="text-center font-semibold">
+							Total Marks GoPencil
+						</TableCell>
 						<TableCell className="text-center font-semibold">
 							{totalMarks.subjectMarksFirst}
 						</TableCell>
