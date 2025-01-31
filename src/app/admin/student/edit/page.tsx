@@ -45,8 +45,8 @@ export default function TeacherRegistrationForm() {
 			className="min-h-dvh flex flex-col justify-center items-center"
 		>
 			<div className="grid gap-4 w-full max-w-3xl">
-				<div className="grid grid-cols-2 gap-4">
-					<div>
+				<div className="grid grid-cols-5 gap-4  ">
+					<div className="col-start-1 col-end-5 space-y-1.5">
 						<div className="flex flex-col space-y-1.5">
 							<Label required htmlFor="firstName">
 								First Name
@@ -58,7 +58,7 @@ export default function TeacherRegistrationForm() {
 								{...register("firstName", { required: "First name is required" })}
 							/>
 						</div>
-						<div className="flex flex-col space-y-1.5">
+						<div className="flex flex-col space-y-1.5 ">
 							<Label htmlFor="middleName">Middle Name</Label>
 							<Input
 								id="middleName"
@@ -76,14 +76,15 @@ export default function TeacherRegistrationForm() {
 							/>
 						</div>
 					</div>
-					<Image
-						src="/logo.svg"
-						width={100}
-						height={200}
-						alt=" "
-						className="shadow-xl
-]"
-					/>
+					<div>
+						<Image
+							src="/logo.svg"
+							width={175}
+							height={150}
+							alt=" "
+							className="shadow-xl rounded-2xlc col-span-2 col-end-7 "
+						></Image>
+					</div>
 				</div>
 				<div className="flex flex-col space-y-1.5 rounded-[50px]">
 					<Label required htmlFor="registration">
