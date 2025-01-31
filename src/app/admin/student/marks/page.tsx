@@ -131,7 +131,7 @@ export default function TableDemo() {
 					<p>{studentName}</p>
 					<div className="flex justify-between">
 						<p>{branch}</p>
-						<p>Semester {sem}</p>
+						<p>{sem}</p>
 					</div>
 				</div>
 			</div>
