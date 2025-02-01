@@ -6,12 +6,21 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { Label } from "@/components/ui/label";
 import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useState } from "react";
 // import Link from "next/link";
 
 interface FormInput {
@@ -29,6 +38,29 @@ interface FormInput {
 	semester: string;
 	courseType: string;
 }
+interface tableRowData {
+	semester: string;
+	obtained: number;
+	total: number;
+}
+
+const data: tableRowData[] = [
+	{
+		semester: "1st",
+		obtained: 785,
+		total: 800,
+	},
+	{
+		semester: "2nd",
+		obtained: 795,
+		total: 800,
+	},
+	{
+		semester: "3rd",
+		obtained: 685,
+		total: 800,
+	},
+];
 
 export default function TeacherRegistrationForm() {
 	const {
@@ -283,9 +315,44 @@ export default function TeacherRegistrationForm() {
 							</Select>
 						</div>
 					</div>
+					<div>
+						<Label>Academics</Label>
+						<div>
+							<Table className="w-full ">
+								<TableHeader>
+									<TableRow>
+										<TableHead className="w-[50%]">Semster</TableHead>
+										<TableHead className="w-[16.66%] text-right">
+											Obtained Marks
+										</TableHead>
+										<TableHead className="w-[16.66%] text-right">
+											Total Marks
+										</TableHead>
+										<TableHead className="w-[16.66%] text-right">
+											Percentage
+										</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									<TableRow>
+										<TableCell className="font-medium">1st Semester </TableCell>
+										<TableCell className="font-medium text-right">
+											725
+										</TableCell>
+										<TableCell className="font-medium text-right">
+											800
+										</TableCell>
+										<TableCell className="font-medium text-right">
+											69%
+										</TableCell>
+									</TableRow>
+								</TableBody>
+							</Table>
+						</div>
+					</div>
 				</div>
 				<div className="flex justify-center mt-4">
-					<Button type="submit">Register</Button>
+					<Button type="submit">Submit</Button>
 					{/* <Link href={"/admin"}>
 					<Button>Register</Button>
 				</Link> */}

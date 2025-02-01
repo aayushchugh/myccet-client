@@ -152,25 +152,37 @@ export default function TeacherRegistrationForm() {
 						<Label required htmlFor="category">
 							Category
 						</Label>
-						<Select
-							onValueChange={(value) => {
-								setValue("category", value);
-							}}
-						>
-							<SelectTrigger error={errors?.category?.message}>
-								<SelectValue
-									placeholder={"Select Category"}
-									{...register("category", { required: "Category is required" })}
-								/>
-							</SelectTrigger>
-
-							<SelectContent>
-								<SelectItem value="GEN">General</SelectItem>
-								<SelectItem value="SC">SC (Scheduled Caste)</SelectItem>
-								<SelectItem value="ST">ST (Scheduled Tribe)</SelectItem>
-								<SelectItem value="OBC">OBC (Other Backward Caste)</SelectItem>
-							</SelectContent>
-						</Select>
+						<Input
+							id="registration"
+							type="text"
+							placeholder="Enter your registration number"
+							error={errors.registration?.message}
+							{...register("registration", {
+								required: "registration number is required",
+								pattern: {
+									value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+									message: "Enter a valid registration number",
+								},
+							})}
+						/>
+					</div>
+					<div className="flex flex-col space-y-1.5">
+						<Label required htmlFor="email">
+							Email
+						</Label>
+						<Input
+							id="email"
+							type="email"
+							placeholder="Enter your email"
+							error={errors.email?.message}
+							{...register("email", {
+								required: "Email is required",
+								pattern: {
+									value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+									message: "Enter a valid email address",
+								},
+							})}
+						/>
 					</div>
 
 					<div className="flex flex-col space-y-1.5">
@@ -230,6 +242,81 @@ export default function TeacherRegistrationForm() {
 							</SelectContent>
 						</Select>
 					</div>
+				</div>
+				<div className="flex flex-col space-y-1.5">
+					<Label required htmlFor="registration">
+						Registration number
+					</Label>
+					<Input
+						id="registration"
+						type="text"
+						placeholder="Enter your registration number"
+						error={errors.registration?.message}
+						{...register("registration", {
+							required: "registration number is required",
+							pattern: {
+								value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+								message: "Enter a valid registration number",
+							},
+						})}
+					/>
+				</div>
+				<div className="flex flex-col space-y-1.5">
+					<Label required htmlFor="email">
+						Email
+					</Label>
+					<Input
+						id="email"
+						type="email"
+						placeholder="Enter your email"
+						error={errors.email?.message}
+						{...register("email", {
+							required: "Email is required",
+							pattern: {
+								value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+								message: "Enter a valid email address",
+							},
+						})}
+					/>
+				</div>
+
+				<div className="flex flex-col space-y-1.5">
+					<Label required htmlFor="phoneNumber">
+						Phone Number
+					</Label>
+					<Input
+						id="phoneNumber"
+						type="tel"
+						placeholder="Phone Number"
+						error={errors.phoneNumber?.message}
+						{...register("phoneNumber", {
+							required: "Phone number is required",
+						})}
+					/>
+				</div>
+				<div className="flex flex-col space-y-1.5">
+					<Label required htmlFor="fatherName">
+						Fathers Name
+					</Label>
+					<Input
+						id="fatherName"
+						placeholder="Fathers Name"
+						error={errors.fatherName?.message}
+						{...register("fatherName", { required: "Role is required" })}
+					/>
+				</div>
+				<div className="flex flex-col space-y-1.5">
+					<Label required htmlFor="motherName">
+						Mothers Name
+					</Label>
+					<Input
+						id="motherName"
+						placeholder="Mothers Name"
+						error={errors.motherName?.message}
+						{...register("motherName", { required: "Role is required" })}
+					/>
+				</div>
+				<div className="grid grid-cols-4 gap-2">
 					<div className="flex flex-col space-y-1.5">
 						<Label required htmlFor="courseType">
 							Course Type
