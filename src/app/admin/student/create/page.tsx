@@ -166,26 +166,9 @@ export default function TeacherRegistrationForm() {
 							{...register("motherName", { required: "Role is required" })}
 						/>
 					</div>
-					<div className="flex flex-col space-y-1.5">
-						<Label required htmlFor="email">
-							Email
-						</Label>
-						<Input
-							id="email"
-							type="email"
-							placeholder="Enter your email"
-							error={errors.email?.message}
-							{...register("email", {
-								required: "Email is required",
-								pattern: {
-									value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-									message: "Enter a valid email address",
-								},
-							})}
-						/>
-					</div>
+
 					<div className="grid grid-cols-4 gap-2">
-						<div className="flex flex-col space-y-1.5">
+						<div className="">
 							<Label required htmlFor="category">
 								Category
 							</Label>
@@ -212,7 +195,38 @@ export default function TeacherRegistrationForm() {
 							</Select>
 						</div>
 
-						<div className="flex flex-col space-y-1.5">
+						<div>
+							<Label required htmlFor="semester">
+								Semester
+							</Label>
+							<Select
+								onValueChange={(value) => {
+									setValue("semester", value);
+								}}
+							>
+								<SelectTrigger error={errors?.semester?.message}>
+									<SelectValue
+										placeholder={"Select Semester"}
+										{...register("semester", {
+											required: "Semester is required",
+										})}
+									/>
+								</SelectTrigger>
+
+								<SelectContent>
+									<SelectItem value="1">1</SelectItem>
+									<SelectItem value="2">2</SelectItem>
+									<SelectItem value="3">3</SelectItem>
+									<SelectItem value="4">4</SelectItem>
+									<SelectItem value="5">5</SelectItem>
+									<SelectItem value="6">6</SelectItem>
+									<SelectItem value="7">7</SelectItem>
+									<SelectItem value="8">8</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+
+						<div>
 							<Label required htmlFor="Branch">
 								Branch
 							</Label>
@@ -229,93 +243,18 @@ export default function TeacherRegistrationForm() {
 								</SelectTrigger>
 
 								<SelectContent>
-									<SelectItem value="1">1</SelectItem>
-									<SelectItem value="2">2</SelectItem>
-									<SelectItem value="3">3</SelectItem>
-									<SelectItem value="4">4</SelectItem>
-									<SelectItem value="5">5</SelectItem>
-									<SelectItem value="6">6</SelectItem>
-									<SelectItem value="7">7</SelectItem>
-									<SelectItem value="8">8</SelectItem>
+									<SelectItem value="CSE">CSE</SelectItem>
+									<SelectItem value="ECE">ECE</SelectItem>
+									<SelectItem value="EE">EE</SelectItem>
+									<SelectItem value="ME">ME</SelectItem>
+									<SelectItem value="PE">PE</SelectItem>
+									<SelectItem value="AA">AA</SelectItem>
+									<SelectItem value="CE">CE</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
-					</div>
-					<div className="flex flex-col space-y-1.5">
-						<Label required htmlFor="registration">
-							Registration number
-						</Label>
-						<Input
-							id="registration"
-							type="text"
-							placeholder="Enter your registration number"
-							error={errors.registration?.message}
-							{...register("registration", {
-								required: "registration number is required",
-								pattern: {
-									value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-									message: "Enter a valid registration number",
-								},
-							})}
-						/>
-					</div>
-					<div className="flex flex-col space-y-1.5">
-						<Label required htmlFor="email">
-							Email
-						</Label>
-						<Input
-							id="email"
-							type="email"
-							placeholder="Enter your email"
-							error={errors.email?.message}
-							{...register("email", {
-								required: "Email is required",
-								pattern: {
-									value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-									message: "Enter a valid email address",
-								},
-							})}
-						/>
-					</div>
 
-					<div className="flex flex-col space-y-1.5">
-						<Label required htmlFor="phoneNumber">
-							Phone Number
-						</Label>
-						<Input
-							id="phoneNumber"
-							type="tel"
-							placeholder="Phone Number"
-							error={errors.phoneNumber?.message}
-							{...register("phoneNumber", {
-								required: "Phone number is required",
-							})}
-						/>
-					</div>
-					<div className="flex flex-col space-y-1.5">
-						<Label required htmlFor="fatherName">
-							Fathers Name
-						</Label>
-						<Input
-							id="fatherName"
-							placeholder="Fathers Name"
-							error={errors.fatherName?.message}
-							{...register("fatherName", { required: "Role is required" })}
-						/>
-					</div>
-					<div className="flex flex-col space-y-1.5">
-						<Label required htmlFor="motherName">
-							Mothers Name
-						</Label>
-						<Input
-							id="motherName"
-							placeholder="Mothers Name"
-							error={errors.motherName?.message}
-							{...register("motherName", { required: "Role is required" })}
-						/>
-					</div>
-					<div className="grid grid-cols-4 gap-2">
-						<div className="flex flex-col space-y-1.5">
+						<div>
 							<Label required htmlFor="courseType">
 								Course Type
 							</Label>
@@ -334,38 +273,8 @@ export default function TeacherRegistrationForm() {
 								</SelectTrigger>
 
 								<SelectContent>
-									<SelectItem value="1">1</SelectItem>
-									<SelectItem value="2">2</SelectItem>
-									<SelectItem value="3">3</SelectItem>
-									<SelectItem value="4">4</SelectItem>
-									<SelectItem value="5">5</SelectItem>
-									<SelectItem value="6">6</SelectItem>
-									<SelectItem value="7">7</SelectItem>
-									<SelectItem value="8">8</SelectItem>
-								</SelectContent>
-							</Select>
-						</div>
-						<div className="flex flex-col space-y-1.5">
-							<Label required htmlFor="courseType">
-								Course Type
-							</Label>
-							<Select
-								onValueChange={(value) => {
-									setValue("courseType", value);
-								}}
-							>
-								<SelectTrigger error={errors?.courseType?.message}>
-									<SelectValue
-										placeholder={"Select Course Type"}
-										{...register("courseType", {
-											required: "Course Type is required",
-										})}
-									/>
-								</SelectTrigger>
-
-								<SelectContent>
-									<SelectItem value="m@example.com">Full Time Diploma</SelectItem>
-									<SelectItem value="m@google.com">Part Time Diploma</SelectItem>
+									<SelectItem value="full">Full Time Diploma</SelectItem>
+									<SelectItem value="part">Part Time Diploma</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
