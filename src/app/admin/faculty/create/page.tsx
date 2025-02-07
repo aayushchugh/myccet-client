@@ -4,6 +4,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CiEdit } from "react-icons/ci";
 
 interface FormInput {
 	avatar: FileList;
@@ -37,6 +38,9 @@ export default function TeacherRegistrationForm() {
 					error={errors.avatar?.message}
 					{...register("avatar", { required: "Avatar is required" })}
 				/>
+				<div>
+					<CiEdit />
+				</div>
 			</div>
 			<form
 				onSubmit={handleSubmit(onSubmit)}
