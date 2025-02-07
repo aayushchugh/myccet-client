@@ -17,8 +17,31 @@ export default function LoginPage() {
 		register,
 		handleSubmit,
 		formState: { errors },
+		setError,
 	} = useForm<FormInput>();
-	const onSubmit: SubmitHandler<FormInput> = (data) => console.log(data);
+	const onSubmit: SubmitHandler<FormInput> = async (data) => {
+		console.log(data.email);
+		try {
+			const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(data),
+			});
+			const result = await response.json();
+			if (!response.ok) {
+				throw new Error(result.message || "Login failed");
+			}
+			alert("Login successful!");
+		} catch (error) {
+			if (error instanceof Error) {
+				setError("email", { type: "server", message: error.message });
+			} else {
+				setError("email", { type: "server", message: "An unknown error occurred" });
+			}
+		}
+	};
 
 	return (
 		<div>

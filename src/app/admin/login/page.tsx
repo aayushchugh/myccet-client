@@ -30,7 +30,6 @@ export default function LoginPage() {
 				},
 				body: JSON.stringify(data),
 			});
-			console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
 
 			const result = await response.json();
 
