@@ -16,9 +16,37 @@ export default function LoginPage() {
 	const {
 		register,
 		handleSubmit,
+		setError,
 		formState: { errors },
 	} = useForm<FormInput>();
-	const onSubmit: SubmitHandler<FormInput> = (data) => console.log(data);
+
+	const onSubmit: SubmitHandler<FormInput> = async (data) => {
+		console.log(data.email);
+		try {
+			const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(data),
+			});
+			console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
+
+			const result = await response.json();
+
+			if (!response.ok) {
+				throw new Error(result.message || "Login failed");
+			}
+
+			alert("Login successful!");
+		} catch (error) {
+			if (error instanceof Error) {
+				setError("email", { type: "server", message: error.message });
+			} else {
+				setError("email", { type: "server", message: "An unknown error occurred" });
+			}
+		}
+	};
 
 	return (
 		<form
@@ -44,6 +72,7 @@ export default function LoginPage() {
 										value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
 										message: "Enter a valid email address",
 									},
+									setValueAs: (value) => value.trim(),
 								})}
 							/>
 						</div>
