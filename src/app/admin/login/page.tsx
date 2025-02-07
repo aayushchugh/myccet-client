@@ -6,14 +6,14 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Logo from "@/components/common/logo";
-import Link from "next/link";
-
+import { useRouter } from "next/navigation";
 interface FormInput {
 	email: string;
 	password: string;
 }
 
 export default function LoginPage() {
+	const router = useRouter();
 	const {
 		register,
 		handleSubmit,
@@ -39,7 +39,7 @@ export default function LoginPage() {
 			}
 
 			alert("Login successful!");
-			return <Link href="/">Dashboard</Link>;
+			router.push("/admin");
 		} catch (error) {
 			if (error instanceof Error) {
 				setError("email", { type: "server", message: error.message });
