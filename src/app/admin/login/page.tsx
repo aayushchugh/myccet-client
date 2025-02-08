@@ -1,12 +1,14 @@
 "use client";
 import * as React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Logo from "@/components/common/logo";
 import { useRouter } from "next/navigation";
+
 interface FormInput {
 	email: string;
 	password: string;
@@ -18,27 +20,40 @@ export default function LoginPage() {
 		register,
 		handleSubmit,
 		setError,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 	} = useForm<FormInput>();
 
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
-		console.log(data.email);
 		try {
-			const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-				method: "POST",
+			const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+			if (!apiUrl) {
+				throw new Error("API URL is not defined");
+			}
+
+			// Send login request
+			const response = await axios.post(`${apiUrl}/auth/login`, data, {
+				withCredentials: true,
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify(data),
 			});
 
-			const result = await response.json();
+			// Log the response for debugging
+			console.log("Login API Response:", response.data);
 
-			if (!response.ok) {
-				throw new Error(result.message || "Login failed");
+			// Extract token correctly
+			const token = response?.data?.payload?.access_token;
+			console.log("Extracted Token:", token); // Debugging log
+
+			if (!token) {
+				throw new Error("Token not provided in API response");
 			}
 
-			alert("Login successful!");
+			// Store token securely
+			localStorage.setItem("token", token);
+			console.log("Stored Token in Session:", localStorage.getItem("token")); // Debugging log
+
+			// Navigate to admin page
 			router.push("/admin");
 		} catch (error) {
 			if (error instanceof Error) {
@@ -65,7 +80,6 @@ export default function LoginPage() {
 							<Input
 								id="email"
 								type="email"
-								error={errors.email?.message}
 								placeholder="Enter your email"
 								{...register("email", {
 									required: "Email is required",
@@ -75,7 +89,11 @@ export default function LoginPage() {
 									},
 									setValueAs: (value) => value.trim(),
 								})}
+								className={errors.email ? "border-red-500" : ""}
 							/>
+							{errors.email && (
+								<p className="text-red-500 text-sm">{errors.email.message}</p>
+							)}
 						</div>
 						<div className="flex flex-col space-y-1.5">
 							<Label htmlFor="password">Password</Label>
@@ -83,7 +101,6 @@ export default function LoginPage() {
 								id="password"
 								type="password"
 								placeholder="Password"
-								error={errors.password?.message}
 								{...register("password", {
 									required: "Password is required",
 									minLength: {
@@ -91,12 +108,18 @@ export default function LoginPage() {
 										message: "Password must be at least 6 characters long",
 									},
 								})}
+								className={errors.password ? "border-red-500" : ""}
 							/>
+							{errors.password && (
+								<p className="text-red-500 text-sm">{errors.password.message}</p>
+							)}
 						</div>
 					</div>
 				</CardContent>
 				<CardFooter className="flex justify-center">
-					<Button type="submit">Login</Button>
+					<Button type="submit" disabled={isSubmitting}>
+						{isSubmitting ? "Logging in..." : "Login"}
+					</Button>
 				</CardFooter>
 			</Card>
 		</form>
