@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,21 +20,21 @@ export default function LoginPage() {
 		formState: { errors },
 		setError,
 	} = useForm<FormInput>();
+
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
-		console.log(data.email);
 		try {
-			const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
+			const response = await axios.post(
+				`${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+				data,
+				{
+					headers: {
+						"Content-Type": "application/json",
+					},
 				},
-				body: JSON.stringify(data),
-			});
-			const result = await response.json();
-			if (!response.ok) {
-				throw new Error(result.message || "Login failed");
-			}
+			);
+
 			alert("Login successful!");
+			localStorage.setItem("token", response.data.token);
 		} catch (error) {
 			if (error instanceof Error) {
 				setError("email", { type: "server", message: error.message });
