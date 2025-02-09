@@ -38,7 +38,6 @@ export default function LoginPage() {
 				throw new Error(result.message || "Login failed");
 			}
 
-			alert("Login successful!");
 			router.push("/admin");
 		} catch (error) {
 			if (error instanceof Error) {

@@ -12,16 +12,16 @@ export function BreadcrumbDemo() {
 		<Breadcrumb>
 			<BreadcrumbList>
 				<BreadcrumbItem>
-					<BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
+					<BreadcrumbLink href="/admin">Home</BreadcrumbLink>
 				</BreadcrumbItem>
 				<BreadcrumbSeparator />
 
 				<BreadcrumbItem>
-					<BreadcrumbLink href="/admin/faculty">faculty</BreadcrumbLink>
+					<BreadcrumbLink href="/admin">Dashboard</BreadcrumbLink>
 				</BreadcrumbItem>
 				<BreadcrumbSeparator />
 				<BreadcrumbItem>
-					<BreadcrumbPage>Create</BreadcrumbPage>
+					<BreadcrumbPage>view</BreadcrumbPage>
 				</BreadcrumbItem>
 			</BreadcrumbList>
 		</Breadcrumb>

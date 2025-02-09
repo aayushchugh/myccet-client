@@ -16,6 +16,8 @@ import {
 	PaginationNext,
 	PaginationPrevious,
 } from "@/components/ui/pagination";
+import { useRouter } from "next/navigation";
+
 interface TableRowData {
 	registrationNumber: string;
 	name: string;
@@ -194,6 +196,7 @@ export default function TableDemo() {
 	const handlePageChange = (page: number): void => {
 		SelectCurrentPage(page);
 	};
+	const router = useRouter();
 	return (
 		<div className="w-full px-4">
 			<Table className="w-full ">
@@ -206,14 +209,22 @@ export default function TableDemo() {
 						<TableHead className="w-[20%] ">Branch</TableHead>
 					</TableRow>
 				</TableHeader>
+
 				<TableBody>
 					{currentRows.map((row, index) => (
-						<TableRow key={index}>
-							<TableCell className="font-medium">{row.registrationNumber}</TableCell>
-							<TableCell>{row.name}</TableCell>
-							<TableCell>{row.fathersName}</TableCell>
-							<TableCell>{row.semester}</TableCell>
-							<TableCell>{row.branch}</TableCell>
+						<TableRow
+							key={index}
+							className="hover:bg-gray-100 transition cursor-pointer"
+							onClick={() => router.push(`/admin/student/view/edit`)}
+							// onClick={() => router.push(`/student/${row.registrationNumber}`)}
+						>
+							<TableCell className="font-medium w-[20%]">
+								{row.registrationNumber}
+							</TableCell>
+							<TableCell className="w-[20%]">{row.name}</TableCell>
+							<TableCell className="w-[20%]">{row.fathersName}</TableCell>
+							<TableCell className="w-[20%]">{row.semester}</TableCell>
+							<TableCell className="w-[20%]">{row.branch}</TableCell>
 						</TableRow>
 					))}
 				</TableBody>
