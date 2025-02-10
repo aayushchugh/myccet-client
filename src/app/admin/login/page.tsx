@@ -30,36 +30,36 @@ export default function LoginPage() {
 				throw new Error("API URL is not defined");
 			}
 
-			// Send login request
 			const response = await axios.post(`${apiUrl}/auth/login`, data, {
 				withCredentials: true,
-				headers: {
-					"Content-Type": "application/json",
-				},
+				headers: { "Content-Type": "application/json" },
 			});
 
-			// Log the response for debugging
 			console.log("Login API Response:", response.data);
 
-			// Extract token correctly
 			const token = response?.data?.payload?.access_token;
-			console.log("Extracted Token:", token); // Debugging log
-
 			if (!token) {
 				throw new Error("Token not provided in API response");
 			}
 
-			// Store token securely
 			localStorage.setItem("token", token);
-			console.log("Stored Token in Session:", localStorage.getItem("token")); // Debugging log
-
-			// Navigate to admin page
 			router.push("/admin");
 		} catch (error) {
-			if (error instanceof Error) {
-				setError("email", { type: "server", message: error.message });
+			if (axios.isAxiosError(error) && error.response) {
+				const { status, data } = error.response;
+
+				if (status === 404) {
+					setError("email", { type: "server", message: data.message });
+				} else if (status === 401) {
+					setError("password", { type: "server", message: data.message });
+				} else {
+					setError("email", {
+						type: "server",
+						message: "An unexpected error occurred. Please try again.",
+					});
+				}
 			} else {
-				setError("email", { type: "server", message: "An unknown error occurred" });
+				setError("email", { type: "server", message: "Network error. Try again later." });
 			}
 		}
 	};
