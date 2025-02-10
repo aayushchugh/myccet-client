@@ -5,6 +5,7 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { setegid } from "process";
 
 interface FormInput {
 	first_name: string;
@@ -20,11 +21,12 @@ export default function TeacherRegistrationForm() {
 	const {
 		register,
 		handleSubmit,
-
+		setError,
 		formState: { errors, isSubmitting },
 	} = useForm<FormInput>();
 
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
+		console.log("hi");
 		data.phone = Number(data.phone);
 		console.log("Submitting Data:", data);
 
@@ -34,7 +36,11 @@ export default function TeacherRegistrationForm() {
 			console.log("Token:", token);
 
 			if (!token) {
-				throw new Error("User is not authenticated. Please log in first.");
+				setError("email", {
+					type: "manual",
+					message: "user is not authenticated. plaese log in first",
+				});
+				return;
 			}
 
 			// Send request with token
@@ -52,8 +58,21 @@ export default function TeacherRegistrationForm() {
 			console.error("❌ API Error:", error);
 
 			if (axios.isAxiosError(error) && error.response) {
-				console.log("📢 Server Response:", error.response.data);
-				alert(`Error: ${JSON.stringify(error.response.data)}`);
+				const { status, data } = error.response;
+				console.log("📢 Server Response", data);
+				if (status === 400) {
+					alert(`Bad request : ${data.message || "Check your input fields"}`);
+				} else if (status === 409) {
+					if (data.message.includes("Email")) {
+						setError("email", { type: "server", message: data.message });
+					} else if (data.message.includes("Phone")) {
+						setError("phone", { type: "server", message: data.message });
+					} else {
+						alert(`Error: ${data.message} ?? "something went wrong`);
+					}
+				} else {
+					alert("Network Error . please try again later");
+				}
 			}
 		}
 	};
@@ -86,14 +105,12 @@ export default function TeacherRegistrationForm() {
 							/>
 						</div>
 						<div className="flex flex-col space-y-1.5">
-							<Label required htmlFor="lastName">
-								Last Name
-							</Label>
+							<Label htmlFor="lastName">Last Name</Label>
 							<Input
 								id="lastName"
 								placeholder="Last Name"
 								error={errors.last_name?.message}
-								{...register("last_name", { required: "Last name is required" })}
+								{...register("last_name")}
 							/>
 						</div>
 					</div>
