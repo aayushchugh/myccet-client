@@ -1,7 +1,6 @@
 "use client";
 import * as React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import Logo from "@/components/common/logo";
 import { useRouter } from "next/navigation";
 import handleFormValidationErrors from "../../lib/handle-form-validation-errors";
+import apiService from "../../services/api-service";
 
 interface FormInput {
 	email: string;
@@ -32,12 +32,7 @@ export default function LoginPage() {
 			}
 
 			// Send login request
-			const response = await axios.post(`${apiUrl}/auth/login`, data, {
-				withCredentials: true,
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
+			const response = await apiService.post(`/auth/login`, data);
 
 			// Log the response for debugging
 			console.log("Login API Response:", response.data);
