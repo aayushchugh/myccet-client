@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Logo from "@/components/common/logo";
 import { useRouter } from "next/navigation";
+import handleFormValidationErrors from "../../lib/handle-form-validation-errors";
 
 interface FormInput {
 	email: string;
@@ -55,11 +56,16 @@ export default function LoginPage() {
 
 			// Navigate to admin page
 			router.push("/admin");
-		} catch (error) {
-			if (error instanceof Error) {
-				setError("email", { type: "server", message: error.message });
-			} else {
-				setError("email", { type: "server", message: "An unknown error occurred" });
+		} catch (error: any) {
+			if (
+				error.response.status === 400 ||
+				error.response.status === 401 ||
+				error.response.status === 404
+			) {
+				handleFormValidationErrors(error.response.data.errors, setError);
+			}
+
+			if (error.response.status === 500) {
 			}
 		}
 	};
@@ -82,11 +88,11 @@ export default function LoginPage() {
 								type="email"
 								placeholder="Enter your email"
 								{...register("email", {
-									required: "Email is required",
-									pattern: {
-										value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-										message: "Enter a valid email address",
-									},
+									// required: "Email is required",
+									// pattern: {
+									// 	value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+									// 	message: "Enter a valid email address",
+									// },
 									setValueAs: (value) => value.trim(),
 								})}
 								className={errors.email ? "border-red-500" : ""}
@@ -102,11 +108,11 @@ export default function LoginPage() {
 								type="password"
 								placeholder="Password"
 								{...register("password", {
-									required: "Password is required",
-									minLength: {
-										value: 6,
-										message: "Password must be at least 6 characters long",
-									},
+									// required: "Password is required",
+									// minLength: {
+									// 	value: 6,
+									// 	message: "Password must be at least 6 characters long",
+									// },
 								})}
 								className={errors.password ? "border-red-500" : ""}
 							/>
