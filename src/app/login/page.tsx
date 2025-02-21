@@ -49,7 +49,7 @@ export default function LoginPage() {
 			localStorage.setItem("token", token);
 			console.log("Stored Token in Session:", localStorage.getItem("token")); // Debugging log
 
-			// Navigate to admin page
+			// Navigate to admin pageee
 			router.push("/admin");
 		} catch (error: any) {
 			if (
