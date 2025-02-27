@@ -17,18 +17,20 @@ import {
 	PaginationPrevious,
 } from "@/components/ui/pagination";
 interface TableRowData {
-	registrationNumber: string;
+	email: string;
 	name: string;
-	department: string;
+	designation: string;
 	subject: string;
+	createdBy: string;
 }
 
 const data: TableRowData[] = [
 	{
-		registrationNumber: "220099510649",
+		email: "hey@adityapant.com",
 		name: "John Doe",
-		department: "CSE",
+		designation: "HOD",
 		subject: "physics",
+		createdBy: "Aditya",
 	},
 ];
 
@@ -50,19 +52,19 @@ export default function TableDemo() {
 			<Table className="w-full ">
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[25%]">Name</TableHead>
-						<TableHead className="w-[25%]">Designation</TableHead>
+						<TableHead className="w-[25%] ">Email Address</TableHead>
+						<TableHead className="w-[25%] text-right">Name</TableHead>
+						<TableHead className="w-[25%] text-right">Designation</TableHead>
 						<TableHead className="w-[25%] text-right">Created By</TableHead>
-						<TableHead className="w-[25%] text-right">Created On</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
 					{currentRows.map((row, index) => (
 						<TableRow key={index}>
-							<TableCell className="font-medium">{row.registrationNumber}</TableCell>
-							<TableCell>{row.name}</TableCell>
-							<TableCell className="text-right">{row.department}</TableCell>
-							<TableCell className="text-right">{row.subject}</TableCell>
+							<TableCell className="">{row.email}</TableCell>
+							<TableCell className="text-right">{row.name}</TableCell>
+							<TableCell className="text-right">{row.designation}</TableCell>
+							<TableCell className="text-right">{row.designation}</TableCell>
 						</TableRow>
 					))}
 				</TableBody>

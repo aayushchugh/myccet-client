@@ -5,6 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CiEdit } from "react-icons/ci";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 
 interface FormInput {
 	avatar: FileList;
@@ -14,13 +21,14 @@ interface FormInput {
 	email: string;
 	phoneNumber: string;
 	password: string;
-	teacherRole: string;
+	designation: string;
 }
 
 export default function TeacherRegistrationForm() {
 	const {
 		register,
 		handleSubmit,
+		setValue,
 		formState: { errors },
 	} = useForm<FormInput>();
 	const onSubmit: SubmitHandler<FormInput> = (data) => console.log(data);
@@ -126,16 +134,31 @@ export default function TeacherRegistrationForm() {
 							})}
 						/>
 					</div>
-					<div className="flex flex-col space-y-1.5">
-						<Label required htmlFor="teacherRole">
-							Teacher Role
+					<div>
+						<Label required htmlFor="designation">
+							Designation
 						</Label>
-						<Input
-							id="teacherRole"
-							placeholder="Enter your role"
-							error={errors.teacherRole?.message}
-							{...register("teacherRole", { required: "Role is required" })}
-						/>
+						<Select
+							onValueChange={(value) => {
+								setValue("designation", value);
+							}}
+						>
+							<SelectTrigger error={errors?.designation?.message}>
+								<SelectValue
+									placeholder={"Select designation"}
+									{...register("designation", {
+										required: "Designation is required",
+									})}
+								/>
+							</SelectTrigger>
+
+							<SelectContent>
+								<SelectItem value="Principal">Principal</SelectItem>
+								<SelectItem value="HOD">HOD</SelectItem>
+								<SelectItem value="Tutor">Tutor</SelectItem>
+								<SelectItem value="Teacher">Teacher</SelectItem>
+							</SelectContent>
+						</Select>
 					</div>
 				</div>
 				<div className="flex justify-center mt-4">
