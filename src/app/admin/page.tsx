@@ -21,12 +21,11 @@ export default function Home() {
 							Admin
 						</Typography>
 						<div className="flex items-center justify-evenly mt-6">
-							<Link href={"/admin/manager/create"}>
-								<Button className="w-[76px] ">Create</Button>
-							</Link>
-
-							<Link href={"/admin/manager/view"}>
+							<Link href={"/admin/view"}>
 								<Button className="w-[76px]">View</Button>
+							</Link>
+							<Link href={"/admin/create"}>
+								<Button className="w-[76px] ">Create</Button>
 							</Link>
 						</div>
 					</CardContent>
@@ -67,7 +66,7 @@ export default function Home() {
 							Student
 						</Typography>
 						<div className="flex items-center justify-evenly mt-6">
-							<Link href={"/admin/student/view/table"}>
+							<Link href={"/admin/student/view"}>
 								<Button className="w-[76px]">View</Button>
 							</Link>
 
