@@ -27,7 +27,6 @@ export default function TeacherRegistrationForm() {
 
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
 		data.phone = Number(data.phone);
-		console.log("Submitting Data:", data);
 
 		try {
 			const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -37,7 +36,6 @@ export default function TeacherRegistrationForm() {
 
 			// Retrieve token from localStorage
 			const token = localStorage.getItem("token");
-			console.log("Retrieved Token:", token);
 
 			if (!token) {
 				throw new Error("User is not authenticated. Please log in first.");
