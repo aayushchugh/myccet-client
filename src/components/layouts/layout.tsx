@@ -14,17 +14,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const items = [
 	{
 		title: "Admin",
-		url: "#",
+		url: "/admin/view",
 		icon: Shield,
 	},
 	{
 		title: "Faculty",
-		url: "#",
+		url: "/admin/faculty/view",
 		icon: UserRoundPen,
 	},
 	{
 		title: "Student",
-		url: "#",
+		url: "/admin/student/view",
 		icon: GraduationCap,
 	},
 	{
