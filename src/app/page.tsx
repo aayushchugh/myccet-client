@@ -18,11 +18,11 @@ export default function Home() {
 						Please select your role
 					</Typography>
 					<div className="flex items-center justify-evenly mt-6">
-						<Link href={"/faculty/login"}>
+						<Link href={"/login"}>
 							<Button>Faculty</Button>
 						</Link>
 
-						<Link href={"/admin/login"}>
+						<Link href={"/login"}>
 							<Button>Admin</Button>
 						</Link>
 					</div>
