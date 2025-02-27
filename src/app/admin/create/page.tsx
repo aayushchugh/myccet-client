@@ -6,6 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import handleFormValidationErrors from "@/lib/handle-form-validation-errors";
 import apiService from "@/services/api-service";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 
 interface FormInput {
 	first_name: string;
@@ -22,6 +29,7 @@ export default function TeacherRegistrationForm() {
 		register,
 		handleSubmit,
 		setError,
+		setValue,
 		formState: { errors, isSubmitting },
 	} = useForm<FormInput>();
 
@@ -154,16 +162,31 @@ export default function TeacherRegistrationForm() {
 							className={errors.password ? "border-red-500" : ""}
 						/>
 					</div>
-					<div className="flex flex-col space-y-1.5">
+					<div>
 						<Label required htmlFor="designation">
 							Designation
 						</Label>
-						<Input
-							id="designation"
-							placeholder="Enter Designation"
-							error={errors.designation?.message}
-							{...register("designation", { required: "Designation is required" })}
-						/>
+						<Select
+							onValueChange={(value) => {
+								setValue("designation", value);
+							}}
+						>
+							<SelectTrigger error={errors?.designation?.message}>
+								<SelectValue
+									placeholder={"Select designation"}
+									{...register("designation", {
+										required: "Designation is required",
+									})}
+								/>
+							</SelectTrigger>
+
+							<SelectContent>
+								<SelectItem value="Principal">Principal</SelectItem>
+								<SelectItem value="HOD">HOD</SelectItem>
+								<SelectItem value="Tutor">Tutor</SelectItem>
+								<SelectItem value="Teacher">Teacher</SelectItem>
+							</SelectContent>
+						</Select>
 					</div>
 				</div>
 				<div className="flex justify-center mt-4">
