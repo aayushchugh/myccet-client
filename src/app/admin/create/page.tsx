@@ -1,10 +1,11 @@
 "use client";
 import * as React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import handleFormValidationErrors from "@/lib/handle-form-validation-errors";
+import apiService from "@/services/api-service";
 
 interface FormInput {
 	first_name: string;
@@ -20,40 +21,47 @@ export default function TeacherRegistrationForm() {
 	const {
 		register,
 		handleSubmit,
-
+		setError,
 		formState: { errors, isSubmitting },
 	} = useForm<FormInput>();
 
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
 		data.phone = Number(data.phone);
-		console.log("Submitting Data:", data);
 
 		try {
-			// Retrieve token from session storage
+			const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+			if (!apiUrl) {
+				throw new Error("API URL is not defined");
+			}
+
+			// Retrieve token from localStorage
 			const token = localStorage.getItem("token");
-			console.log("Token:", token);
 
 			if (!token) {
 				throw new Error("User is not authenticated. Please log in first.");
 			}
 
 			// Send request with token
-			const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/admin`, data, {
+			const response = await apiService.post(`/admin`, data, {
 				withCredentials: true,
 				headers: {
 					"Content-Type": "application/json",
-					Authorization: `Bearer ${token}`, // Add token here
+					Authorization: `Bearer ${token}`,
 				},
 			});
 
 			console.log("API Response:", response.data);
 			alert("Registration successful!");
-		} catch (error) {
-			console.error("❌ API Error:", error);
+		} catch (error: any) {
+			if (
+				error.response.status === 400 ||
+				error.response.status === 401 ||
+				error.response.status === 404
+			) {
+				handleFormValidationErrors(error.response.data.errors, setError);
+			}
 
-			if (axios.isAxiosError(error) && error.response) {
-				console.log("📢 Server Response:", error.response.data);
-				alert(`Error: ${JSON.stringify(error.response.data)}`);
+			if (error.response.status === 500) {
 			}
 		}
 	};
@@ -143,6 +151,7 @@ export default function TeacherRegistrationForm() {
 									message: "Password must be at least 6 characters long",
 								},
 							})}
+							className={errors.password ? "border-red-500" : ""}
 						/>
 					</div>
 					<div className="flex flex-col space-y-1.5">
