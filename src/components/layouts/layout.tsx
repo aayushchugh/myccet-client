@@ -1,4 +1,4 @@
-import { NotebookPen, GraduationCap, UserRoundPen, Album } from "lucide-react";
+import { NotebookPen, GraduationCap, UserRoundPen, Shield, Album } from "lucide-react";
 
 import {
 	Sidebar,
@@ -13,13 +13,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 // Menu items.
 const items = [
 	{
+		title: "Admin",
+		url: "/admin/view",
+		icon: Shield,
+	},
+	{
 		title: "Faculty",
-		url: "#",
+		url: "/admin/faculty/view",
 		icon: UserRoundPen,
 	},
 	{
 		title: "Student",
-		url: "#",
+		url: "/admin/student/view",
 		icon: GraduationCap,
 	},
 	{
@@ -48,7 +53,7 @@ export function AppSidebar() {
 				</div>
 
 				{/* Navigation Menu */}
-				<div className="pl-4">
+				<div className="px-4">
 					<SidebarMenu>
 						{items.map((item) => (
 							<SidebarMenuItem key={item.title}>

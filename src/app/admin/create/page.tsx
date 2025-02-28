@@ -9,6 +9,14 @@ import handleFormValidationErrors from "@/lib/handle-form-validation-errors"; //
 import { toast } from "sonner"; // Import toast for displaying error messages
 import { useRouter } from "next/navigation"; // Import useRouter for redirecting
 
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+
 interface FormInput {
 	first_name: string;
 	middle_name?: string;
@@ -25,17 +33,21 @@ export default function TeacherRegistrationForm() {
 		register,
 		handleSubmit,
 		setError,
+		setValue,
 		formState: { errors, isSubmitting },
 	} = useForm<FormInput>();
 
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
 		data.phone = Number(data.phone);
-		console.log("Submitting Data:", data);
 
 		try {
-			// Retrieve token from session storage
+			const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+			if (!apiUrl) {
+				throw new Error("API URL is not defined");
+			}
+
+			// Retrieve token from localStorage
 			const token = localStorage.getItem("token");
-			console.log("Token:", token);
 
 			if (!token) {
 				toast.error("You are not authenticated. Please log in first.");
@@ -188,23 +200,37 @@ export default function TeacherRegistrationForm() {
 									message: "Password must be at least 6 characters long",
 								},
 							})}
+							className={errors.password ? "border-red-500" : ""}
 						/>
 						{errors.password && (
 							<p className="text-red-500 text-sm">{errors.password.message}</p>
 						)}
 					</div>
-					<div className="flex flex-col space-y-1.5">
+					<div>
 						<Label required htmlFor="designation">
 							Designation
 						</Label>
-						<Input
-							id="designation"
-							placeholder="Enter Designation"
-							{...register("designation", { required: "Designation is required" })}
-						/>
-						{errors.designation && (
-							<p className="text-red-500 text-sm">{errors.designation.message}</p>
-						)}
+						<Select
+							onValueChange={(value) => {
+								setValue("designation", value);
+							}}
+						>
+							<SelectTrigger error={errors?.designation?.message}>
+								<SelectValue
+									placeholder={"Select designation"}
+									{...register("designation", {
+										required: "Designation is required",
+									})}
+								/>
+							</SelectTrigger>
+
+							<SelectContent>
+								<SelectItem value="Principal">Principal</SelectItem>
+								<SelectItem value="hod">HOD</SelectItem>
+								<SelectItem value="lecturer">Tutor</SelectItem>
+								<SelectItem value="maintenance">Teacher</SelectItem>
+							</SelectContent>
+						</Select>
 					</div>
 				</div>
 				<div className="flex justify-center mt-4">
