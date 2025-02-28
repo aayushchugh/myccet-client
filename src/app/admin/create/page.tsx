@@ -8,7 +8,6 @@ import apiService from "@/services/api-service"; // Import your apiService
 import handleFormValidationErrors from "@/lib/handle-form-validation-errors"; // Ensure this utility exists
 import { toast } from "sonner"; // Import toast for displaying error messages
 import { useRouter } from "next/navigation"; // Import useRouter for redirecting
-
 import {
 	Select,
 	SelectContent,
@@ -20,7 +19,7 @@ import {
 interface FormInput {
 	first_name: string;
 	middle_name?: string;
-	last_name: string;
+	last_name?: string;
 	email: string;
 	phone: number;
 	password: string;
@@ -36,24 +35,22 @@ export default function TeacherRegistrationForm() {
 		setValue,
 		formState: { errors, isSubmitting },
 	} = useForm<FormInput>();
-
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
 		data.phone = Number(data.phone);
 
 		try {
-			const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-			if (!apiUrl) {
-				throw new Error("API URL is not defined");
-			}
-
 			// Retrieve token from localStorage
 			const token = localStorage.getItem("token");
+			console.log(token);
 
 			if (!token) {
 				toast.error("You are not authenticated. Please log in first.");
 				router.push("/login"); // Redirect to login page
 				return;
 			}
+
+			// Log the data being sent
+			console.log("Submitting Data:", data);
 
 			// Send request with token using apiService
 			const response = await apiService.post("/admin", data, {
@@ -64,6 +61,7 @@ export default function TeacherRegistrationForm() {
 
 			console.log("API Response:", response.data);
 			toast.success("Registration successful!");
+			router.push("/admin/view");
 		} catch (error: any) {
 			console.error("❌ API Error:", error);
 
@@ -97,9 +95,10 @@ export default function TeacherRegistrationForm() {
 					handleFormValidationErrors(error.response.data.errors, setError);
 				}
 
-				// Handle 500 errors (already handled by apiService interceptor)
+				// Handle 500 errors
 				if (error.response.status === 500) {
 					toast.error("Server error. Please try again later.");
+					console.error("Server Error Details:", error.response.data);
 				}
 			} else {
 				// Handle network errors or unexpected errors
@@ -144,11 +143,8 @@ export default function TeacherRegistrationForm() {
 							<Input
 								id="lastName"
 								placeholder="Last Name"
-								{...register("last_name", { required: "Last name is required" })}
+								{...register("last_name")}
 							/>
-							{errors.last_name && (
-								<p className="text-red-500 text-sm">{errors.last_name.message}</p>
-							)}
 						</div>
 					</div>
 					<div className="flex flex-col space-y-1.5">
