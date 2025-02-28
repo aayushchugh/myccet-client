@@ -4,8 +4,11 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import handleFormValidationErrors from "@/lib/handle-form-validation-errors";
-import apiService from "@/services/api-service";
+import apiService from "@/services/api-service"; // Import your apiService
+import handleFormValidationErrors from "@/lib/handle-form-validation-errors"; // Ensure this utility exists
+import { toast } from "sonner"; // Import toast for displaying error messages
+import { useRouter } from "next/navigation"; // Import useRouter for redirecting
+
 import {
 	Select,
 	SelectContent,
@@ -25,6 +28,7 @@ interface FormInput {
 }
 
 export default function TeacherRegistrationForm() {
+	const router = useRouter();
 	const {
 		register,
 		handleSubmit,
@@ -46,30 +50,60 @@ export default function TeacherRegistrationForm() {
 			const token = localStorage.getItem("token");
 
 			if (!token) {
-				throw new Error("User is not authenticated. Please log in first.");
+				toast.error("You are not authenticated. Please log in first.");
+				router.push("/login"); // Redirect to login page
+				return;
 			}
 
-			// Send request with token
-			const response = await apiService.post(`/admin`, data, {
-				withCredentials: true,
+			// Send request with token using apiService
+			const response = await apiService.post("/admin", data, {
 				headers: {
-					"Content-Type": "application/json",
 					Authorization: `Bearer ${token}`,
 				},
 			});
 
 			console.log("API Response:", response.data);
-			alert("Registration successful!");
+			toast.success("Registration successful!");
 		} catch (error: any) {
-			if (
-				error.response.status === 400 ||
-				error.response.status === 401 ||
-				error.response.status === 404
-			) {
-				handleFormValidationErrors(error.response.data.errors, setError);
-			}
+			console.error("❌ API Error:", error);
 
-			if (error.response.status === 500) {
+			if (error.response) {
+				console.log("📢 Server Response:", error.response.data);
+
+				// Handle 409 Conflict errors
+				if (error.response.status === 409) {
+					const errorMessage =
+						error.response.data.message ||
+						"A conflict occurred. Please check your input.";
+					toast.error(errorMessage);
+
+					// Optionally, set form errors for specific fields
+					if (error.response.data.errors) {
+						handleFormValidationErrors(error.response.data.errors, setError);
+					}
+					return;
+				}
+
+				// Handle 401 Unauthorized errors
+				if (error.response.status === 401) {
+					toast.error("You are not authorized. Please log in again.");
+					localStorage.removeItem("token"); // Clear invalid token
+					router.push("/login"); // Redirect to login page
+					return;
+				}
+
+				// Handle form validation errors
+				if (error.response.status === 400 || error.response.status === 404) {
+					handleFormValidationErrors(error.response.data.errors, setError);
+				}
+
+				// Handle 500 errors (already handled by apiService interceptor)
+				if (error.response.status === 500) {
+					toast.error("Server error. Please try again later.");
+				}
+			} else {
+				// Handle network errors or unexpected errors
+				toast.error("An unexpected error occurred. Please try again.");
 			}
 		}
 	};
@@ -89,9 +123,11 @@ export default function TeacherRegistrationForm() {
 							<Input
 								id="firstName"
 								placeholder="First Name"
-								error={errors.first_name?.message}
 								{...register("first_name", { required: "First name is required" })}
 							/>
+							{errors.first_name && (
+								<p className="text-red-500 text-sm">{errors.first_name.message}</p>
+							)}
 						</div>
 						<div className="flex flex-col space-y-1.5">
 							<Label htmlFor="middleName">Middle Name</Label>
@@ -108,9 +144,11 @@ export default function TeacherRegistrationForm() {
 							<Input
 								id="lastName"
 								placeholder="Last Name"
-								error={errors.last_name?.message}
 								{...register("last_name", { required: "Last name is required" })}
 							/>
+							{errors.last_name && (
+								<p className="text-red-500 text-sm">{errors.last_name.message}</p>
+							)}
 						</div>
 					</div>
 					<div className="flex flex-col space-y-1.5">
@@ -121,7 +159,6 @@ export default function TeacherRegistrationForm() {
 							id="email"
 							type="email"
 							placeholder="Enter your email"
-							error={errors.email?.message}
 							{...register("email", {
 								required: "Email is required",
 								pattern: {
@@ -130,6 +167,9 @@ export default function TeacherRegistrationForm() {
 								},
 							})}
 						/>
+						{errors.email && (
+							<p className="text-red-500 text-sm">{errors.email.message}</p>
+						)}
 					</div>
 					<div className="flex flex-col space-y-1.5">
 						<Label required htmlFor="phoneNumber">
@@ -139,9 +179,11 @@ export default function TeacherRegistrationForm() {
 							id="phoneNumber"
 							type="number"
 							placeholder="Phone Number"
-							error={errors.phone?.message}
 							{...register("phone", { required: "Phone number is required" })}
 						/>
+						{errors.phone && (
+							<p className="text-red-500 text-sm">{errors.phone.message}</p>
+						)}
 					</div>
 					<div className="flex flex-col space-y-1.5">
 						<Label required htmlFor="password">
@@ -151,7 +193,6 @@ export default function TeacherRegistrationForm() {
 							id="password"
 							type="password"
 							placeholder="Password"
-							error={errors.password?.message}
 							{...register("password", {
 								required: "Password is required",
 								minLength: {
@@ -161,6 +202,9 @@ export default function TeacherRegistrationForm() {
 							})}
 							className={errors.password ? "border-red-500" : ""}
 						/>
+						{errors.password && (
+							<p className="text-red-500 text-sm">{errors.password.message}</p>
+						)}
 					</div>
 					<div>
 						<Label required htmlFor="designation">
@@ -182,9 +226,9 @@ export default function TeacherRegistrationForm() {
 
 							<SelectContent>
 								<SelectItem value="Principal">Principal</SelectItem>
-								<SelectItem value="HOD">HOD</SelectItem>
-								<SelectItem value="Tutor">Tutor</SelectItem>
-								<SelectItem value="Teacher">Teacher</SelectItem>
+								<SelectItem value="hod">HOD</SelectItem>
+								<SelectItem value="lecturer">Tutor</SelectItem>
+								<SelectItem value="maintenance">Teacher</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
