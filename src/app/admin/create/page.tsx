@@ -121,12 +121,10 @@ export default function TeacherRegistrationForm() {
 							</Label>
 							<Input
 								id="firstName"
+								error={errors?.first_name?.message}
 								placeholder="First Name"
 								{...register("first_name", { required: "First name is required" })}
 							/>
-							{errors.first_name && (
-								<p className="text-red-500 text-sm">{errors.first_name.message}</p>
-							)}
 						</div>
 						<div className="flex flex-col space-y-1.5">
 							<Label htmlFor="middleName">Middle Name</Label>
@@ -137,9 +135,7 @@ export default function TeacherRegistrationForm() {
 							/>
 						</div>
 						<div className="flex flex-col space-y-1.5">
-							<Label required htmlFor="lastName">
-								Last Name
-							</Label>
+							<Label htmlFor="lastName">Last Name</Label>
 							<Input
 								id="lastName"
 								placeholder="Last Name"
@@ -154,6 +150,7 @@ export default function TeacherRegistrationForm() {
 						<Input
 							id="email"
 							type="email"
+							error={errors?.email?.message}
 							placeholder="Enter your email"
 							{...register("email", {
 								required: "Email is required",
@@ -163,9 +160,6 @@ export default function TeacherRegistrationForm() {
 								},
 							})}
 						/>
-						{errors.email && (
-							<p className="text-red-500 text-sm">{errors.email.message}</p>
-						)}
 					</div>
 					<div className="flex flex-col space-y-1.5">
 						<Label required htmlFor="phoneNumber">
@@ -174,12 +168,10 @@ export default function TeacherRegistrationForm() {
 						<Input
 							id="phoneNumber"
 							type="number"
+							error={errors?.phone?.message}
 							placeholder="Phone Number"
 							{...register("phone", { required: "Phone number is required" })}
 						/>
-						{errors.phone && (
-							<p className="text-red-500 text-sm">{errors.phone.message}</p>
-						)}
 					</div>
 					<div className="flex flex-col space-y-1.5">
 						<Label required htmlFor="password">
@@ -188,6 +180,7 @@ export default function TeacherRegistrationForm() {
 						<Input
 							id="password"
 							type="password"
+							error={errors?.password?.message}
 							placeholder="Password"
 							{...register("password", {
 								required: "Password is required",
@@ -196,11 +189,7 @@ export default function TeacherRegistrationForm() {
 									message: "Password must be at least 6 characters long",
 								},
 							})}
-							className={errors.password ? "border-red-500" : ""}
 						/>
-						{errors.password && (
-							<p className="text-red-500 text-sm">{errors.password.message}</p>
-						)}
 					</div>
 					<div>
 						<Label required htmlFor="designation">
