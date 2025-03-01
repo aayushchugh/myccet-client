@@ -41,16 +41,12 @@ export default function TeacherRegistrationForm() {
 		try {
 			// Retrieve token from localStorage
 			const token = localStorage.getItem("token");
-			console.log(token);
 
 			if (!token) {
 				toast.error("You are not authenticated. Please log in first.");
 				router.push("/login"); // Redirect to login page
 				return;
 			}
-
-			// Log the data being sent
-			console.log("Submitting Data:", data);
 
 			// Send request with token using apiService
 			const response = await apiService.post("/admin", data, {
@@ -98,7 +94,6 @@ export default function TeacherRegistrationForm() {
 				// Handle 500 errors
 				if (error.response.status === 500) {
 					toast.error("Server error. Please try again later.");
-					console.error("Server Error Details:", error.response.data);
 				}
 			} else {
 				// Handle network errors or unexpected errors
