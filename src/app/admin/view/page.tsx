@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import apiService from "@/services/api-service";
 import {
 	Table,
 	TableBody,
@@ -16,43 +17,79 @@ import {
 	PaginationNext,
 	PaginationPrevious,
 } from "@/components/ui/pagination";
+
 interface TableRowData {
+	id: number;
 	email: string;
-	name: string;
+	first_name: string;
+	middle_name: string;
+	last_name: string;
+	phone: number;
 	designation: string;
-	subject: string;
 	createdBy: string;
 }
 
-const data: TableRowData[] = [
-	{
-		email: "hey@adityapant.com",
-		name: "John Doe",
-		designation: "HOD",
-		subject: "physics",
-		createdBy: "Aditya",
-	},
-];
-
 export default function TableDemo() {
-	const [currentPage, SelectCurrentPage] = useState(1);
+	const [data, setData] = useState<TableRowData[]>([]);
+	const [currentPage, setCurrentPage] = useState(1);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 	const rowsPerPage = 17;
 
-	const totalPages: number = Math.ceil(data.length / rowsPerPage);
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const token = localStorage.getItem("token");
 
-	const currentRows: TableRowData[] = data.slice(
-		(currentPage - 1) * rowsPerPage,
-		currentPage * rowsPerPage,
-	);
+				if (!token) {
+					throw new Error("No authentication token found.");
+				}
+
+				const response = await apiService.get("/admin", {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+
+				console.log("Full API Response:", response);
+				const responseData = response.data.payload;
+				if (!Array.isArray(responseData)) {
+					throw new Error("API response is not an array.");
+				}
+
+				setData(responseData);
+			} catch (error) {
+				setError("An error occurred while fetching data.");
+				console.error("Error fetching data:", error);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		fetchData();
+	}, []);
+	const totalPages = Math.ceil(data.length / rowsPerPage);
+
+	const currentRows = data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
 	const handlePageChange = (page: number): void => {
-		SelectCurrentPage(page);
+		setCurrentPage(page);
 	};
+
+	if (isLoading) {
+		return <div>Loading...</div>;
+	}
+
+	if (error) {
+		return <div className="text-red-500">{error}</div>;
+	}
+
 	return (
 		<div className="w-full px-4">
-			<Table className="w-full ">
+			<Table className="w-full">
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[25%] ">Email Address</TableHead>
+						<TableHead className="w-[25%]">Email Address</TableHead>
 						<TableHead className="w-[25%] text-right">Name</TableHead>
 						<TableHead className="w-[25%] text-right">Designation</TableHead>
 						<TableHead className="w-[25%] text-right">Created By</TableHead>
@@ -61,10 +98,14 @@ export default function TableDemo() {
 				<TableBody>
 					{currentRows.map((row, index) => (
 						<TableRow key={index}>
-							<TableCell className="">{row.email}</TableCell>
-							<TableCell className="text-right">{row.name}</TableCell>
+							<TableCell>{row.email}</TableCell>
+							<TableCell className="text-right">
+								{`${row.first_name} ${row.middle_name || ""} ${
+									row.last_name || ""
+								}`.trim()}
+							</TableCell>
 							<TableCell className="text-right">{row.designation}</TableCell>
-							<TableCell className="text-right">{row.designation}</TableCell>
+							<TableCell className="text-right">{row.createdBy}</TableCell>
 						</TableRow>
 					))}
 				</TableBody>
