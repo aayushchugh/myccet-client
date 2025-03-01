@@ -8,7 +8,6 @@ import apiService from "@/services/api-service"; // Import your apiService
 import handleFormValidationErrors from "@/lib/handle-form-validation-errors"; // Ensure this utility exists
 import { toast } from "sonner"; // Import toast for displaying error messages
 import { useRouter } from "next/navigation"; // Import useRouter for redirecting
-
 import {
 	Select,
 	SelectContent,
@@ -20,7 +19,7 @@ import {
 interface FormInput {
 	first_name: string;
 	middle_name?: string;
-	last_name: string;
+	last_name?: string;
 	email: string;
 	phone: number;
 	password: string;
@@ -36,16 +35,10 @@ export default function TeacherRegistrationForm() {
 		setValue,
 		formState: { errors, isSubmitting },
 	} = useForm<FormInput>();
-
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
 		data.phone = Number(data.phone);
 
 		try {
-			const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-			if (!apiUrl) {
-				throw new Error("API URL is not defined");
-			}
-
 			// Retrieve token from localStorage
 			const token = localStorage.getItem("token");
 
@@ -64,6 +57,7 @@ export default function TeacherRegistrationForm() {
 
 			console.log("API Response:", response.data);
 			toast.success("Registration successful!");
+			router.push("/admin/view");
 		} catch (error: any) {
 			console.error("❌ API Error:", error);
 
@@ -97,7 +91,7 @@ export default function TeacherRegistrationForm() {
 					handleFormValidationErrors(error.response.data.errors, setError);
 				}
 
-				// Handle 500 errors (already handled by apiService interceptor)
+				// Handle 500 errors
 				if (error.response.status === 500) {
 					toast.error("Server error. Please try again later.");
 				}
@@ -122,12 +116,10 @@ export default function TeacherRegistrationForm() {
 							</Label>
 							<Input
 								id="firstName"
+								error={errors?.first_name?.message}
 								placeholder="First Name"
 								{...register("first_name", { required: "First name is required" })}
 							/>
-							{errors.first_name && (
-								<p className="text-red-500 text-sm">{errors.first_name.message}</p>
-							)}
 						</div>
 						<div className="flex flex-col space-y-1.5">
 							<Label htmlFor="middleName">Middle Name</Label>
@@ -138,17 +130,12 @@ export default function TeacherRegistrationForm() {
 							/>
 						</div>
 						<div className="flex flex-col space-y-1.5">
-							<Label required htmlFor="lastName">
-								Last Name
-							</Label>
+							<Label htmlFor="lastName">Last Name</Label>
 							<Input
 								id="lastName"
 								placeholder="Last Name"
-								{...register("last_name", { required: "Last name is required" })}
+								{...register("last_name")}
 							/>
-							{errors.last_name && (
-								<p className="text-red-500 text-sm">{errors.last_name.message}</p>
-							)}
 						</div>
 					</div>
 					<div className="flex flex-col space-y-1.5">
@@ -158,6 +145,7 @@ export default function TeacherRegistrationForm() {
 						<Input
 							id="email"
 							type="email"
+							error={errors?.email?.message}
 							placeholder="Enter your email"
 							{...register("email", {
 								required: "Email is required",
@@ -167,9 +155,6 @@ export default function TeacherRegistrationForm() {
 								},
 							})}
 						/>
-						{errors.email && (
-							<p className="text-red-500 text-sm">{errors.email.message}</p>
-						)}
 					</div>
 					<div className="flex flex-col space-y-1.5">
 						<Label required htmlFor="phoneNumber">
@@ -178,12 +163,10 @@ export default function TeacherRegistrationForm() {
 						<Input
 							id="phoneNumber"
 							type="number"
+							error={errors?.phone?.message}
 							placeholder="Phone Number"
 							{...register("phone", { required: "Phone number is required" })}
 						/>
-						{errors.phone && (
-							<p className="text-red-500 text-sm">{errors.phone.message}</p>
-						)}
 					</div>
 					<div className="flex flex-col space-y-1.5">
 						<Label required htmlFor="password">
@@ -192,6 +175,7 @@ export default function TeacherRegistrationForm() {
 						<Input
 							id="password"
 							type="password"
+							error={errors?.password?.message}
 							placeholder="Password"
 							{...register("password", {
 								required: "Password is required",
@@ -200,11 +184,7 @@ export default function TeacherRegistrationForm() {
 									message: "Password must be at least 6 characters long",
 								},
 							})}
-							className={errors.password ? "border-red-500" : ""}
 						/>
-						{errors.password && (
-							<p className="text-red-500 text-sm">{errors.password.message}</p>
-						)}
 					</div>
 					<div>
 						<Label required htmlFor="designation">

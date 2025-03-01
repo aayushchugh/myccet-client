@@ -34,6 +34,7 @@ export default function TeacherRegistrationForm() {
 	const {
 		register,
 		handleSubmit,
+
 		setValue,
 		formState: { errors },
 	} = useForm<FormInput>();
