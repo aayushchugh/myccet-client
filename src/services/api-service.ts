@@ -2,7 +2,9 @@ import axios from "axios";
 import { toast } from "sonner";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-const accessToken = localStorage.getItem("token");
+const isClient = typeof window !== "undefined";
+
+const accessToken = isClient ? localStorage.getItem("token") : undefined;
 
 const apiService = axios.create({
 	baseURL: BASE_URL,
