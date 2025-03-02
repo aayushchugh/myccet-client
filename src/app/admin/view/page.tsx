@@ -78,23 +78,22 @@ export default function TableDemo() {
 			<Table className="w-full">
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[25%]">Email Address</TableHead>
-						<TableHead className="w-[25%] text-right">Name</TableHead>
-						<TableHead className="w-[25%] text-right">Designation</TableHead>
-						<TableHead className="w-[25%] text-right">Created By</TableHead>
+						<TableHead className="w-[60%]">Email Address</TableHead>
+						<TableHead className="w-[25%] ">Name</TableHead>
+						<TableHead className="w-[15%] ">Designation</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
 					{currentRows.map((row, index) => (
 						<TableRow key={index}>
 							<TableCell>{row.email}</TableCell>
-							<TableCell className="text-right">
+							<TableCell className="">
 								{`${row.first_name} ${row.middle_name || ""} ${
 									row.last_name || ""
 								}`.trim()}
 							</TableCell>
-							<TableCell className="text-right">{row.designation}</TableCell>
-							<TableCell className="text-right">{row.createdBy}</TableCell>
+							<TableCell className="">{row.designation}</TableCell>
+							<TableCell className="">{row.createdBy}</TableCell>
 						</TableRow>
 					))}
 				</TableBody>
