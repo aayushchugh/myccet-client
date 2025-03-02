@@ -150,11 +150,9 @@ export default function TeacherRegistrationForm() {
 								</SelectTrigger>
 
 								<SelectContent>
-									<SelectItem value="admin">Admin</SelectItem>
 									<SelectItem value="Principal">Principal</SelectItem>
-									<SelectItem value="hod">HOD</SelectItem>
-									<SelectItem value="lecturer">Tutor</SelectItem>
-									<SelectItem value="maintenance">Teacher</SelectItem>
+
+									<SelectItem value="maintenance">Maintenance</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
