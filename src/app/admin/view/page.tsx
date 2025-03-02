@@ -39,22 +39,11 @@ export default function TableDemo() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const token = localStorage.getItem("token");
+				const response = await apiService.get("/admin", {});
 
-				if (!token) {
-					throw new Error("No authentication token found.");
-				}
-
-				const response = await apiService.get("/admin", {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
-
-				console.log("Full API Response:", response);
 				const responseData = response.data.payload;
 				if (!Array.isArray(responseData)) {
-					throw new Error("API response is not an array.");
+					throw new Error("");
 				}
 
 				setData(responseData);
