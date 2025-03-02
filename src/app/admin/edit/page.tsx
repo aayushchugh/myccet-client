@@ -150,7 +150,7 @@ export default function TeacherRegistrationForm() {
 								</SelectTrigger>
 
 								<SelectContent>
-									<SelectItem value="Principal">Principal</SelectItem>
+									<SelectItem value="principal">Principal</SelectItem>
 
 									<SelectItem value="maintenance">Maintenance</SelectItem>
 								</SelectContent>
