@@ -51,7 +51,7 @@ export default function TableDemo() {
 			<Table className="w-full ">
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[50%]">Subject Code</TableHead>
+						<TableHead className="w-[50%] text">Subject Code</TableHead>
 						<TableHead className="w-[50%] text-right te">Subject Name</TableHead>
 					</TableRow>
 				</TableHeader>
