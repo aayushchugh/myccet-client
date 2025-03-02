@@ -2,11 +2,14 @@ import axios from "axios";
 import { toast } from "sonner";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const accessToken = localStorage.getItem("token");
 
 const apiService = axios.create({
 	baseURL: BASE_URL,
 	headers: {
 		"Content-Type": "application/json",
+		// If there is accessToken, add it to the header
+		...(accessToken && { Authorization: `Bearer ${accessToken}` }),
 	},
 });
 

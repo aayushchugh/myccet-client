@@ -22,7 +22,7 @@ export default function Home() {
 							<Button>Faculty</Button>
 						</Link>
 
-						<Link href={"/admin/login"}>
+						<Link href={"/login"}>
 							<Button>Admin</Button>
 						</Link>
 					</div>
