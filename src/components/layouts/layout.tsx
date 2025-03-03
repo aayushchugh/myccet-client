@@ -29,7 +29,7 @@ const items = [
 	},
 	{
 		title: "Subject ",
-		url: "#",
+		url: "/admin/subject/view",
 		icon: NotebookPen,
 	},
 	{
