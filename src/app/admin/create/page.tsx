@@ -62,7 +62,7 @@ export default function TeacherRegistrationForm() {
 			console.error("❌ API Error:", error);
 
 			if (error.response) {
-				console.log("📢 Server Response:", error.response.data);
+				console.log(" Server Response:", error.response.data);
 
 				// Handle 409 Conflict errors
 				if (error.response.status === 409) {

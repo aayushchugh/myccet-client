@@ -32,7 +32,7 @@ const data: TableRowData[] = [
 	},
 ];
 
-export default function TableDemo() {
+export default function TablwView() {
 	const [currentPage, SelectCurrentPage] = useState(1);
 	const rowsPerPage = 17;
 
