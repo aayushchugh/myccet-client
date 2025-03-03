@@ -1,5 +1,7 @@
-import { NotebookPen, GraduationCap, UserRoundPen, Shield, Album } from "lucide-react";
+"use client";
 
+import { NotebookPen, GraduationCap, UserRoundPen, Shield, Album } from "lucide-react";
+import { useState, useEffect } from "react";
 import {
 	Sidebar,
 	SidebarContent,
@@ -9,6 +11,7 @@ import {
 	SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import apiService from "@/services/api-service";
 
 // Menu items.
 const items = [
@@ -40,6 +43,30 @@ const items = [
 ];
 
 export function AppSidebar() {
+	const [username, setUsername] = useState("Loading...");
+	const [designation, setDesignation] = useState("Loading...");
+
+	useEffect(() => {
+		const fetchUserData = async () => {
+			try {
+				const response = await apiService.get("/auth/me", { withCredentials: true });
+				const userData = response.data.payload;
+				if (userData) {
+					setUsername(
+						`${userData.first_name} ${userData.middle_name || ""} ${
+							userData.last_name || ""
+						}`.trim(),
+					);
+					setDesignation(userData.designation);
+				}
+			} catch (error) {
+				console.error("Rrror fetching user data", error);
+				setUsername("Unknown User");
+				setDesignation("Unknown");
+			}
+		};
+		fetchUserData();
+	}, []);
 	return (
 		<Sidebar>
 			<SidebarContent>
@@ -76,8 +103,8 @@ export function AppSidebar() {
 					</Avatar>
 
 					<div>
-						<p className="text-sm font-medium">Username</p>
-						<p className="text-xs text-muted-foreground">@Username</p>
+						<p className="text-sm font-medium">{username}</p>
+						<p className="text-xs text-muted-foreground">{designation}</p>
 					</div>
 				</div>
 			</SidebarFooter>
