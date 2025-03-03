@@ -29,7 +29,7 @@ interface TableRowData {
 	createdBy: string;
 }
 
-export default function TableDemo() {
+export default function Tableveiw() {
 	const [data, setData] = useState<TableRowData[]>([]);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [isLoading, setIsLoading] = useState(true);
