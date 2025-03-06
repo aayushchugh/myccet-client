@@ -1,11 +1,11 @@
-"use client";
 import * as React from "react";
-
+import apiService from "@/services/api-service";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { Label } from "@/components/ui/label";
+import { useState, useEffect } from "react";
 
 import {
 	Select,
@@ -14,8 +14,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-// import { useState } from "react";
-// import Link from "next/link";
 
 interface FormInput {
 	avatar: FileList;
@@ -27,7 +25,11 @@ interface FormInput {
 	designation: string;
 }
 
-export default function TeacherRegistrationForm() {
+export default async function TeacherRegistrationForm() {
+	const [data, setData] = useState<FormInput[]>([]);
+	const [error, setError] = useState<string | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
+
 	const {
 		register,
 		handleSubmit,
@@ -36,7 +38,35 @@ export default function TeacherRegistrationForm() {
 	} = useForm<FormInput>();
 	const onSubmit: SubmitHandler<FormInput> = (data) => console.log(data);
 
-	// const [percentage, setPercentage] = useState(null);
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const response = await apiService.get("/admin", {});
+
+				const responseData = response.data.payload;
+				if (!Array.isArray(responseData)) {
+					throw new Error("");
+				}
+
+				setData(responseData);
+			} catch (error) {
+				setError("An error occurred while fetching data.");
+				console.error("Error fetching data:", error);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		fetchData();
+	}, []);
+
+	if (isLoading) {
+		return <div>Loading...</div>;
+	}
+
+	if (error) {
+		return <div className="text-red-500">{error}</div>;
+	}
 
 	return (
 		<div>
