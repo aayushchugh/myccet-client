@@ -181,7 +181,7 @@ const data: TableRowData[] = [
 	},
 ];
 
-export default function Tableview() {
+export default function StudentList() {
 	const [currentPage, SelectCurrentPage] = useState(1);
 	const rowsPerPage = 17;
 
