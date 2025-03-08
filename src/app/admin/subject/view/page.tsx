@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Trash2 } from "lucide-react";
 import { Pencil } from "lucide-react";
 import { Copy } from "lucide-react";
@@ -19,35 +19,50 @@ import {
 	PaginationNext,
 	PaginationPrevious,
 } from "@/components/ui/pagination";
+import apiService from "@/services/api-service";
 interface TableRowData {
-	subject_code: number;
-	subject_name: string;
+	code: number;
+	title: string;
 }
 
-const data: TableRowData[] = [
-	{
-		subject_code: 5234,
-		subject_name: "Mathematics",
-	},
-	{
-		subject_code: 5234,
-		subject_name: "Mathematics",
-	},
-];
-
 export default function TablwView() {
+	const [data, setData] = useState<TableRowData[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 	const [currentPage, SelectCurrentPage] = useState(1);
 	const rowsPerPage = 17;
 
-	const totalPages: number = Math.ceil(data.length / rowsPerPage);
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const response = await apiService.get("subjects", {});
+				const responseData = response.data.payload;
+				if (!Array.isArray(responseData)) {
+					throw new Error("");
+				}
+				setData(responseData);
+			} catch (error) {
+				setError("an error occured while fethcing data");
+				console.error("error Fetching data:", error);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+		fetchData();
+	}, []);
 
-	const currentRows: TableRowData[] = data.slice(
-		(currentPage - 1) * rowsPerPage,
-		currentPage * rowsPerPage,
-	);
+	const totalPages = Math.ceil(data.length / rowsPerPage);
+
+	const currentRows = data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 	const handlePageChange = (page: number): void => {
 		SelectCurrentPage(page);
 	};
+	if (isLoading) {
+		return <div>Loading...</div>;
+	}
+	if (error) {
+		return <div className="text-red-500"> {error}</div>;
+	}
 
 	return (
 		<div className="w-full px-4">
@@ -64,8 +79,8 @@ export default function TablwView() {
 				<TableBody>
 					{currentRows.map((row, index) => (
 						<TableRow key={index}>
-							<TableCell className="font-medium">{row.subject_code}</TableCell>
-							<TableCell className="">{row.subject_name}</TableCell>
+							<TableCell className=" font-medium">{row.code}</TableCell>
+							<TableCell className="">{row.title}</TableCell>
 
 							<TableCell className="text-right">
 								<Copy size={16} />
