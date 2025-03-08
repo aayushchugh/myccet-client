@@ -4,23 +4,90 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import apiService from "@/services/api-service"; // Import your apiService
+import handleFormValidationErrors from "@/lib/handle-form-validation-errors"; // Ensure this utility exists
+import { toast } from "sonner"; // Import toast for displaying error messages
+import { useRouter } from "next/navigation"; // Import useRouter for redirecting
 
 interface FormInput {
-	subject_code: number;
-	subject_name: string;
+	title: string;
+	code: string;
 }
 
 export default function TeacherRegistrationForm() {
+	const router = useRouter();
 	const {
 		register,
 		handleSubmit,
+		setError,
 		formState: { errors, isSubmitting },
 	} = useForm<FormInput>();
 
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
-		console.log("Form submitted:", data);
-	};
+		data.code = String(data.code);
+		try {
+			// Retrieve token from localStorage
+			const token = localStorage.getItem("token");
 
+			if (!token) {
+				toast.error("You are not authenticated. Please log in first.");
+				router.push("/login"); // Redirect to login page
+				return;
+			}
+
+			// Send request with token using apiService
+			const response = await apiService.post("/subjects", data, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+			console.log("API Response:", response.data);
+			toast.success("Subject Created!");
+			router.push("/admim/subject/view");
+		} catch (error: any) {
+			console.error("❌ API Error:", error);
+
+			if (error.response) {
+				console.log(" Server Response:", error.response.data);
+
+				// Handle 409 Conflict errors
+				if (error.response.status === 409) {
+					const errorMessage =
+						error.response.data.message ||
+						"A conflict occurred. Please check your input.";
+					toast.error(errorMessage);
+
+					// Optionally, set form errors for specific fields
+					if (error.response.data.errors) {
+						handleFormValidationErrors(error.response.data.errors, setError);
+					}
+					return;
+				}
+
+				// Handle 401 Unauthorized errors
+				if (error.response.status === 401) {
+					toast.error("You are not authorized. Please log in again.");
+					localStorage.removeItem("token"); // Clear invalid token
+					router.push("/login"); // Redirect to login page
+					return;
+				}
+
+				// Handle form validation errors
+				if (error.response.status === 400 || error.response.status === 404) {
+					handleFormValidationErrors(error.response.data.errors, setError);
+				}
+
+				// Handle 500 errors
+				if (error.response.status === 500) {
+					toast.error("Server error. Please try again later.");
+				}
+			} else {
+				// Handle network errors or unexpected errors
+				toast.error("An unexpected error occurred. Please try again.");
+			}
+		}
+	};
 	return (
 		<form
 			onSubmit={handleSubmit(onSubmit)}
@@ -35,14 +102,12 @@ export default function TeacherRegistrationForm() {
 						id="subject_code"
 						type="number"
 						placeholder="Enter Subject Code"
-						{...register("subject_code", {
+						{...register("code", {
 							required: "Subject code is required",
 							valueAsNumber: true,
 						})}
 					/>
-					{errors.subject_code && (
-						<p className="text-red-500 text-sm">{errors.subject_code.message}</p>
-					)}
+					{errors.code && <p className="text-red-500 text-sm">{errors.code.message}</p>}
 				</div>
 
 				<div className="flex flex-col space-y-1.5">
@@ -53,7 +118,7 @@ export default function TeacherRegistrationForm() {
 						id="subject_name"
 						type="text"
 						placeholder="Enter Subject Name"
-						{...register("subject_name", {
+						{...register("title", {
 							required: "Subject name is required",
 							minLength: {
 								value: 3,
@@ -61,9 +126,7 @@ export default function TeacherRegistrationForm() {
 							},
 						})}
 					/>
-					{errors.subject_name && (
-						<p className="text-red-500 text-sm">{errors.subject_name.message}</p>
-					)}
+					{errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
 				</div>
 
 				<div className="flex justify-center mt-4">
