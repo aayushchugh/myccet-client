@@ -2,9 +2,9 @@ import { Button } from "@/components/ui";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Typography } from "@/components/ui/typography";
 import Link from "next/link";
-import { MdAdminPanelSettings } from "react-icons/md";
-import { FaChalkboardTeacher } from "react-icons/fa";
-import { PiStudentBold } from "react-icons/pi";
+import { Shield } from "lucide-react";
+import { UserRoundPen } from "lucide-react";
+import { GraduationCap } from "lucide-react";
 
 export default function Home() {
 	return (
@@ -13,7 +13,7 @@ export default function Home() {
 				<Card className="max-w-2xl w-full ">
 					<CardHeader className="flex items-center justify-center p-0">
 						<div className="">
-							<MdAdminPanelSettings size={200} color="#B92727" />
+							<Shield size={200} strokeWidth={0.3} color="#737373" />
 						</div>
 					</CardHeader>
 					<CardContent>
@@ -35,7 +35,7 @@ export default function Home() {
 				<Card className="max-w-2xl w-full">
 					<CardHeader className="flex items-center justify-center p-0">
 						<div>
-							<FaChalkboardTeacher size={200} color="#d8ab2f" />
+							<UserRoundPen size={200} strokeWidth={0.3} color="#737373" />
 						</div>
 					</CardHeader>
 					<CardContent>
@@ -58,7 +58,7 @@ export default function Home() {
 				<Card className="max-w-2xl w-full">
 					<CardHeader className="flex items-center justify-center p-0">
 						<div>
-							<PiStudentBold size={200} color="#b92727" />
+							<GraduationCap size={200} strokeWidth={0.3} color="#737373" />
 						</div>
 					</CardHeader>
 					<CardContent>
