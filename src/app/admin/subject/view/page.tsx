@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { Trash2 } from "lucide-react";
 import { Pencil } from "lucide-react";
 import { Copy } from "lucide-react";
+import { toast } from "sonner";
+import { Check } from "lucide-react";
 import {
 	Table,
 	TableBody,
@@ -20,6 +22,7 @@ import {
 	PaginationPrevious,
 } from "@/components/ui/pagination";
 import apiService from "@/services/api-service";
+
 interface TableRowData {
 	code: number;
 	title: string;
@@ -30,6 +33,8 @@ export default function TablwView() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [currentPage, SelectCurrentPage] = useState(1);
+	const [editingRow, setEditingRow] = useState<number | null>(null);
+	const [editTitle, setEditTitle] = useState("");
 	const rowsPerPage = 17;
 
 	useEffect(() => {
@@ -57,13 +62,74 @@ export default function TablwView() {
 	const handlePageChange = (page: number): void => {
 		SelectCurrentPage(page);
 	};
+
+	const handleDelete = async (code: number) => {
+		try {
+			const token = localStorage.getItem("token");
+			if (!token) {
+				throw new Error("Token is missing. Please log in.");
+			}
+
+			// Send delete request
+			const response = await apiService.delete(`/subjects/${code}`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+			// If delete successful, update the state
+			if (response.status === 200) {
+				setData((prevData) => prevData.filter((item) => item.code !== code));
+				toast.success("Task deleted successfully");
+			}
+		} catch (error) {
+			console.error("Error deleting task:", error);
+			toast.error("Failed to delete the task");
+		}
+	};
+	const handleEdit = (row: TableRowData) => {
+		setEditingRow(row.code);
+		setEditTitle(row.title);
+	};
+	const handleUpdate = async (code: number) => {
+		try {
+			const token = localStorage.getItem("token");
+			if (!token) {
+				throw new Error("Token is missing. Please log in.");
+			}
+
+			// Send Update request
+			const response = await apiService.put(
+				`/subjects/${code}`,
+				{ title: editTitle },
+				{
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			);
+
+			if (response.status === 200) {
+				setData((prevData) =>
+					prevData.map((item) =>
+						item.code === code ? { ...item, title: editTitle } : item,
+					),
+				);
+				toast.success("Task updated successfully");
+				setEditingRow(null);
+			}
+		} catch (error) {
+			console.error("Error updating task:", error);
+			toast.error("Failed to update the task");
+		}
+	};
+
 	if (isLoading) {
 		return <div>Loading...</div>;
 	}
 	if (error) {
 		return <div className="text-red-500"> {error}</div>;
 	}
-
 	return (
 		<div className="w-full px-4">
 			<Table className="w-full ">
@@ -80,16 +146,36 @@ export default function TablwView() {
 					{currentRows.map((row, index) => (
 						<TableRow key={index}>
 							<TableCell className=" font-medium">{row.code}</TableCell>
-							<TableCell className="">{row.title}</TableCell>
+							<TableCell>
+								{editingRow === row.code ? (
+									<input
+										value={editTitle}
+										onChange={(e) => setEditTitle(e.target.value)}
+									/>
+								) : (
+									row.title
+								)}
+							</TableCell>
 
-							<TableCell className="text-right">
-								<Copy size={16} />
+							<TableCell className="">
+								<div className="">
+									<Copy size={16} />
+								</div>
 							</TableCell>
-							<TableCell className="text-right">
-								<Pencil size={16} />
+							<TableCell>
+								{editingRow === row.code ? (
+									<Check size={16} onClick={() => handleUpdate(row.code)} />
+								) : (
+									<Pencil size={16} onClick={() => handleEdit(row)} />
+								)}
 							</TableCell>
-							<TableCell className="text-right">
-								<Trash2 color="red" size={16} />
+							<TableCell>
+								<Trash2
+									color="red"
+									size={16}
+									className=""
+									onClick={() => handleDelete(row.code)}
+								/>
 							</TableCell>
 						</TableRow>
 					))}
