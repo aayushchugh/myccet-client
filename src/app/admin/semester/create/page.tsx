@@ -16,8 +16,6 @@ import { useRouter } from "next/navigation";
 
 interface FormInput {
 	title: string;
-	startDate: Date;
-	endDate: Date;
 }
 
 export default function TeacherRegistrationForm() {
@@ -39,14 +37,22 @@ export default function TeacherRegistrationForm() {
 			router.push("/login");
 			return;
 		}
+
+		if (!startDate || !endDate) {
+			toast.error("Please select both start and end dates.");
+			return;
+		}
+
 		try {
-			const response = await apiService.post(
-				"/semesters",
-				{ ...data, startDate, endDate },
-				{
-					headers: { Authorization: `Bearer ${token}` },
-				},
-			);
+			const formattedData = {
+				title: data.title,
+				start_date: format(startDate, "yyyy-MM-dd"),
+				end_date: format(endDate, "yyyy-MM-dd"),
+			};
+
+			const response = await apiService.post("/semesters", formattedData, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
 			console.log("API Response:", response.data);
 			toast.success("Teacher registered successfully!");
 			router.push("/admin/semester/view");
