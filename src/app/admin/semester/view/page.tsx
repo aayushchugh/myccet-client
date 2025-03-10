@@ -85,7 +85,7 @@ export default function TableView() {
 								<Copy size={16} className="cursor-pointer" />
 							</TableCell>
 							<TableCell className="text-center">
-								<Pencil size={16} className="cursor-pointer text-blue-500" />
+								<Pencil size={16} className="cursor-pointer" />
 							</TableCell>
 							<TableCell className="text-center">
 								<Trash2 size={16} className="cursor-pointer text-red-500" />

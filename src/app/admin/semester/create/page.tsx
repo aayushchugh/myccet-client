@@ -32,11 +32,6 @@ export default function TeacherRegistrationForm() {
 
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
 		const token = localStorage.getItem("token");
-		if (!token) {
-			toast.error("You are not authenticated. Please log in first.");
-			router.push("/login");
-			return;
-		}
 
 		if (!startDate || !endDate) {
 			toast.error("Please select both start and end dates.");
