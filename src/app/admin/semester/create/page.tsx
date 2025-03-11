@@ -22,6 +22,8 @@ export default function TeacherRegistrationForm() {
 	const router = useRouter();
 	const [startDate, setStartDate] = React.useState<Date | undefined>();
 	const [endDate, setEndDate] = React.useState<Date | undefined>();
+	const [startDateError, setStartDateError] = React.useState<string | null>(null);
+	const [endDateError, setEndDateError] = React.useState<string | null>(null);
 
 	const {
 		register,
@@ -31,8 +33,16 @@ export default function TeacherRegistrationForm() {
 	} = useForm<FormInput>();
 
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
+		setStartDateError(null);
+		setEndDateError(null);
+
+		if (!startDate) {
+			setStartDateError("Start date is required.");
+		}
+		if (!endDate) {
+			setEndDateError("End date is required.");
+		}
 		if (!startDate || !endDate) {
-			toast.error("Please select both start and end dates.");
 			return;
 		}
 
@@ -43,17 +53,12 @@ export default function TeacherRegistrationForm() {
 				end_date: format(endDate, "yyyy-MM-dd"),
 			};
 
-			const response = await apiService.post("/semesters", formattedData);
+			await apiService.post("/semesters", formattedData);
 
-			toast.success("Teacher registered successfully!");
+			toast.success("Semester registered successfully!");
 			router.push("/admin/semester/view");
 		} catch (error: any) {
 			if (error.response) {
-				if (error.response.status === 409) {
-					toast.error("A conflict occurred. Please check your input.");
-					return;
-				}
-
 				handleFormValidationErrors(error.response.data.errors, setError);
 			}
 		}
@@ -99,6 +104,7 @@ export default function TeacherRegistrationForm() {
 								/>
 							</PopoverContent>
 						</Popover>
+						{startDateError && <p className="text-red-500 text-sm">{startDateError}</p>}
 					</div>
 					<div className="flex flex-col space-y-1.5">
 						<Label htmlFor="endDate">End Date</Label>
@@ -124,6 +130,7 @@ export default function TeacherRegistrationForm() {
 								/>
 							</PopoverContent>
 						</Popover>
+						{endDateError && <p className="text-red-500 text-sm">{endDateError}</p>}
 					</div>
 				</div>
 				<div className="flex justify-center mt-4">
