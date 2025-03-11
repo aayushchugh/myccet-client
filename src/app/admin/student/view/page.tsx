@@ -8,6 +8,8 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import Link from "next/link";
+import { Button } from "@/components/ui";
 import {
 	Pagination,
 	PaginationContent,
@@ -196,6 +198,11 @@ export default function TableDemo() {
 	};
 	return (
 		<div className="w-full px-4">
+			<div className="flex justify-end">
+				<Link href={"/admin/student/create"}>
+					<Button className="w-auto right-0">Register Student</Button>
+				</Link>
+			</div>
 			<Table className="w-full ">
 				<TableHeader>
 					<TableRow>

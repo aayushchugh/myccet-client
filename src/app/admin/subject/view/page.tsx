@@ -5,6 +5,8 @@ import { Pencil } from "lucide-react";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
 import { Check } from "lucide-react";
+import { Button } from "@/components/ui";
+import Link from "next/link";
 import {
 	Table,
 	TableBody,
@@ -101,6 +103,11 @@ export default function TablwView() {
 	}
 	return (
 		<div className="w-full px-4">
+			<div className="flex justify-end">
+				<Link href={"/admin/subject/create"}>
+					<Button className="w-auto right-0">Create Subject</Button>
+				</Link>
+			</div>
 			<Table className="w-full ">
 				<TableHeader>
 					<TableRow>

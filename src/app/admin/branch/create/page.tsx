@@ -10,7 +10,7 @@ import { toast } from "sonner"; // Import toast for displaying error messages
 import { useRouter } from "next/navigation"; // Import useRouter for redirecting
 
 interface FormInput {
-	branch: string;
+	title: string;
 }
 
 export default function TeacherRegistrationForm() {
@@ -25,11 +25,10 @@ export default function TeacherRegistrationForm() {
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
 		try {
 			// Send request with token using apiService
-			const response = await apiService.post("/branches", data, {});
+			await apiService.post("/branches", data);
 
-			console.log("API Response:", response.data);
 			toast.success("Branch Created!");
-			router.push("/admim/branche/view");
+			router.push("/admin/branch/view");
 		} catch (error: any) {
 			console.error("❌ API Error:", error);
 
@@ -86,7 +85,7 @@ export default function TeacherRegistrationForm() {
 					id="branch_name"
 					type="text"
 					placeholder="Enter Branch Name"
-					{...register("branch", {
+					{...register("title", {
 						required: "Branch name is required",
 						minLength: {
 							value: 3,
@@ -94,7 +93,7 @@ export default function TeacherRegistrationForm() {
 						},
 					})}
 				/>
-				{errors.branch && <p className="text-red-500 text-sm">{errors.branch.message}</p>}
+				{errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
 			</div>
 
 			<div className="flex justify-center mt-4">
