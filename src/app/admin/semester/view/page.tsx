@@ -1,8 +1,7 @@
 "use client";
-import * as React from "react";
 import { useState, useEffect } from "react";
-import { Trash2, Pencil, Copy } from "lucide-react";
-
+import { Trash2, Pencil, Copy, Check } from "lucide-react";
+import { toast } from "sonner";
 import {
 	Table,
 	TableBody,
@@ -20,30 +19,33 @@ import {
 	PaginationPrevious,
 } from "@/components/ui/pagination";
 import apiService from "@/services/api-service";
-import { format } from "date-fns";
 
-interface SemesterData {
+interface TableRowData {
+	id: number;
 	title: string;
-	start_date: string;
-	end_date: string;
 }
 
-export default function SemesterView() {
-	const [data, setData] = useState<SemesterData[]>([]);
+export default function TableView() {
+	const [data, setData] = useState<TableRowData[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [currentPage, setCurrentPage] = useState(1);
-	const rowsPerPage = 10;
+	const [editingRow, setEditingRow] = useState<number | null>(null);
+	const [editTitle, setEditTitle] = useState("");
+	const rowsPerPage = 17;
 
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
 				const response = await apiService.get("/semesters");
 				const responseData = response.data.payload;
-
+				if (!Array.isArray(responseData)) {
+					throw new Error("Invalid data format");
+				}
 				setData(responseData);
-			} catch {
-				setError("An error occurred while fetching data.");
+			} catch (error) {
+				setError("An error occurred while fetching data");
+				console.error("Error fetching data:", error);
 			} finally {
 				setIsLoading(false);
 			}
@@ -54,7 +56,39 @@ export default function SemesterView() {
 	const totalPages = Math.ceil(data.length / rowsPerPage);
 	const currentRows = data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
-	const handlePageChange = (page: number) => setCurrentPage(page);
+	const handlePageChange = (page: number): void => {
+		setCurrentPage(page);
+	};
+
+	const handleDelete = async (id: number) => {
+		try {
+			await apiService.delete(`/semesters/${id}`);
+			setData((prevData) => prevData.filter((item) => item.id !== id));
+			toast.success("Semester deleted successfully");
+		} catch (error) {
+			console.error("Error deleting semester:", error);
+			toast.error("Failed to delete the semester");
+		}
+	};
+
+	const handleEdit = (row: TableRowData) => {
+		setEditingRow(row.id);
+		setEditTitle(row.title);
+	};
+
+	const handleUpdate = async (id: number) => {
+		try {
+			await apiService.put(`/semesters/${id}`, { title: editTitle });
+			setData((prevData) =>
+				prevData.map((item) => (item.id === id ? { ...item, title: editTitle } : item)),
+			);
+			toast.success("Semester updated successfully");
+			setEditingRow(null);
+		} catch (error) {
+			console.error("Error updating semester:", error);
+			toast.error("Failed to update the semester");
+		}
+	};
 
 	if (isLoading) return <div>Loading...</div>;
 	if (error) return <div className="text-red-500">{error}</div>;
@@ -64,44 +98,61 @@ export default function SemesterView() {
 			<Table className="w-full">
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[15%]">Title</TableHead>
-						<TableHead className="w-[35%]">Start Date</TableHead>
-						<TableHead className="w-[35%]">End Date</TableHead>
+						<TableHead className="w-[15%]">Semester ID</TableHead>
+						<TableHead className="w-[70%]">Semester Name</TableHead>
 						<TableHead className="w-[5%] text-center"></TableHead>
 						<TableHead className="w-[5%] text-center"></TableHead>
 						<TableHead className="w-[5%] text-center"></TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
-					{currentRows.map((semester, index) => (
-						<TableRow key={index}>
-							<TableCell className="font-medium">{semester.title}</TableCell>
-							<TableCell>{format(new Date(semester.start_date), "PPP")}</TableCell>
-							<TableCell>{format(new Date(semester.end_date), "PPP")}</TableCell>
-							<TableCell className="text-center">
-								<Copy size={16} className="cursor-pointer" />
+					{currentRows.map((row) => (
+						<TableRow key={row.id}>
+							<TableCell className="font-medium">{row.id}</TableCell>
+							<TableCell>
+								{editingRow === row.id ? (
+									<input
+										type="text"
+										value={editTitle}
+										onChange={(e) => setEditTitle(e.target.value)}
+									/>
+								) : (
+									row.title
+								)}
 							</TableCell>
-							<TableCell className="text-center">
-								<Pencil size={16} className="cursor-pointer" />
+							<TableCell>
+								<Copy size={16} />
 							</TableCell>
-							<TableCell className="text-center">
-								<Trash2 size={16} className="cursor-pointer text-red-500" />
+							<TableCell>
+								{editingRow === row.id ? (
+									<Check size={16} onClick={() => handleUpdate(row.id)} />
+								) : (
+									<Pencil size={16} onClick={() => handleEdit(row)} />
+								)}
+							</TableCell>
+							<TableCell>
+								<Trash2
+									color="red"
+									size={16}
+									onClick={() => handleDelete(row.id)}
+								/>
 							</TableCell>
 						</TableRow>
 					))}
 				</TableBody>
 			</Table>
-
-			{/* Pagination */}
-			<div className="mt-10">
+			<div className=" mt-10">
 				<Pagination>
 					<PaginationContent>
+						{/* Previous Button */}
 						<PaginationItem>
 							<PaginationPrevious
 								href="#"
 								onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
 							/>
 						</PaginationItem>
+
+						{/* Page Numbers */}
 						{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
 							<PaginationItem key={page}>
 								<PaginationLink
@@ -113,6 +164,8 @@ export default function SemesterView() {
 								</PaginationLink>
 							</PaginationItem>
 						))}
+
+						{/* Next Button */}
 						<PaginationItem>
 							<PaginationNext
 								href="#"
