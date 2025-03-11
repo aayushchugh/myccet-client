@@ -31,8 +31,6 @@ export default function TeacherRegistrationForm() {
 	} = useForm<FormInput>();
 
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
-		const token = localStorage.getItem("token");
-
 		if (!startDate || !endDate) {
 			toast.error("Please select both start and end dates.");
 			return;
@@ -45,10 +43,8 @@ export default function TeacherRegistrationForm() {
 				end_date: format(endDate, "yyyy-MM-dd"),
 			};
 
-			const response = await apiService.post("/semesters", formattedData, {
-				headers: { Authorization: `Bearer ${token}` },
-			});
-			console.log("API Response:", response.data);
+			const response = await apiService.post("/semesters", formattedData);
+
 			toast.success("Teacher registered successfully!");
 			router.push("/admin/semester/view");
 		} catch (error: any) {
@@ -57,15 +53,8 @@ export default function TeacherRegistrationForm() {
 					toast.error("A conflict occurred. Please check your input.");
 					return;
 				}
-				if (error.response.status === 401) {
-					toast.error("Unauthorized. Please log in again.");
-					localStorage.removeItem("token");
-					router.push("/login");
-					return;
-				}
+
 				handleFormValidationErrors(error.response.data.errors, setError);
-			} else {
-				toast.error("An unexpected error occurred. Please try again.");
 			}
 		}
 	};

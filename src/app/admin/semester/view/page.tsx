@@ -28,7 +28,7 @@ interface SemesterData {
 	end_date: string;
 }
 
-export default function TableView() {
+export default function SemesterView() {
 	const [data, setData] = useState<SemesterData[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -40,13 +40,10 @@ export default function TableView() {
 			try {
 				const response = await apiService.get("/semesters");
 				const responseData = response.data.payload;
-				if (!Array.isArray(responseData)) {
-					throw new Error("Invalid data format received");
-				}
+
 				setData(responseData);
-			} catch (error) {
+			} catch {
 				setError("An error occurred while fetching data.");
-				console.error("Error fetching data:", error);
 			} finally {
 				setIsLoading(false);
 			}
