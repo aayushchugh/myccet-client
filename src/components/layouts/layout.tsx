@@ -37,7 +37,7 @@ const items = [
 	},
 	{
 		title: "Branch",
-		url: "#",
+		url: "/admin/branch/view",
 		icon: Album,
 	},
 ];

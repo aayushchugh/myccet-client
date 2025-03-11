@@ -65,10 +65,23 @@ export default function TablwView() {
 
 	const handleDelete = async (code: number) => {
 		try {
-			await apiService.delete(`/subjects/${code}`);
+			const token = localStorage.getItem("token");
+			if (!token) {
+				throw new Error("Token is missing. Please log in.");
+			}
 
-			setData((prevData) => prevData.filter((item) => item.code !== code));
-			toast.success("Task deleted successfully");
+			// Send delete request
+			const response = await apiService.delete(`/subjects/${code}`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+			// If delete successful, update the state
+			if (response.status === 200) {
+				setData((prevData) => prevData.filter((item) => item.code !== code));
+				toast.success("Task deleted successfully");
+			}
 		} catch (error) {
 			console.error("Error deleting task:", error);
 			toast.error("Failed to delete the task");
@@ -80,13 +93,31 @@ export default function TablwView() {
 	};
 	const handleUpdate = async (code: number) => {
 		try {
-			await apiService.put(`/subjects/${code}`, { title: editTitle });
+			const token = localStorage.getItem("token");
+			if (!token) {
+				throw new Error("Token is missing. Please log in.");
+			}
 
-			setData((prevData) =>
-				prevData.map((item) => (item.code === code ? { ...item, title: editTitle } : item)),
+			// Send Update request
+			const response = await apiService.put(
+				`/subjects/${code}`,
+				{ title: editTitle },
+				{
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
 			);
-			toast.success("Task updated successfully");
-			setEditingRow(null);
+
+			if (response.status === 200) {
+				setData((prevData) =>
+					prevData.map((item) =>
+						item.code === code ? { ...item, title: editTitle } : item,
+					),
+				);
+				toast.success("Task updated successfully");
+				setEditingRow(null);
+			}
 		} catch (error) {
 			console.error("Error updating task:", error);
 			toast.error("Failed to update the task");
