@@ -18,6 +18,7 @@ import {
 	PaginationNext,
 	PaginationPrevious,
 } from "@/components/ui/pagination";
+
 interface TableRowData {
 	registrationNumber: string;
 	name: string;
@@ -30,23 +31,41 @@ const data: TableRowData[] = [
 		registrationNumber: "220099510649",
 		name: "John Doe",
 		department: "CSE",
-		subject: "physics",
+		subject: "Physics",
+	},
+	{
+		registrationNumber: "220099510650",
+		name: "Jane Smith",
+		department: "ECE",
+		subject: "Mathematics",
+	},
+	{
+		registrationNumber: "220099510651",
+		name: "Alice Johnson",
+		department: "ME",
+		subject: "Thermodynamics",
 	},
 ];
 
-export default function TableDemo() {
-	const [currentPage, SelectCurrentPage] = useState(1);
-	const rowsPerPage = 17;
+export default function FacultyList() {
+	const [currentPage, setCurrentPage] = useState(1);
+	const [search, setSearch] = useState("");
+	const rowsPerPage = 10;
 
-	const totalPages: number = Math.ceil(data.length / rowsPerPage);
+	const filteredData = data.filter((row) =>
+		`${row.registrationNumber} ${row.name} ${row.department} ${row.subject}`
+			.toLowerCase()
+			.includes(search.toLowerCase()),
+	);
 
-	const currentRows: TableRowData[] = data.slice(
+	const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+	const currentRows = filteredData.slice(
 		(currentPage - 1) * rowsPerPage,
 		currentPage * rowsPerPage,
 	);
-	const handlePageChange = (page: number): void => {
-		SelectCurrentPage(page);
-	};
+
+	const handlePageChange = (page: number): void => setCurrentPage(page);
+
 	return (
 		<div className="w-full px-4">
 			<div className="flex justify-end">
@@ -54,7 +73,19 @@ export default function TableDemo() {
 					<Button className="w-auto right-0">Register Faculty</Button>
 				</Link>
 			</div>
-			<Table className="w-full ">
+
+			<input
+				type="text"
+				value={search}
+				onChange={(e) => {
+					setSearch(e.target.value);
+					setCurrentPage(1);
+				}}
+				placeholder="Search..."
+				className="w-full mb-4 p-2 border border-gray-300 rounded-md"
+			/>
+
+			<Table className="w-full">
 				<TableHeader>
 					<TableRow>
 						<TableHead className="w-[25%]">Registration Number</TableHead>
@@ -64,49 +95,62 @@ export default function TableDemo() {
 					</TableRow>
 				</TableHeader>
 				<TableBody>
-					{currentRows.map((row, index) => (
-						<TableRow key={index}>
-							<TableCell className="font-medium">{row.registrationNumber}</TableCell>
-							<TableCell>{row.name}</TableCell>
-							<TableCell>{row.department}</TableCell>
-							<TableCell>{row.subject}</TableCell>
+					{currentRows.length > 0 ? (
+						currentRows.map((row, index) => (
+							<TableRow key={index}>
+								<TableCell className="font-medium">
+									{row.registrationNumber}
+								</TableCell>
+								<TableCell>{row.name}</TableCell>
+								<TableCell>{row.department}</TableCell>
+								<TableCell>{row.subject}</TableCell>
+							</TableRow>
+						))
+					) : (
+						<TableRow>
+							<TableCell colSpan={4} className="text-center py-4">
+								No records found
+							</TableCell>
 						</TableRow>
-					))}
+					)}
 				</TableBody>
 			</Table>
 
-			<Pagination className="mt-10">
-				<PaginationContent>
-					{/* Previous Button */}
-					<PaginationItem>
-						<PaginationPrevious
-							href="#"
-							onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
-						/>
-					</PaginationItem>
-
-					{/* Page Numbers */}
-					{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-						<PaginationItem key={page}>
-							<PaginationLink
+			{/* Pagination */}
+			{totalPages > 1 && (
+				<Pagination className="mt-10">
+					<PaginationContent>
+						{/* Previous Button */}
+						<PaginationItem>
+							<PaginationPrevious
 								href="#"
-								isActive={page === currentPage}
-								onClick={() => handlePageChange(page)}
-							>
-								{page}
-							</PaginationLink>
+								onClick={() => handlePageChange(currentPage - 1)}
+							/>
 						</PaginationItem>
-					))}
 
-					{/* Next Button */}
-					<PaginationItem>
-						<PaginationNext
-							href="#"
-							onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
-						/>
-					</PaginationItem>
-				</PaginationContent>
-			</Pagination>
+						{/* Page Numbers */}
+						{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+							<PaginationItem key={page}>
+								<PaginationLink
+									href="#"
+									isActive={page === currentPage}
+									onClick={() => handlePageChange(page)}
+								>
+									{page}
+								</PaginationLink>
+							</PaginationItem>
+						))}
+
+						{/* Next Button */}
+						<PaginationItem>
+							<PaginationNext
+								href="#"
+								onClick={() => handlePageChange(currentPage + 1)}
+							/>
+						</PaginationItem>
+					</PaginationContent>
+				</Pagination>
+			)}
 		</div>
 	);
 }

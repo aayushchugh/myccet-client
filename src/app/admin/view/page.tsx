@@ -24,16 +24,17 @@ interface TableRowData {
 	id: number;
 	email: string;
 	first_name: string;
-	middle_name: string;
-	last_name: string;
+	middle_name?: string;
+	last_name?: string;
 	phone: number;
 	designation: string;
 	createdBy: string;
 }
 
-export default function TableDemo() {
+export default function AdminList() {
 	const [data, setData] = useState<TableRowData[]>([]);
 	const [currentPage, setCurrentPage] = useState(1);
+	const [search, setSearch] = useState("");
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const rowsPerPage = 17;
@@ -41,17 +42,17 @@ export default function TableDemo() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await apiService.get("/admin", {});
-
+				const response = await apiService.get("/admin");
 				const responseData = response.data.payload;
+
 				if (!Array.isArray(responseData)) {
-					throw new Error("");
+					throw new Error("Invalid data format received.");
 				}
 
 				setData(responseData);
-			} catch (error) {
+			} catch (err) {
 				setError("An error occurred while fetching data.");
-				console.error("Error fetching data:", error);
+				console.error("Error fetching data:", err);
 			} finally {
 				setIsLoading(false);
 			}
@@ -59,21 +60,27 @@ export default function TableDemo() {
 
 		fetchData();
 	}, []);
-	const totalPages = Math.ceil(data.length / rowsPerPage);
 
-	const currentRows = data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+	const filteredData = data.filter((row) =>
+		`${row.first_name} ${row.middle_name || ""} ${row.last_name || ""} ${row.email} ${
+			row.designation
+		}`
+			.toLowerCase()
+			.includes(search.toLowerCase()),
+	);
+
+	const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+	const currentRows = filteredData.slice(
+		(currentPage - 1) * rowsPerPage,
+		currentPage * rowsPerPage,
+	);
 
 	const handlePageChange = (page: number): void => {
 		setCurrentPage(page);
 	};
 
-	if (isLoading) {
-		return <div>Loading...</div>;
-	}
-
-	if (error) {
-		return <div className="text-red-500">{error}</div>;
-	}
+	if (isLoading) return <div>Loading...</div>;
+	if (error) return <div className="text-red-500">{error}</div>;
 
 	return (
 		<div className="w-full px-4">
@@ -82,62 +89,85 @@ export default function TableDemo() {
 					<Button className="w-auto right-0">Create Admin</Button>
 				</Link>
 			</div>
+			<input
+				type="text"
+				value={search}
+				onChange={(e) => {
+					setSearch(e.target.value);
+					setCurrentPage(1);
+				}}
+				placeholder="Search..."
+				className="w-full mb-4 p-2 border border-gray-300 rounded-md"
+			/>
+
 			<Table className="w-full">
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[60%]">Email Address</TableHead>
-						<TableHead className="w-[25%] ">Name</TableHead>
-						<TableHead className="w-[15%] ">Designation</TableHead>
+						<TableHead className="w-[40%]">Email Address</TableHead>
+						<TableHead className="w-[30%]">Name</TableHead>
+						<TableHead className="w-[20%]">Designation</TableHead>
+						<TableHead className="w-[10%]">Created By</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
-					{currentRows.map((row, index) => (
-						<TableRow key={index}>
-							<TableCell>{row.email}</TableCell>
-							<TableCell className="">
-								{`${row.first_name} ${row.middle_name || ""} ${
-									row.last_name || ""
-								}`.trim()}
+					{currentRows.length > 0 ? (
+						currentRows.map((row) => (
+							<TableRow key={row.id}>
+								<TableCell>{row.email}</TableCell>
+								<TableCell>
+									{`${row.first_name} ${row.middle_name || ""} ${
+										row.last_name || ""
+									}`.trim()}
+								</TableCell>
+								<TableCell>{row.designation}</TableCell>
+								<TableCell>{row.createdBy}</TableCell>
+							</TableRow>
+						))
+					) : (
+						<TableRow>
+							<TableCell colSpan={4} className="text-center py-4">
+								No matching records found.
 							</TableCell>
-							<TableCell className="">{row.designation}</TableCell>
-							<TableCell className="">{row.createdBy}</TableCell>
 						</TableRow>
-					))}
+					)}
 				</TableBody>
 			</Table>
 
-			<Pagination className="mt-10">
-				<PaginationContent>
-					{/* Previous Button */}
-					<PaginationItem>
-						<PaginationPrevious
-							href="#"
-							onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
-						/>
-					</PaginationItem>
-
-					{/* Page Numbers */}
-					{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-						<PaginationItem key={page}>
-							<PaginationLink
+			{/* Pagination */}
+			{totalPages > 1 && (
+				<Pagination className="mt-4">
+					<PaginationContent>
+						{/* Previous Button */}
+						<PaginationItem>
+							<PaginationPrevious
 								href="#"
-								isActive={page === currentPage}
-								onClick={() => handlePageChange(page)}
-							>
-								{page}
-							</PaginationLink>
+								onClick={() => handlePageChange(currentPage - 1)}
+							/>
 						</PaginationItem>
-					))}
 
-					{/* Next Button */}
-					<PaginationItem>
-						<PaginationNext
-							href="#"
-							onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
-						/>
-					</PaginationItem>
-				</PaginationContent>
-			</Pagination>
+						{/* Page Numbers */}
+						{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+							<PaginationItem key={page}>
+								<PaginationLink
+									href="#"
+									isActive={page === currentPage}
+									onClick={() => handlePageChange(page)}
+								>
+									{page}
+								</PaginationLink>
+							</PaginationItem>
+						))}
+
+						{/* Next Button */}
+						<PaginationItem>
+							<PaginationNext
+								href="#"
+								onClick={() => handlePageChange(currentPage + 1)}
+							/>
+						</PaginationItem>
+					</PaginationContent>
+				</Pagination>
+			)}
 		</div>
 	);
 }
