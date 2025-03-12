@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { Trash2, Pencil, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui";
+import Link from "next/link";
 import {
 	Table,
 	TableBody,
@@ -95,6 +97,11 @@ export default function TableView() {
 
 	return (
 		<div className="w-full px-4">
+			<div className="flex justify-end">
+				<Link href={"/admin/semster/create"}>
+					<Button className="w-auto right-0">Create Semester</Button>
+				</Link>
+			</div>
 			<Table className="w-full">
 				<TableHeader>
 					<TableRow>
