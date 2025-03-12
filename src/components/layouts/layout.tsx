@@ -42,6 +42,11 @@ const items = [
 		url: "/admin/branch/view",
 		icon: Album,
 	},
+	{
+		title: "Semester",
+		url: "/admin/semester/view",
+		icon: Album,
+	},
 ];
 
 export function AppSidebar() {
