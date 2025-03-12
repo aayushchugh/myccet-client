@@ -8,6 +8,8 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui";
+import Link from "next/link";
 import {
 	Pagination,
 	PaginationContent,
@@ -66,6 +68,12 @@ export default function FacultyList() {
 
 	return (
 		<div className="w-full px-4">
+			<div className="flex justify-end">
+				<Link href={"/admin/faculty/create"}>
+					<Button className="w-auto right-0">Register Faculty</Button>
+				</Link>
+			</div>
+
 			<input
 				type="text"
 				value={search}

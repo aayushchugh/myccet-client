@@ -26,25 +26,11 @@ export default function TeacherRegistrationForm() {
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
 		data.code = String(data.code);
 		try {
-			// Retrieve token from localStorage
-			const token = localStorage.getItem("token");
-
-			if (!token) {
-				toast.error("You are not authenticated. Please log in first.");
-				router.push("/login"); // Redirect to login page
-				return;
-			}
-
 			// Send request with token using apiService
-			const response = await apiService.post("/subjects", data, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
+			await apiService.post("/subjects", data);
 
-			console.log("API Response:", response.data);
 			toast.success("Subject Created!");
-			router.push("/admim/subject/view");
+			router.push("/admin/subject/view");
 		} catch (error: any) {
 			console.error("❌ API Error:", error);
 
@@ -54,11 +40,9 @@ export default function TeacherRegistrationForm() {
 				// Handle 409 Conflict errors
 				if (error.response.status === 409) {
 					const errorMessage =
-						error.response.data.message ||
-						"A conflict occurred. Please check your input.";
+						error.response.data.message || "Subject Code already in use.";
 					toast.error(errorMessage);
 
-					// Optionally, set form errors for specific fields
 					if (error.response.data.errors) {
 						handleFormValidationErrors(error.response.data.errors, setError);
 					}

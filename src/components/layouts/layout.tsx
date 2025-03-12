@@ -2,6 +2,7 @@
 
 import { NotebookPen, GraduationCap, UserRoundPen, Shield, Album } from "lucide-react";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import {
 	Sidebar,
 	SidebarContent,
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import apiService from "@/services/api-service";
+import Link from "next/link";
 
 // Menu items.
 const items = [
@@ -37,7 +39,12 @@ const items = [
 	},
 	{
 		title: "Branch",
-		url: "#",
+		url: "/admin/branch/view",
+		icon: Album,
+	},
+	{
+		title: "Semester",
+		url: "/admin/semester/view",
 		icon: Album,
 	},
 ];
@@ -72,11 +79,15 @@ export function AppSidebar() {
 			<SidebarContent>
 				{/* Top Image */}
 				<div className="p-6 text-center">
-					<img
-						src="/logo.svg"
-						alt="Logo"
-						className="mx-auto h-32" // Increased width and height
-					/>
+					<Link href={`/admin`}>
+						<Image
+							src="/logo.svg"
+							width={500}
+							height={500}
+							alt="Picture of the author"
+							className="mx-auto h-32"
+						/>
+					</Link>
 				</div>
 
 				{/* Navigation Menu */}
