@@ -1,10 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Trash2 } from "lucide-react";
-import { Pencil } from "lucide-react";
-import { Copy } from "lucide-react";
+import { Trash2, Pencil, Copy, Check, X } from "lucide-react";
 import { toast } from "sonner";
-import { Check } from "lucide-react";
 import { Button } from "@/components/ui";
 import Link from "next/link";
 import {
@@ -30,11 +27,11 @@ interface TableRowData {
 	title: string;
 }
 
-export default function TablwView() {
+export default function TableView() {
 	const [data, setData] = useState<TableRowData[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [currentPage, SelectCurrentPage] = useState(1);
+	const [currentPage, setCurrentPage] = useState(1);
 	const [editingRow, setEditingRow] = useState<number | null>(null);
 	const [editTitle, setEditTitle] = useState("");
 	const rowsPerPage = 17;
@@ -44,13 +41,11 @@ export default function TablwView() {
 			try {
 				const response = await apiService.get("subjects", {});
 				const responseData = response.data.payload;
-				if (!Array.isArray(responseData)) {
-					throw new Error("");
-				}
+				if (!Array.isArray(responseData)) throw new Error("Invalid data format");
 				setData(responseData);
 			} catch (error) {
-				setError("an error occured while fethcing data");
-				console.error("error Fetching data:", error);
+				setError("An error occurred while fetching data.");
+				console.error("Error fetching data:", error);
 			} finally {
 				setIsLoading(false);
 			}
@@ -59,97 +54,113 @@ export default function TablwView() {
 	}, []);
 
 	const totalPages = Math.ceil(data.length / rowsPerPage);
-
 	const currentRows = data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
-	const handlePageChange = (page: number): void => {
-		SelectCurrentPage(page);
-	};
+	const handlePageChange = (page: number) => setCurrentPage(page);
 
 	const handleDelete = async (code: number) => {
 		try {
 			await apiService.delete(`/subjects/${code}`);
-
 			setData((prevData) => prevData.filter((item) => item.code !== code));
-			toast.success("Task deleted successfully");
+			toast.success("Subject deleted successfully");
 		} catch (error) {
-			console.error("Error deleting task:", error);
-			toast.error("Failed to delete the task");
+			console.error("Error deleting subject:", error);
+			toast.error("Failed to delete the subject");
 		}
 	};
+
 	const handleEdit = (row: TableRowData) => {
 		setEditingRow(row.code);
 		setEditTitle(row.title);
 	};
+
 	const handleUpdate = async (code: number) => {
 		try {
 			await apiService.put(`/subjects/${code}`, { title: editTitle });
-
 			setData((prevData) =>
 				prevData.map((item) => (item.code === code ? { ...item, title: editTitle } : item)),
 			);
-			toast.success("Task updated successfully");
+			toast.success("Subject updated successfully");
 			setEditingRow(null);
 		} catch (error) {
-			console.error("Error updating task:", error);
-			toast.error("Failed to update the task");
+			console.error("Error updating subject:", error);
+			toast.error("Failed to update the subject");
 		}
 	};
 
-	if (isLoading) {
-		return <div>Loading...</div>;
-	}
-	if (error) {
-		return <div className="text-red-500"> {error}</div>;
-	}
+	const handleCancelEdit = () => {
+		setEditingRow(null);
+		setEditTitle("");
+	};
+
+	if (isLoading) return <div>Loading...</div>;
+	if (error) return <div className="text-red-500">{error}</div>;
+
 	return (
 		<div className="w-full px-4">
 			<div className="flex justify-end">
 				<Link href={"/admin/subject/create"}>
-					<Button className="w-auto right-0">Create Subject</Button>
+					<Button className="w-auto">Create Subject</Button>
 				</Link>
 			</div>
-			<Table className="w-full ">
+			<Table className="w-full">
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[15%] text">Subject Code</TableHead>
-						<TableHead className="w-[70%]  te">Subject Name</TableHead>
-						<TableHead className="w-[5%] text-center te"></TableHead>
-						<TableHead className="w-[5%] text-center te"></TableHead>
-						<TableHead className="w-[5%] text-center te"></TableHead>
+						<TableHead className="w-[15%]">Subject Code</TableHead>
+						<TableHead className="w-[70%]">Subject Name</TableHead>
+						<TableHead className="w-[5%] text-center"></TableHead>
+						<TableHead className="w-[5%] text-center"></TableHead>
+						<TableHead className="w-[5%] text-center"></TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
-					{currentRows.map((row, index) => (
-						<TableRow key={index}>
-							<TableCell className=" font-medium">{row.code}</TableCell>
+					{currentRows.map((row) => (
+						<TableRow key={row.code}>
+							<TableCell className="font-medium">{row.code}</TableCell>
 							<TableCell>
 								{editingRow === row.code ? (
 									<input
 										value={editTitle}
 										onChange={(e) => setEditTitle(e.target.value)}
+										onKeyDown={(e) => {
+											if (e.key === "Enter") handleUpdate(row.code);
+											if (e.key === "Escape") handleCancelEdit();
+										}}
+										autoFocus
+										className="border rounded px-2 py-1 w-full"
 									/>
 								) : (
 									row.title
 								)}
 							</TableCell>
-
-							<TableCell className="">
-								<div className="">
-									<Copy size={16} />
-								</div>
+							<TableCell>
+								<Copy size={16} className="cursor-pointer" />
 							</TableCell>
 							<TableCell>
 								{editingRow === row.code ? (
-									<Check size={16} onClick={() => handleUpdate(row.code)} />
+									<div className="flex gap-2">
+										<Check
+											size={16}
+											className="cursor-pointer text-green-600"
+											onClick={() => handleUpdate(row.code)}
+										/>
+										<X
+											size={16}
+											className="cursor-pointer text-red-600"
+											onClick={handleCancelEdit}
+										/>
+									</div>
 								) : (
-									<Pencil size={16} onClick={() => handleEdit(row)} />
+									<Pencil
+										size={16}
+										className="cursor-pointer"
+										onClick={() => handleEdit(row)}
+									/>
 								)}
 							</TableCell>
 							<TableCell>
 								<Trash2
-									color="red"
 									size={16}
-									className=""
+									className="cursor-pointer text-red-600"
 									onClick={() => handleDelete(row.code)}
 								/>
 							</TableCell>
@@ -157,18 +168,15 @@ export default function TablwView() {
 					))}
 				</TableBody>
 			</Table>
-			<div className=" mt-10">
+			<div className="mt-10">
 				<Pagination>
 					<PaginationContent>
-						{/* Previous Button */}
 						<PaginationItem>
 							<PaginationPrevious
 								href="#"
 								onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
 							/>
 						</PaginationItem>
-
-						{/* Page Numbers */}
 						{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
 							<PaginationItem key={page}>
 								<PaginationLink
@@ -180,8 +188,6 @@ export default function TablwView() {
 								</PaginationLink>
 							</PaginationItem>
 						))}
-
-						{/* Next Button */}
 						<PaginationItem>
 							<PaginationNext
 								href="#"

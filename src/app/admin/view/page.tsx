@@ -113,14 +113,22 @@ export default function AdminList() {
 					{currentRows.length > 0 ? (
 						currentRows.map((row) => (
 							<TableRow key={row.id}>
-								<TableCell>{row.email}</TableCell>
 								<TableCell>
-									{`${row.first_name} ${row.middle_name || ""} ${
-										row.last_name || ""
-									}`.trim()}
+									<Link href={`/admin/${row.id}`}>{row.email}</Link>
 								</TableCell>
-								<TableCell>{row.designation}</TableCell>
-								<TableCell>{row.createdBy}</TableCell>
+								<TableCell>
+									<Link href={`/admin/${row.id}`}>
+										{`${row.first_name} ${row.middle_name || ""} ${
+											row.last_name || ""
+										}`.trim()}
+									</Link>
+								</TableCell>
+								<TableCell>
+									<Link href={`/admin/${row.id}`}>{row.designation}</Link>
+								</TableCell>
+								<TableCell>
+									<Link href={`/admin/${row.id}`}> {row.createdBy}</Link>
+								</TableCell>
 							</TableRow>
 						))
 					) : (

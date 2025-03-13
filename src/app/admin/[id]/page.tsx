@@ -1,202 +1,149 @@
-import * as React from "react";
+"use client";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import apiService from "@/services/api-service";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import Image from "next/image";
-import { Label } from "@/components/ui/label";
-import { useState, useEffect } from "react";
+import { Button } from "@/components/ui";
+import { Pencil, Check, X } from "lucide-react";
+import { toast } from "sonner"; // Import Sonner
 
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-
-interface FormInput {
-	avatar: FileList;
-	firstName: string;
-	middleName: string;
-	lastName: string;
+interface User {
+	id: number;
 	email: string;
-	phoneNumber: string;
+	first_name: string;
+	middle_name?: string;
+	last_name: string;
+	phone: number;
 	designation: string;
 }
 
-export default async function TeacherRegistrationForm() {
-	const [data, setData] = useState<FormInput[]>([]);
-	const [error, setError] = useState<string | null>(null);
+export default function UserDetails() {
+	const { id } = useParams();
+	const router = useRouter();
+	const [user, setUser] = useState<User | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
-
-	const {
-		register,
-		handleSubmit,
-		setValue,
-		formState: { errors },
-	} = useForm<FormInput>();
-	const onSubmit: SubmitHandler<FormInput> = (data) => console.log(data);
+	const [error, setError] = useState<string | null>(null);
+	const [editingField, setEditingField] = useState<string | null>(null);
+	const [editValue, setEditValue] = useState<string>("");
 
 	useEffect(() => {
-		const fetchData = async () => {
+		if (!id) return;
+
+		const fetchUser = async () => {
 			try {
-				const response = await apiService.get("/admin", {});
-
-				const responseData = response.data.payload;
-				if (!Array.isArray(responseData)) {
-					throw new Error("");
+				const response = await apiService.get(`/admin/${id}`);
+				if (response.data && response.data.payload) {
+					setUser(response.data.payload);
+				} else {
+					throw new Error("Invalid response format");
 				}
-
-				setData(responseData);
-			} catch (error) {
-				setError("An error occurred while fetching data.");
-				console.error("Error fetching data:", error);
+			} catch (err) {
+				setError("Failed to load user data.");
+				toast.error("Failed to load user data."); // Show toast on error
 			} finally {
 				setIsLoading(false);
 			}
 		};
 
-		fetchData();
-	}, []);
+		fetchUser();
+	}, [id]);
 
-	if (isLoading) {
-		return <div>Loading...</div>;
-	}
+	const handleEdit = (field: keyof User, value: string) => {
+		setEditingField(field);
+		setEditValue(value);
+	};
 
-	if (error) {
-		return <div className="text-red-500">{error}</div>;
-	}
+	const handleUpdate = async () => {
+		if (!user || !editingField) return;
+		try {
+			const updatedUser = { ...user, [editingField]: editValue };
+			await apiService.put(`/admin/${user.id}`, updatedUser);
+			setUser(updatedUser);
+			setEditingField(null);
+			toast.success(`${editingField.replace("_", " ")} updated successfully`); // Success toast
+		} catch (error) {
+			console.error("Error updating user:", error);
+			toast.error("Failed to update user data."); // Error toast
+		}
+	};
+
+	const handleCancelEdit = () => {
+		setEditingField(null);
+		setEditValue("");
+		toast.info("Edit cancelled"); // Info toast on cancel
+	};
+
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (!editingField) return;
+			if (e.key === "Enter") handleUpdate();
+			if (e.key === "Escape") handleCancelEdit();
+		};
+
+		document.addEventListener("keydown", handleKeyDown);
+		return () => document.removeEventListener("keydown", handleKeyDown);
+	}, [editingField, editValue]);
+
+	if (isLoading) return <div>Loading...</div>;
+	if (error) return <div className="text-red-500">{error}</div>;
 
 	return (
-		<div>
-			<form
-				onSubmit={handleSubmit(onSubmit)}
-				className="min-h-dvh flex flex-col justify-center items-center"
-			>
-				<div className="grid gap-4 w-full max-w-3xl">
-					<div className="grid grid-cols-5 gap-4  ">
-						<div className="col-start-1 col-end-5 space-y-1.5">
-							<div className="flex flex-col space-y-1.5">
-								<Label required htmlFor="firstName">
-									First Name
-								</Label>
-								<Input
-									id="firstName"
-									placeholder="First Name"
-									error={errors.firstName?.message}
-									{...register("firstName", {
-										required: "First name is required",
-									})}
-								/>
+		<div className="">
+			<div className="space-y-4">
+				{["email", "first_name", "middle_name", "last_name", "phone", "designation"].map(
+					(field) =>
+						user && (field !== "middle_name" || user.middle_name) ? (
+							<div key={field}>
+								<label className="block font-medium capitalize">
+									{field.replace("_", " ")}
+								</label>
+								<div className="relative">
+									{editingField === field ? (
+										<input
+											className="w-full p-2 border rounded-md pr-8"
+											value={editValue}
+											onChange={(e) => setEditValue(e.target.value)}
+											autoFocus
+										/>
+									) : (
+										<input
+											className="w-full p-2 border rounded-md pr-8"
+											value={user[field as keyof User] as string}
+											readOnly
+										/>
+									)}
+									{editingField === field ? (
+										<div className="absolute inset-y-0 right-2 flex items-center gap-2">
+											<Check
+												size={16}
+												className="cursor-pointer text-green-600"
+												onClick={handleUpdate}
+											/>
+											<X
+												size={16}
+												className="cursor-pointer text-red-600"
+												onClick={handleCancelEdit}
+											/>
+										</div>
+									) : (
+										<Pencil
+											size={16}
+											className="absolute inset-y-3 right-2 flex items-center cursor-pointer"
+											onClick={() =>
+												handleEdit(
+													field as keyof User,
+													user[field as keyof User] as string,
+												)
+											}
+										/>
+									)}
+								</div>
 							</div>
-							<div className="flex flex-col space-y-1.5 ">
-								<Label htmlFor="middleName">Middle Name</Label>
-								<Input
-									id="middleName"
-									placeholder="Middle Name"
-									{...register("middleName")}
-								/>
-							</div>
-							<div className="flex flex-col space-y-1.5">
-								<Label htmlFor="lastName">Last Name</Label>
-								<Input
-									id="lastName"
-									placeholder="Last Name"
-									error={errors.lastName?.message}
-									{...register("lastName")}
-								/>
-							</div>
-						</div>
-						<div>
-							<Image
-								src="/logo.svg"
-								width={175}
-								height={150}
-								alt=" "
-								className=" rounded-2xlc col-span-2 col-end-7 "
-							></Image>
-							<Input
-								id="avatar"
-								type="file"
-								accept="image/*"
-								className="mt-1"
-								{...register("avatar", {
-									required: "Avatar is required",
-								})}
-							/>
-						</div>
-					</div>
-
-					<div className="flex flex-col space-y-1.5">
-						<Label required htmlFor="email">
-							Email
-						</Label>
-						<Input
-							id="email"
-							type="email"
-							placeholder="Enter your email"
-							error={errors.email?.message}
-							{...register("email", {
-								required: "Email is required",
-								pattern: {
-									value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-									message: "Enter a valid email address",
-								},
-							})}
-						/>
-					</div>
-
-					<div className="flex flex-col space-y-1.5">
-						<Label required htmlFor="phoneNumber">
-							Phone Number
-						</Label>
-						<Input
-							id="phoneNumber"
-							type="tel"
-							placeholder="Phone Number"
-							error={errors.phoneNumber?.message}
-							{...register("phoneNumber", {
-								required: "Phone number is required",
-							})}
-						/>
-					</div>
-
-					<div className="grid grid-cols-4 gap-2">
-						<div className="flex flex-col space-y-1.5">
-							<Label required htmlFor="designation">
-								Designation
-							</Label>
-							<Select
-								onValueChange={(value) => {
-									setValue("designation", value);
-								}}
-							>
-								<SelectTrigger error={errors?.designation?.message}>
-									<SelectValue
-										placeholder={"Select Designation"}
-										{...register("designation", {
-											required: "Designation is required",
-										})}
-									/>
-								</SelectTrigger>
-
-								<SelectContent>
-									<SelectItem value="principal">Principal</SelectItem>
-
-									<SelectItem value="maintenance">Maintenance</SelectItem>
-								</SelectContent>
-							</Select>
-						</div>
-					</div>
-				</div>
-				<div className="flex justify-center mt-4">
-					<Button type="submit">Submit</Button>
-					{/* <Link href={"/admin"}>
-					<Button>Register</Button>
-				</Link> */}
-				</div>
-			</form>
+						) : null,
+				)}
+			</div>
+			<Button className="mt-4" onClick={() => router.back()}>
+				Go Back
+			</Button>
 		</div>
 	);
 }
