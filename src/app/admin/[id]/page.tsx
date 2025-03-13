@@ -36,7 +36,7 @@ export default function UserDetails() {
 				} else {
 					throw new Error("Invalid response format");
 				}
-			} catch (err) {
+			} catch {
 				setError("Failed to load user data.");
 				toast.error("Failed to load user data."); // Show toast on error
 			} finally {
