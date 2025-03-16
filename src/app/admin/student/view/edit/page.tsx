@@ -5,14 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { Label } from "@/components/ui/label";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
+
 import {
 	Select,
 	SelectContent,
@@ -38,32 +31,7 @@ interface FormInput {
 	semester: string;
 	courseType: string;
 }
-interface tableRowData {
-	semester: string;
-	obtained: number;
-	total: number;
-}
-
-const data: tableRowData[] = [
-	{
-		semester: "1st",
-		obtained: 785,
-		total: 800,
-	},
-	{
-		semester: "2nd",
-		obtained: 795,
-		total: 800,
-	},
-	{
-		semester: "3rd",
-		obtained: 685,
-		total: 800,
-	},
-];
-
 export default function TeacherRegistrationForm() {
-	const currentRows: tableRowData[] = data;
 	const {
 		register,
 		handleSubmit,
@@ -316,44 +284,6 @@ export default function TeacherRegistrationForm() {
 									<SelectItem value="m@google.com">Part Time Diploma</SelectItem>
 								</SelectContent>
 							</Select>
-						</div>
-					</div>
-					<div>
-						<Label>Academics</Label>
-
-						<div>
-							<Table className="w-full ">
-								<TableHeader>
-									<TableRow>
-										<TableHead className="w-[50%]">Semster</TableHead>
-										<TableHead className="w-[16.66%] text-right">
-											Obtained Marks
-										</TableHead>
-										<TableHead className="w-[16.66%] text-right">
-											Total Marks
-										</TableHead>
-										<TableHead className="w-[16.66%] text-right">
-											Percentage
-										</TableHead>
-									</TableRow>
-								</TableHeader>
-								<TableBody>
-									{currentRows.map((row, index) => (
-										<TableRow key={index}>
-											<TableCell className="font-medium">
-												{row.semester}
-											</TableCell>
-											<TableCell className="font-medium text-right">
-												{row.obtained}
-											</TableCell>
-											<TableCell className="font-medium text-right">
-												{row.total}
-											</TableCell>
-											<TableCell className="font-medium text-right"></TableCell>
-										</TableRow>
-									))}
-								</TableBody>
-							</Table>
 						</div>
 					</div>
 				</div>

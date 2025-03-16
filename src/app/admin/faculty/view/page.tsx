@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import apiService from "@/services/api-service";
 import {
 	Table,
 	TableBody,
@@ -8,8 +9,8 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui";
 import Link from "next/link";
+import { Button } from "@/components/ui";
 import {
 	Pagination,
 	PaginationContent,
@@ -20,40 +21,50 @@ import {
 } from "@/components/ui/pagination";
 
 interface TableRowData {
-	registrationNumber: string;
-	name: string;
-	department: string;
-	subject: string;
+	id: number;
+	email: string;
+	first_name: string;
+	middle_name?: string;
+	last_name?: string;
+	phone: number;
+	designation: string;
+	createdBy: string;
 }
 
-const data: TableRowData[] = [
-	{
-		registrationNumber: "220099510649",
-		name: "John Doe",
-		department: "CSE",
-		subject: "Physics",
-	},
-	{
-		registrationNumber: "220099510650",
-		name: "Jane Smith",
-		department: "ECE",
-		subject: "Mathematics",
-	},
-	{
-		registrationNumber: "220099510651",
-		name: "Alice Johnson",
-		department: "ME",
-		subject: "Thermodynamics",
-	},
-];
-
-export default function FacultyList() {
+export default function AdminList() {
+	const [data, setData] = useState<TableRowData[]>([]);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [search, setSearch] = useState("");
-	const rowsPerPage = 10;
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const rowsPerPage = 17;
+
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const response = await apiService.get("/admin");
+				const responseData = response.data.payload;
+
+				if (!Array.isArray(responseData)) {
+					throw new Error("Invalid data format received.");
+				}
+
+				setData(responseData);
+			} catch (err) {
+				setError("An error occurred while fetching data.");
+				console.error("Error fetching data:", err);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		fetchData();
+	}, []);
 
 	const filteredData = data.filter((row) =>
-		`${row.registrationNumber} ${row.name} ${row.department} ${row.subject}`
+		`${row.first_name} ${row.middle_name || ""} ${row.last_name || ""} ${row.email} ${
+			row.designation
+		}`
 			.toLowerCase()
 			.includes(search.toLowerCase()),
 	);
@@ -64,16 +75,20 @@ export default function FacultyList() {
 		currentPage * rowsPerPage,
 	);
 
-	const handlePageChange = (page: number): void => setCurrentPage(page);
+	const handlePageChange = (page: number): void => {
+		setCurrentPage(page);
+	};
+
+	if (isLoading) return <div>Loading...</div>;
+	if (error) return <div className="text-red-500">{error}</div>;
 
 	return (
 		<div className="w-full px-4">
 			<div className="flex justify-end">
-				<Link href={"/admin/faculty/create"}>
-					<Button className="w-auto right-0">Register Faculty</Button>
+				<Link href={"/admin/create"}>
+					<Button className="w-auto right-0">Create Admin</Button>
 				</Link>
 			</div>
-
 			<input
 				type="text"
 				value={search}
@@ -88,28 +103,38 @@ export default function FacultyList() {
 			<Table className="w-full">
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[25%]">Registration Number</TableHead>
-						<TableHead className="w-[25%]">Name</TableHead>
-						<TableHead className="w-[25%]">Department</TableHead>
-						<TableHead className="w-[25%]">Subject</TableHead>
+						<TableHead className="w-[40%]">Email Address</TableHead>
+						<TableHead className="w-[30%]">Name</TableHead>
+						<TableHead className="w-[20%]">Designation</TableHead>
+						<TableHead className="w-[10%]">Created By</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
 					{currentRows.length > 0 ? (
-						currentRows.map((row, index) => (
-							<TableRow key={index}>
-								<TableCell className="font-medium">
-									{row.registrationNumber}
+						currentRows.map((row) => (
+							<TableRow key={row.id}>
+								<TableCell>
+									<Link href={`/admin/${row.id}`}>{row.email}</Link>
 								</TableCell>
-								<TableCell>{row.name}</TableCell>
-								<TableCell>{row.department}</TableCell>
-								<TableCell>{row.subject}</TableCell>
+								<TableCell>
+									<Link href={`/admin/${row.id}`}>
+										{`${row.first_name} ${row.middle_name || ""} ${
+											row.last_name || ""
+										}`.trim()}
+									</Link>
+								</TableCell>
+								<TableCell>
+									<Link href={`/admin/${row.id}`}>{row.designation}</Link>
+								</TableCell>
+								<TableCell>
+									<Link href={`/admin/${row.id}`}> {row.createdBy}</Link>
+								</TableCell>
 							</TableRow>
 						))
 					) : (
 						<TableRow>
 							<TableCell colSpan={4} className="text-center py-4">
-								No records found
+								No matching records found.
 							</TableCell>
 						</TableRow>
 					)}
@@ -118,7 +143,7 @@ export default function FacultyList() {
 
 			{/* Pagination */}
 			{totalPages > 1 && (
-				<Pagination className="mt-10">
+				<Pagination className="mt-4">
 					<PaginationContent>
 						{/* Previous Button */}
 						<PaginationItem>

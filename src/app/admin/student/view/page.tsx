@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import apiService from "@/services/api-service";
 import {
 	Table,
 	TableBody,
@@ -20,169 +21,74 @@ import {
 } from "@/components/ui/pagination";
 
 interface TableRowData {
-	registrationNumber: string;
-	name: string;
-	fathersName: string;
-	semester: string;
-	branch: string;
+	id: number;
+	email: string;
+	first_name: string;
+	middle_name?: string;
+	last_name?: string;
+	phone: number;
+	designation: string;
+	createdBy: string;
 }
 
-const data: TableRowData[] = [
-	{
-		registrationNumber: "220099510649",
-		name: "John Doe",
-		fathersName: "Richard Doe",
-		semester: "5",
-		branch: "Electrical Engineering",
-	},
-	{
-		registrationNumber: "220099510649",
-		name: "John Doe",
-		fathersName: "Richard Doe",
-		semester: "5",
-		branch: "Electrical Engineering",
-	},
-	{
-		registrationNumber: "220099510649",
-		name: "John Doe",
-		fathersName: "Richard Doe",
-		semester: "5",
-		branch: "Electrical Engineering",
-	},
-	{
-		registrationNumber: "220099510649",
-		name: "John Doe",
-		fathersName: "Richard Doe",
-		semester: "5",
-		branch: "Electrical Engineering",
-	},
-	{
-		registrationNumber: "220099510649",
-		name: "John Doe",
-		fathersName: "Richard Doe",
-		semester: "5",
-		branch: "Electrical Engineering",
-	},
-	{
-		registrationNumber: "220099510649",
-		name: "John Doe",
-		fathersName: "Richard Doe",
-		semester: "5",
-		branch: "Electrical Engineering",
-	},
-	{
-		registrationNumber: "220099510649",
-		name: "John Doe",
-		fathersName: "Richard Doe",
-		semester: "5",
-		branch: "Electrical Engineering",
-	},
-	{
-		registrationNumber: "220099510649",
-		name: "John Doe",
-		fathersName: "Richard Doe",
-		semester: "5",
-		branch: "Electrical Engineering",
-	},
-	{
-		registrationNumber: "220099510649",
-		name: "John Doe",
-		fathersName: "Richard Doe",
-		semester: "5",
-		branch: "Electrical Engineering",
-	},
-	{
-		registrationNumber: "220099510649",
-		name: "John Doe",
-		fathersName: "Richard Doe",
-		semester: "5",
-		branch: "Electrical Engineering",
-	},
-	{
-		registrationNumber: "220099510649",
-		name: "John Doe",
-		fathersName: "Richard Doe",
-		semester: "5",
-		branch: "Electrical Engineering",
-	},
-	{
-		registrationNumber: "220099510649",
-		name: "John Doe",
-		fathersName: "Richard Doe",
-		semester: "5",
-		branch: "Electrical Engineering",
-	},
-	{
-		registrationNumber: "220099510649",
-		name: "John Doe",
-		fathersName: "Richard Doe",
-		semester: "5",
-		branch: "Electrical Engineering",
-	},
-	{
-		registrationNumber: "220099510649",
-		name: "John Doe",
-		fathersName: "Richard Doe",
-		semester: "5",
-		branch: "Electrical Engineering",
-	},
-	{
-		registrationNumber: "220099510649",
-		name: "John Doe",
-		fathersName: "Richard Doe",
-		semester: "5",
-		branch: "Electrical Engineering",
-	},
-	{
-		registrationNumber: "220099510649",
-		name: "John Doe",
-		fathersName: "Richard Doe",
-		semester: "5",
-		branch: "Electrical Engineering",
-	},
-	{
-		registrationNumber: "220099510649",
-		name: "John Doe",
-		fathersName: "Richard Doe",
-		semester: "5",
-		branch: "Electrical Engineering",
-	},
-	{
-		registrationNumber: "220099510649",
-		name: "kirti",
-		fathersName: "Richard Doe",
-		semester: "5",
-		branch: "Electrical Engineering",
-	},
-];
-
-export default function StudentView() {
-	const [search, setSearch] = useState("");
+export default function AdminList() {
+	const [data, setData] = useState<TableRowData[]>([]);
 	const [currentPage, setCurrentPage] = useState(1);
+	const [search, setSearch] = useState("");
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 	const rowsPerPage = 17;
 
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const response = await apiService.get("/admin");
+				const responseData = response.data.payload;
+
+				if (!Array.isArray(responseData)) {
+					throw new Error("Invalid data format received.");
+				}
+
+				setData(responseData);
+			} catch (err) {
+				setError("An error occurred while fetching data.");
+				console.error("Error fetching data:", err);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		fetchData();
+	}, []);
+
 	const filteredData = data.filter((row) =>
-		`${row.registrationNumber} ${row.name} ${row.fathersName} ${row.semester} ${row.branch}`
+		`${row.first_name} ${row.middle_name || ""} ${row.last_name || ""} ${row.email} ${
+			row.designation
+		}`
 			.toLowerCase()
 			.includes(search.toLowerCase()),
 	);
 
-	const totalPages: number = Math.ceil(filteredData.length / rowsPerPage);
+	const totalPages = Math.ceil(filteredData.length / rowsPerPage);
 	const currentRows = filteredData.slice(
 		(currentPage - 1) * rowsPerPage,
 		currentPage * rowsPerPage,
 	);
 
-	const handlePageChange = (page: number): void => setCurrentPage(page);
+	const handlePageChange = (page: number): void => {
+		setCurrentPage(page);
+	};
+
+	if (isLoading) return <div>Loading...</div>;
+	if (error) return <div className="text-red-500">{error}</div>;
 
 	return (
 		<div className="w-full px-4">
 			<div className="flex justify-end">
-				<Link href={"/admin/student/create"}>
-					<Button className="w-auto right-0">Register Student</Button>
+				<Link href={"/admin/create"}>
+					<Button className="w-auto right-0">Create Admin</Button>
 				</Link>
 			</div>
-
 			<input
 				type="text"
 				value={search}
@@ -190,36 +96,45 @@ export default function StudentView() {
 					setSearch(e.target.value);
 					setCurrentPage(1);
 				}}
-				placeholder="Search by Name, Registration Number, Branch, etc..."
+				placeholder="Search..."
 				className="w-full mb-4 p-2 border border-gray-300 rounded-md"
 			/>
 
 			<Table className="w-full">
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[20%]">Registration Number</TableHead>
+						<TableHead className="w-[30%]">Registration Number</TableHead>
 						<TableHead className="w-[20%]">Name</TableHead>
-						<TableHead className="w-[20%]">Father Name</TableHead>
-						<TableHead className="w-[20%]">Semester</TableHead>
-						<TableHead className="w-[20%]">Branch</TableHead>
+						<TableHead className="w-[25%]">Father Name</TableHead>
+						<TableHead className="w-[5%]">Semester</TableHead>
+						<TableHead className="w-[20%] text-end">Branch </TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
 					{currentRows.length > 0 ? (
-						currentRows.map((row, index) => (
-							<TableRow key={index}>
-								<TableCell className="font-medium">
-									{row.registrationNumber}
+						currentRows.map((row) => (
+							<TableRow key={row.id}>
+								<TableCell>
+									<Link href={`/admin/${row.id}`}>{row.email}</Link>
 								</TableCell>
-								<TableCell>{row.name}</TableCell>
-								<TableCell>{row.fathersName}</TableCell>
-								<TableCell>{row.semester}</TableCell>
-								<TableCell>{row.branch}</TableCell>
+								<TableCell>
+									<Link href={`/admin/${row.id}`}>
+										{`${row.first_name} ${row.middle_name || ""} ${
+											row.last_name || ""
+										}`.trim()}
+									</Link>
+								</TableCell>
+								<TableCell>
+									<Link href={`/admin/${row.id}`}>{row.designation}</Link>
+								</TableCell>
+								<TableCell>
+									<Link href={`/admin/${row.id}`}> {row.createdBy}</Link>
+								</TableCell>
 							</TableRow>
 						))
 					) : (
 						<TableRow>
-							<TableCell colSpan={5} className="text-center py-4">
+							<TableCell colSpan={4} className="text-center py-4">
 								No matching records found.
 							</TableCell>
 						</TableRow>
@@ -227,40 +142,40 @@ export default function StudentView() {
 				</TableBody>
 			</Table>
 
+			{/* Pagination */}
 			{totalPages > 1 && (
-				<div className="mt-10">
-					<Pagination>
-						<PaginationContent>
-							<PaginationItem>
-								<PaginationPrevious
-									href="#"
-									onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
-								/>
-							</PaginationItem>
+				<Pagination className="mt-4">
+					<PaginationContent>
+						{/* Previous Button */}
+						<PaginationItem>
+							<PaginationPrevious
+								href="#"
+								onClick={() => handlePageChange(currentPage - 1)}
+							/>
+						</PaginationItem>
 
-							{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-								<PaginationItem key={page}>
-									<PaginationLink
-										href="#"
-										isActive={page === currentPage}
-										onClick={() => handlePageChange(page)}
-									>
-										{page}
-									</PaginationLink>
-								</PaginationItem>
-							))}
-
-							<PaginationItem>
-								<PaginationNext
+						{/* Page Numbers */}
+						{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+							<PaginationItem key={page}>
+								<PaginationLink
 									href="#"
-									onClick={() =>
-										handlePageChange(Math.min(currentPage + 1, totalPages))
-									}
-								/>
+									isActive={page === currentPage}
+									onClick={() => handlePageChange(page)}
+								>
+									{page}
+								</PaginationLink>
 							</PaginationItem>
-						</PaginationContent>
-					</Pagination>
-				</div>
+						))}
+
+						{/* Next Button */}
+						<PaginationItem>
+							<PaginationNext
+								href="#"
+								onClick={() => handlePageChange(currentPage + 1)}
+							/>
+						</PaginationItem>
+					</PaginationContent>
+				</Pagination>
 			)}
 		</div>
 	);
