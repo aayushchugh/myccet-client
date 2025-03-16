@@ -103,10 +103,10 @@ export default function AdminList() {
 			<Table className="w-full">
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[40%]">Email Address</TableHead>
+						<TableHead className="w-[40%]">Registration Number</TableHead>
 						<TableHead className="w-[30%]">Name</TableHead>
-						<TableHead className="w-[20%]">Designation</TableHead>
-						<TableHead className="w-[10%]">Created By</TableHead>
+						<TableHead className="w-[20%]">Department</TableHead>
+						<TableHead className="w-[10%]">Subject</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
