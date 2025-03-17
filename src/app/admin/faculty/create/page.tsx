@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import apiService from "@/services/api-service";
 
 interface FormInput {
 	avatar: FileList;
@@ -22,6 +24,7 @@ interface FormInput {
 	phoneNumber: string;
 	password: string;
 	designation: string;
+	department: string;
 }
 
 export default function TeacherRegistrationForm() {
@@ -31,6 +34,27 @@ export default function TeacherRegistrationForm() {
 		setValue,
 		formState: { errors },
 	} = useForm<FormInput>();
+
+	const [branches, setBranches] = React.useState<{ id: number; title: string }[]>([]);
+
+	useEffect(() => {
+		const fetchBranches = async () => {
+			try {
+				const response = await apiService.get("/branches");
+				console.log(response);
+				if (response) {
+					setBranches(response.data.payload);
+				} else {
+					console.error("Error fetching branches:");
+				}
+			} catch (error) {
+				console.error("Network error:", error);
+			}
+		};
+
+		fetchBranches();
+	}, []);
+	console.log(branches);
 	const onSubmit: SubmitHandler<FormInput> = (data) => console.log(data);
 
 	return (
@@ -134,31 +158,60 @@ export default function TeacherRegistrationForm() {
 							})}
 						/>
 					</div>
-					<div>
-						<Label required htmlFor="designation">
-							Designation
-						</Label>
-						<Select
-							onValueChange={(value) => {
-								setValue("designation", value);
-							}}
-						>
-							<SelectTrigger error={errors?.designation?.message}>
-								<SelectValue
-									placeholder={"Select designation"}
-									{...register("designation", {
-										required: "Designation is required",
-									})}
-								/>
-							</SelectTrigger>
+					<div className="grid grid-cols-2 gap-3">
+						<div>
+							<Label required htmlFor="designation">
+								Designation
+							</Label>
+							<Select
+								onValueChange={(value) => {
+									setValue("designation", value);
+								}}
+							>
+								<SelectTrigger error={errors?.designation?.message}>
+									<SelectValue
+										placeholder={"Select designation"}
+										{...register("designation", {
+											required: "Designation is required",
+										})}
+									/>
+								</SelectTrigger>
 
-							<SelectContent>
-								<SelectItem value="Principal">Principal</SelectItem>
-								<SelectItem value="HOD">HOD</SelectItem>
-								<SelectItem value="Tutor">Tutor</SelectItem>
-								<SelectItem value="Teacher">Teacher</SelectItem>
-							</SelectContent>
-						</Select>
+								<SelectContent>
+									<SelectItem value="Principal">Principal</SelectItem>
+									<SelectItem value="HOD">HOD</SelectItem>
+									<SelectItem value="Tutor">Tutor</SelectItem>
+									<SelectItem value="Teacher">Teacher</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+						<div>
+							<Label required htmlFor="department">
+								Department
+							</Label>
+							<Select
+								onValueChange={(value) => {
+									setValue("department", value);
+								}}
+							>
+								<SelectTrigger error={errors?.department?.message}>
+									<SelectValue
+										placeholder={"Select department"}
+										{...register("department", {
+											required: "Department is required",
+										})}
+									/>
+								</SelectTrigger>
+
+								<SelectContent>
+									{branches.map((branch) => (
+										<SelectItem key={branch.id} value={branch.title}>
+											{branch.title}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
 					</div>
 				</div>
 				<div className="flex justify-center mt-4">
