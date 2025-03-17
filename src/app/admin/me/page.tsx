@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import apiService from "@/services/api-service";
 import { Button } from "@/components/ui";
 import { Pencil, Check, X } from "lucide-react";

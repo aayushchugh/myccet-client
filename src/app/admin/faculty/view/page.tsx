@@ -28,7 +28,6 @@ interface TableRowData {
 	last_name?: string;
 	phone: number;
 	designation: string;
-	createdBy: string;
 }
 
 export default function AdminList() {
@@ -42,7 +41,7 @@ export default function AdminList() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await apiService.get("/admin");
+				const response = await apiService.get("/faculty");
 				const responseData = response.data.payload;
 
 				if (!Array.isArray(responseData)) {
@@ -84,8 +83,8 @@ export default function AdminList() {
 
 	return (
 		<div className="w-full px-4">
-			<div className="flex justify-end">
-				<Link href={"/admin/create"}>
+			<div className="flex justify-end mb-5">
+				<Link href={"/admin/faculty/create"}>
 					<Button className="w-auto right-0">Create Admin</Button>
 				</Link>
 			</div>
@@ -125,9 +124,6 @@ export default function AdminList() {
 								</TableCell>
 								<TableCell>
 									<Link href={`/admin/${row.id}`}>{row.designation}</Link>
-								</TableCell>
-								<TableCell>
-									<Link href={`/admin/${row.id}`}> {row.createdBy}</Link>
 								</TableCell>
 							</TableRow>
 						))
