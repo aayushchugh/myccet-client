@@ -73,6 +73,11 @@ export function AppSidebar() {
 			}
 		};
 		fetchUserData();
+		const handleUserUpdate = () => fetchUserData();
+		window.addEventListener("userUpdated", handleUserUpdate);
+
+		// Cleanup event listener on unmount
+		return () => window.removeEventListener("userUpdated", handleUserUpdate);
 	}, []);
 	return (
 		<Sidebar>
@@ -112,11 +117,12 @@ export function AppSidebar() {
 						<AvatarImage src="/logo.svg" />
 						<AvatarFallback>CN</AvatarFallback>
 					</Avatar>
-
-					<div>
-						<p className="text-sm font-medium">{username}</p>
-						<p className="text-xs text-muted-foreground">{designation}</p>
-					</div>
+					<Link href={`/admin/me`}>
+						<div>
+							<p className="text-sm font-medium">{username}</p>
+							<p className="text-xs text-muted-foreground">{designation}</p>
+						</div>
+					</Link>
 				</div>
 			</SidebarFooter>
 		</Sidebar>

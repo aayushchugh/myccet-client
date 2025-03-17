@@ -1,5 +1,5 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/layouts/layout";
+import { AppSidebar } from "@/components/layouts/sidebar";
 import { DynamicBreadcrumb } from "@/components/layouts/breadcrumb";
 
 export default function AdminLayout({
