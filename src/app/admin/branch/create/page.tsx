@@ -28,7 +28,7 @@ export default function TeacherRegistrationForm() {
 			await apiService.post("/branches", data);
 
 			toast.success("Branch Created!");
-			router.push("/admin/branch/view");
+			router.push("/admin/branch");
 		} catch (error: any) {
 			// Handle form validation errors
 			if (error.response.data.errors) {
