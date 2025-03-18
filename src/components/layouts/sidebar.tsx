@@ -34,17 +34,17 @@ const items = [
 	},
 	{
 		title: "Subject ",
-		url: "/admin/subject/view",
+		url: "/admin/subject",
 		icon: NotebookPen,
 	},
 	{
 		title: "Branch",
-		url: "/admin/branch/view",
+		url: "/admin/branch",
 		icon: ListTree,
 	},
 	{
 		title: "Semester",
-		url: "/admin/semester/view",
+		url: "/admin/semester",
 		icon: Album,
 	},
 ];
