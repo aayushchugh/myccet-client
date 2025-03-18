@@ -56,7 +56,7 @@ export default function TeacherRegistrationForm() {
 			await apiService.post("/semesters", formattedData);
 
 			toast.success("Semester registered successfully!");
-			router.push("/admin/semester/view");
+			router.push("/admin/semester");
 		} catch (error: any) {
 			if (error.response) {
 				handleFormValidationErrors(error.response.data.errors, setError);

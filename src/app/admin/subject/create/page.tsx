@@ -30,7 +30,7 @@ export default function TeacherRegistrationForm() {
 			await apiService.post("/subjects", data);
 
 			toast.success("Subject Created!");
-			router.push("/admin/subject/view");
+			router.push("/admin/subject");
 		} catch (error: any) {
 			console.error("❌ API Error:", error);
 
