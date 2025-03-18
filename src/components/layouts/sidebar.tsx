@@ -1,6 +1,6 @@
 "use client";
 
-import { NotebookPen, GraduationCap, UserRoundPen, Shield, Album } from "lucide-react";
+import { NotebookPen, GraduationCap, UserRoundPen, Shield, Album, ListTree } from "lucide-react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import {
@@ -40,7 +40,7 @@ const items = [
 	{
 		title: "Branch",
 		url: "/admin/branch/view",
-		icon: Album,
+		icon: ListTree,
 	},
 	{
 		title: "Semester",

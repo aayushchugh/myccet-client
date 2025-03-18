@@ -30,7 +30,7 @@ export default function UserDetails() {
 
 		const fetchUser = async () => {
 			try {
-				const response = await apiService.get(`/admin/${id}`);
+				const response = await apiService.get(`/faculty/${id}`);
 				if (response.data && response.data.payload) {
 					setUser(response.data.payload);
 				} else {

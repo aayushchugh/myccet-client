@@ -113,17 +113,17 @@ export default function AdminList() {
 						currentRows.map((row) => (
 							<TableRow key={row.id}>
 								<TableCell>
-									<Link href={`/admin/${row.id}`}>{row.email}</Link>
+									<Link href={`/faculty/${row.id}`}>{row.email}</Link>
 								</TableCell>
 								<TableCell>
-									<Link href={`/admin/${row.id}`}>
+									<Link href={`/faculty/${row.id}`}>
 										{`${row.first_name} ${row.middle_name || ""} ${
 											row.last_name || ""
 										}`.trim()}
 									</Link>
 								</TableCell>
 								<TableCell>
-									<Link href={`/admin/${row.id}`}>{row.designation}</Link>
+									<Link href={`/faculty/${row.id}`}>{row.designation}</Link>
 								</TableCell>
 							</TableRow>
 						))
