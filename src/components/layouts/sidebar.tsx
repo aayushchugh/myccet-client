@@ -24,12 +24,12 @@ const items = [
 	},
 	{
 		title: "Faculty",
-		url: "/admin/faculty/view",
+		url: "/admin/faculty",
 		icon: UserRoundPen,
 	},
 	{
 		title: "Student",
-		url: "/admin/student/view",
+		url: "/admin/student",
 		icon: GraduationCap,
 	},
 	{
