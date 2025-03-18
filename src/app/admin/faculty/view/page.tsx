@@ -125,6 +125,9 @@ export default function AdminList() {
 								<TableCell>
 									<Link href={`/faculty/${row.id}`}>{row.designation}</Link>
 								</TableCell>
+								<TableCell>
+									<Link href={`/faculty/${row.id}`}>{row.phone}</Link>
+								</TableCell>
 							</TableRow>
 						))
 					) : (
