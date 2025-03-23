@@ -28,6 +28,7 @@ interface TableRowData {
 	last_name?: string;
 	phone: number;
 	designation: string;
+	branch_id: number;
 }
 
 export default function AdminList() {
@@ -113,20 +114,23 @@ export default function AdminList() {
 						currentRows.map((row) => (
 							<TableRow key={row.id}>
 								<TableCell>
-									<Link href={`/faculty/${row.id}`}>{row.email}</Link>
+									<Link href={`/admin/faculty/${row.id}`}>{row.email}</Link>
 								</TableCell>
 								<TableCell>
-									<Link href={`/faculty/${row.id}`}>
+									<Link href={`/admin/faculty/${row.id}`}>
 										{`${row.first_name} ${row.middle_name || ""} ${
 											row.last_name || ""
 										}`.trim()}
 									</Link>
 								</TableCell>
 								<TableCell>
-									<Link href={`/faculty/${row.id}`}>{row.designation}</Link>
+									<Link href={`/admin/faculty/${row.id}`}>{row.designation}</Link>
 								</TableCell>
 								<TableCell>
-									<Link href={`/faculty/${row.id}`}>{row.phone}</Link>
+									<Link href={`/admin/faculty/${row.id}`}>{row.phone}</Link>
+								</TableCell>
+								<TableCell>
+									<Link href={`/admin/faculty/${row.id}`}>{row.branch_id}</Link>
 								</TableCell>
 							</TableRow>
 						))
