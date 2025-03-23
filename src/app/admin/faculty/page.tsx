@@ -85,7 +85,7 @@ export default function AdminList() {
 		<div className="w-full px-4">
 			<div className="flex justify-end mb-5">
 				<Link href={"/admin/faculty/create"}>
-					<Button className="w-auto right-0">Create Admin</Button>
+					<Button className="w-auto right-0">Create Faculty</Button>
 				</Link>
 			</div>
 			<input
