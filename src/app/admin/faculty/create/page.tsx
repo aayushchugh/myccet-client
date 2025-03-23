@@ -5,7 +5,10 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CiEdit } from "react-icons/ci";
+
+import { toast } from "sonner";
+import handleFormValidationErrors from "@/lib/handle-form-validation-errors";
+import { useRouter } from "next/navigation";
 import {
 	Select,
 	SelectContent,
@@ -17,22 +20,24 @@ import apiService from "@/services/api-service";
 
 interface FormInput {
 	avatar: FileList;
-	firstName: string;
-	middleName: string;
-	lastName: string;
+	first_name: string;
+	middle_name: string;
+	last_name: string;
 	email: string;
-	phoneNumber: string;
+	phone: number;
 	password: string;
 	designation: string;
-	department: string;
+	branch_id: number;
 }
 
 export default function TeacherRegistrationForm() {
+	const router = useRouter();
 	const {
 		register,
 		handleSubmit,
 		setValue,
-		formState: { errors },
+		setError,
+		formState: { errors, isSubmitting },
 	} = useForm<FormInput>();
 
 	const [branches, setBranches] = React.useState<{ id: number; title: string }[]>([]);
@@ -41,7 +46,7 @@ export default function TeacherRegistrationForm() {
 		const fetchBranches = async () => {
 			try {
 				const response = await apiService.get("/branches");
-				console.log(response);
+
 				if (response) {
 					setBranches(response.data.payload);
 				} else {
@@ -54,57 +59,67 @@ export default function TeacherRegistrationForm() {
 
 		fetchBranches();
 	}, []);
-	console.log(branches);
-	const onSubmit: SubmitHandler<FormInput> = (data) => console.log(data);
 
+	const onSubmit: SubmitHandler<FormInput> = async (data) => {
+		toast.message("button pressed");
+		try {
+			// Send request with token using apiService
+			await apiService.post("/faculty", data);
+
+			toast.success("Faculty Created!");
+			router.push("/admin/faculty");
+		} catch (error: any) {
+			// Handle form validation errors
+			if (error.response.data.errors) {
+				handleFormValidationErrors(error.response.data.errors, setError);
+			}
+		}
+	};
 	return (
-		<div>
-			<div className="flex flex-col space-y-1.5 pb-3">
-				<Label htmlFor="avatar" required>
-					Avatar
-				</Label>
-				<Input
-					required
-					id="avatar"
-					type="file"
-					error={errors.avatar?.message}
-					{...register("avatar", { required: "Avatar is required" })}
-				/>
-				<div>
-					<CiEdit />
+		<form
+			onSubmit={handleSubmit(onSubmit)}
+			className="min-h-dvh flex flex-col w-full place-items-center"
+		>
+			<div>
+				<div className="flex flex-col space-y-1.5 pb-3">
+					<Label htmlFor="avatar">Avatar</Label>
+					<Input
+						id="avatar"
+						type="file"
+						error={errors.avatar?.message}
+						{...register("avatar")}
+					/>
 				</div>
-			</div>
-			<form
-				onSubmit={handleSubmit(onSubmit)}
-				className="min-h-dvh flex flex-col  w-full place-items-center "
-			>
+
 				<div className="grid gap-4 w-full ">
 					<div className="grid grid-cols-3 gap-4">
 						<div className="flex flex-col space-y-1.5">
-							<Label required htmlFor="firstName">
+							<Label required htmlFor="first_name">
 								First Name
 							</Label>
 							<Input
-								id="firstName"
+								id="first_name"
 								placeholder="First Name"
-								error={errors.firstName?.message}
-								{...register("firstName", { required: "First name is required" })}
+								error={errors.first_name?.message}
+								{...register("first_name", {
+									required: "First name is required",
+								})}
 							/>
 						</div>
 						<div className="flex flex-col space-y-1.5">
-							<Label htmlFor="middleName">Middle Name</Label>
+							<Label htmlFor="middle_name">Middle Name</Label>
 							<Input
-								id="middleName"
+								id="middle_name"
 								placeholder="Middle Name"
-								{...register("middleName")}
+								{...register("middle_name")}
 							/>
 						</div>
 						<div className="flex flex-col space-y-1.5">
-							<Label htmlFor="lastName">Last Name</Label>
+							<Label htmlFor="last_name">Last Name</Label>
 							<Input
 								id="lastName"
 								placeholder="Last Name"
-								{...register("lastName")}
+								{...register("last_name")}
 							/>
 						</div>
 					</div>
@@ -127,16 +142,17 @@ export default function TeacherRegistrationForm() {
 						/>
 					</div>
 					<div className="flex flex-col space-y-1.5">
-						<Label required htmlFor="phoneNumber">
+						<Label required htmlFor="phone">
 							Phone Number
 						</Label>
 						<Input
-							id="phoneNumber"
+							id="phone"
 							type="tel"
 							placeholder="Phone Number"
-							error={errors.phoneNumber?.message}
-							{...register("phoneNumber", {
+							error={errors.phone?.message}
+							{...register("phone", {
 								required: "Phone number is required",
+								setValueAs: (v) => Number(v),
 							})}
 						/>
 					</div>
@@ -178,34 +194,33 @@ export default function TeacherRegistrationForm() {
 								</SelectTrigger>
 
 								<SelectContent>
-									<SelectItem value="Principal">Principal</SelectItem>
-									<SelectItem value="HOD">HOD</SelectItem>
-									<SelectItem value="Tutor">Tutor</SelectItem>
-									<SelectItem value="Teacher">Teacher</SelectItem>
+									<SelectItem value="hod">HOD</SelectItem>
+									<SelectItem value="tutor">Tutor</SelectItem>
+									<SelectItem value="lecturer">Teacher</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
 						<div>
-							<Label required htmlFor="department">
-								Department
+							<Label required htmlFor="branch">
+								Branch
 							</Label>
 							<Select
 								onValueChange={(value) => {
-									setValue("department", value);
+									setValue("branch_id", Number(value));
 								}}
 							>
-								<SelectTrigger error={errors?.department?.message}>
+								<SelectTrigger error={errors?.branch_id?.message}>
 									<SelectValue
-										placeholder={"Select department"}
-										{...register("department", {
-											required: "Department is required",
+										placeholder={"Select Branch"}
+										{...register("branch_id", {
+											required: "Branch is required",
 										})}
 									/>
 								</SelectTrigger>
 
 								<SelectContent>
 									{branches.map((branch) => (
-										<SelectItem key={branch.id} value={branch.title}>
+										<SelectItem key={branch.title} value={branch.id.toString()}>
 											{branch.title}
 										</SelectItem>
 									))}
@@ -215,9 +230,11 @@ export default function TeacherRegistrationForm() {
 					</div>
 				</div>
 				<div className="flex justify-center mt-4">
-					<Button type="submit">Register</Button>
+					<Button type="submit" disabled={isSubmitting}>
+						{isSubmitting ? "Submitting..." : "Create Faculty"}
+					</Button>
 				</div>
-			</form>
-		</div>
+			</div>
+		</form>
 	);
 }

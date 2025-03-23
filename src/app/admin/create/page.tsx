@@ -4,10 +4,10 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import apiService from "@/services/api-service"; // Import your apiService
-import handleFormValidationErrors from "@/lib/handle-form-validation-errors"; // Ensure this utility exists
-import { toast } from "sonner"; // Import toast for displaying error messages
-import { useRouter } from "next/navigation"; // Import useRouter for redirecting
+import apiService from "@/services/api-service";
+import handleFormValidationErrors from "@/lib/handle-form-validation-errors";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import {
 	Select,
 	SelectContent,
@@ -39,23 +39,8 @@ export default function TeacherRegistrationForm() {
 		data.phone = Number(data.phone);
 
 		try {
-			// Retrieve token from localStorage
-			const token = localStorage.getItem("token");
+			await apiService.post("/admin", data);
 
-			if (!token) {
-				toast.error("You are not authenticated. Please log in first.");
-				router.push("/login"); // Redirect to login page
-				return;
-			}
-
-			// Send request with token using apiService
-			const response = await apiService.post("/admin", data, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
-
-			console.log("API Response:", response.data);
 			toast.success("Registration successful!");
 			router.push("/admin/view");
 		} catch (error: any) {
