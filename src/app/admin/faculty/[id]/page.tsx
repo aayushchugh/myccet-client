@@ -56,7 +56,7 @@ export default function UserDetails() {
 		if (!user || !editingField) return;
 		try {
 			const updatedUser = { ...user, [editingField]: editValue };
-			await apiService.put(`/admin/${user.id}`, updatedUser);
+			await apiService.put(`/faculty/${user.id}`, updatedUser);
 			setUser(updatedUser);
 			setEditingField(null);
 			toast.success(`${editingField.replace("_", " ")} updated successfully`); // Success toast
