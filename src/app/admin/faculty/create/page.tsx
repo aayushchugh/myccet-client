@@ -62,7 +62,6 @@ export default function TeacherRegistrationForm() {
 
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
 		try {
-			// Send request with token using apiService
 			await apiService.post("/faculty", data);
 
 			toast.success("Faculty Created!");

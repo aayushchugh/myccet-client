@@ -68,7 +68,17 @@ export default function UserDetails() {
 					// Set form values
 					Object.keys(userData).forEach((key) => {
 						if (key in userData) {
-							setValue(key as keyof User, userData[key]);
+							setValue(
+								key as
+									| "first_name"
+									| "middle_name"
+									| "last_name"
+									| "email"
+									| "phone"
+									| "designation"
+									| "branch_id",
+								userData[key],
+							);
 						}
 					});
 				} else {
