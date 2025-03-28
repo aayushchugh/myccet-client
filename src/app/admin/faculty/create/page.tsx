@@ -61,7 +61,6 @@ export default function TeacherRegistrationForm() {
 	}, []);
 
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
-		toast.message("button pressed");
 		try {
 			// Send request with token using apiService
 			await apiService.post("/faculty", data);
@@ -69,9 +68,45 @@ export default function TeacherRegistrationForm() {
 			toast.success("Faculty Created!");
 			router.push("/admin/faculty");
 		} catch (error: any) {
-			// Handle form validation errors
-			if (error.response.data.errors) {
-				handleFormValidationErrors(error.response.data.errors, setError);
+			console.error("❌ API Error:", error);
+
+			if (error.response) {
+				console.log(" Server Response:", error.response.data);
+
+				// Handle 409 Conflict errors
+				if (error.response.status === 409) {
+					const errorMessage =
+						error.response.data.message ||
+						"A conflict occurred. Please check your input.";
+					toast.error(errorMessage);
+
+					// Optionally, set form errors for specific fields
+					if (error.response.data.errors) {
+						handleFormValidationErrors(error.response.data.errors, setError);
+					}
+					return;
+				}
+
+				// Handle 401 Unauthorized errors
+				if (error.response.status === 401) {
+					toast.error("You are not authorized. Please log in again.");
+					localStorage.removeItem("token"); // Clear invalid token
+					router.push("/login"); // Redirect to login page
+					return;
+				}
+
+				// Handle form validation errors
+				if (error.response.status === 400 || error.response.status === 404) {
+					handleFormValidationErrors(error.response.data.errors, setError);
+				}
+
+				// Handle 500 errors
+				if (error.response.status === 500) {
+					toast.error("Server error. Please try again later.");
+				}
+			} else {
+				// Handle network errors or unexpected errors
+				toast.error("An unexpected error occurred. Please try again.");
 			}
 		}
 	};
