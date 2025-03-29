@@ -98,14 +98,13 @@ export default function TableView() {
 	return (
 		<div className="w-full px-4">
 			<div className="flex justify-end">
-				<Link href={"/admin/student/create"}>
+				<Link href={"/admin/semester/create"}>
 					<Button className="w-auto right-0">Register Student</Button>
 				</Link>
 			</div>
 			<Table className="w-full">
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[15%]">Semester ID</TableHead>
 						<TableHead className="w-[70%]">Semester Name</TableHead>
 						<TableHead className="w-[5%] text-center"></TableHead>
 						<TableHead className="w-[5%] text-center"></TableHead>
@@ -115,7 +114,6 @@ export default function TableView() {
 				<TableBody>
 					{currentRows.map((row) => (
 						<TableRow key={row.id}>
-							<TableCell className="font-medium">{row.id}</TableCell>
 							<TableCell>
 								{editingRow === row.id ? (
 									<input
