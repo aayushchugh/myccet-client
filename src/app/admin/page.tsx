@@ -43,7 +43,7 @@ export default function Home() {
 							Faculty
 						</Typography>
 						<div className="flex items-center justify-evenly mt-6">
-							<Link href={"/admin/faculty/view"}>
+							<Link href={"/admin/faculty"}>
 								<Button className="w-[76px]">View</Button>
 							</Link>
 
@@ -66,7 +66,7 @@ export default function Home() {
 							Student
 						</Typography>
 						<div className="flex items-center justify-evenly mt-6">
-							<Link href={"/admin/student/view"}>
+							<Link href={"/admin/student"}>
 								<Button className="w-[76px]">View</Button>
 							</Link>
 
