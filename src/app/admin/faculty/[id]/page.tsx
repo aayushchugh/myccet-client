@@ -138,6 +138,9 @@ export default function UserDetails() {
 
 	return (
 		<div className="p-6">
+			<div className="flex justify-end">
+				<Button className="bg-red-500">Delete</Button>
+			</div>
 			<form onSubmit={handleSubmit(handleUpdate)}>
 				<div className="space-y-4">
 					{/* Required Fields */}
@@ -211,7 +214,10 @@ export default function UserDetails() {
 						<Select onValueChange={(value) => setValue("branch_id", value)}>
 							<SelectTrigger error={errors?.branch_id?.message}>
 								<SelectValue
-									placeholder="Select Branch"
+									placeholder={
+										branches.find((branch) => branch.id === user?.branch_id)
+											?.title || "Select Branch"
+									}
 									{...register("branch_id", { required: "Branch is required" })}
 								/>
 							</SelectTrigger>
