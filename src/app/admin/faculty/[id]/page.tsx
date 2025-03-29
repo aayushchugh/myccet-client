@@ -18,8 +18,8 @@ interface User {
 	id: number;
 	email: string;
 	first_name: string;
-	middle_name?: string; // Optional
-	last_name?: string; // Optional
+	middle_name?: string;
+	last_name?: string;
 	phone: string;
 	designation: string;
 	branch_id: number;
@@ -121,7 +121,7 @@ export default function UserDetails() {
 
 			await apiService.put(`/faculty/${user.id}`, updatedUser);
 			toast.success("User updated successfully");
-			router.push("/admin/faculty"); // Redirect after save
+			router.push("/admin/faculty");
 		} catch (error) {
 			console.error("Error updating user:", error);
 			toast.error("Failed to update user.");
@@ -130,7 +130,13 @@ export default function UserDetails() {
 
 	const handleCancelEdit = () => {
 		toast.info("Edit cancelled");
-		router.push("/admin/faculty"); // Redirect after cancel
+		router.push("/admin/faculty");
+	};
+
+	// Get branch name from ID
+	const getBranchName = (branchId: number) => {
+		const branch = branches.find((b) => b.id === branchId);
+		return branch ? branch.title : "Select Branch";
 	};
 
 	if (isLoading) return <div>Loading...</div>;
@@ -211,7 +217,7 @@ export default function UserDetails() {
 						<Select onValueChange={(value) => setValue("branch_id", value)}>
 							<SelectTrigger error={errors?.branch_id?.message}>
 								<SelectValue
-									placeholder="Select Branch"
+									placeholder={user ? getBranchName(user.branch_id) : "helloooo"}
 									{...register("branch_id", { required: "Branch is required" })}
 								/>
 							</SelectTrigger>

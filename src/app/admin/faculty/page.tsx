@@ -28,11 +28,12 @@ interface TableRowData {
 	last_name?: string;
 	phone: number;
 	designation: string;
-	branch_id: number;
+	branch: any;
 }
 
 export default function AdminList() {
 	const [data, setData] = useState<TableRowData[]>([]);
+
 	const [currentPage, setCurrentPage] = useState(1);
 	const [search, setSearch] = useState("");
 	const [isLoading, setIsLoading] = useState(true);
@@ -43,13 +44,14 @@ export default function AdminList() {
 		const fetchData = async () => {
 			try {
 				const response = await apiService.get("/faculty");
-				const responseData = response.data.payload;
+				const facultyData = response.data.payload;
+				console.log(facultyData);
 
-				if (!Array.isArray(responseData)) {
+				if (!Array.isArray(facultyData)) {
 					throw new Error("Invalid data format received.");
 				}
 
-				setData(responseData);
+				setData(facultyData);
 			} catch (err) {
 				setError("An error occurred while fetching data.");
 				console.error("Error fetching data:", err);
@@ -64,7 +66,7 @@ export default function AdminList() {
 	const filteredData = data.filter((row) =>
 		`${row.first_name} ${row.middle_name || ""} ${row.last_name || ""} ${row.email} ${
 			row.designation
-		}`
+		} ${row.branch}`
 			.toLowerCase()
 			.includes(search.toLowerCase()),
 	);
@@ -105,8 +107,8 @@ export default function AdminList() {
 					<TableRow>
 						<TableHead className="w-[40%]">Registration Number</TableHead>
 						<TableHead className="w-[30%]">Name</TableHead>
-						<TableHead className="w-[20%]">Department</TableHead>
-						<TableHead className="w-[10%]">Subject</TableHead>
+						<TableHead className="w-[20%]">Designation</TableHead>
+						<TableHead className="w-[10%]">Branch</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
@@ -126,11 +128,11 @@ export default function AdminList() {
 								<TableCell>
 									<Link href={`/admin/faculty/${row.id}`}>{row.designation}</Link>
 								</TableCell>
+
 								<TableCell>
-									<Link href={`/admin/faculty/${row.id}`}>{row.phone}</Link>
-								</TableCell>
-								<TableCell>
-									<Link href={`/admin/faculty/${row.id}`}>{row.branch_id}</Link>
+									<Link href={`/admin/faculty/${row.id}`}>
+										{row.branch.title}
+									</Link>
 								</TableCell>
 							</TableRow>
 						))
