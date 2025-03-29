@@ -13,6 +13,14 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface User {
 	id: number;
@@ -37,6 +45,7 @@ export default function UserDetails() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [branches, setBranches] = useState<Branch[]>([]);
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
 	const {
 		register,
@@ -127,6 +136,20 @@ export default function UserDetails() {
 			toast.error("Failed to update user.");
 		}
 	};
+	const handleDelete = async () => {
+		if (!user) return;
+
+		try {
+			await apiService.delete(`/faculty/${user.id}`);
+			toast.success("User deleted successfully");
+			router.push("/admin/faculty"); // Redirect after delete
+		} catch (error) {
+			console.error("Error deleting user:", error);
+			toast.error("Failed to delete user.");
+		} finally {
+			setIsDialogOpen(false); // Close dialog
+		}
+	};
 
 	const handleCancelEdit = () => {
 		toast.info("Edit cancelled");
@@ -138,6 +161,30 @@ export default function UserDetails() {
 
 	return (
 		<div className="p-6">
+			<div className="flex justify-end">
+				<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+					<DialogTrigger asChild>
+						<Button className="bg-red-500 hover:bg-red-700">Delete</Button>
+					</DialogTrigger>
+					<DialogContent className="sm:max-w-[425px]">
+						<DialogHeader>
+							<DialogTitle>Confirm Deletion</DialogTitle>
+							<DialogDescription>
+								Are you sure you want to delete this user? This action cannot be
+								undone.
+							</DialogDescription>
+						</DialogHeader>
+						<div className="flex justify-end gap-4">
+							<Button onClick={() => setIsDialogOpen(false)} variant="outline">
+								Cancel
+							</Button>
+							<Button className="bg-red-500 hover:bg-red-700" onClick={handleDelete}>
+								Confirm
+							</Button>
+						</div>
+					</DialogContent>
+				</Dialog>
+			</div>
 			<form onSubmit={handleSubmit(handleUpdate)}>
 				<div className="space-y-4">
 					{/* Required Fields */}
@@ -211,7 +258,10 @@ export default function UserDetails() {
 						<Select onValueChange={(value) => setValue("branch_id", value)}>
 							<SelectTrigger error={errors?.branch_id?.message}>
 								<SelectValue
-									placeholder="Select Branch"
+									placeholder={
+										branches.find((branch) => branch.id === user?.branch_id)
+											?.title || "Select Branch"
+									}
 									{...register("branch_id", { required: "Branch is required" })}
 								/>
 							</SelectTrigger>
