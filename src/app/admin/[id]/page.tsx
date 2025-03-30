@@ -14,6 +14,13 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 
 interface User {
 	id: number;
@@ -205,15 +212,29 @@ export default function UserDetails() {
 					</div>
 
 					<div>
-						<Label htmlFor="designation">Designation</Label>
-						<input
-							className="w-full p-2 border rounded-md"
-							{...register("designation", { required: "Designation is required" })}
-							defaultValue={user?.designation || ""}
-						/>
-						{errors.designation && (
-							<p className="text-red-500">{errors.designation.message}</p>
-						)}
+						<Label required htmlFor="designation">
+							Designation
+						</Label>
+						<Select
+							onValueChange={(value) => {
+								setValue("designation", value);
+							}}
+						>
+							<SelectTrigger error={errors?.designation?.message}>
+								<SelectValue
+									placeholder={user?.designation || "Select Branch"}
+									{...register("designation", {
+										required: "Designation is required",
+									})}
+								/>
+							</SelectTrigger>
+
+							<SelectContent>
+								<SelectItem value="hod">HOD</SelectItem>
+								<SelectItem value="tutor">Tutor</SelectItem>
+								<SelectItem value="lecturer">Teacher</SelectItem>
+							</SelectContent>
+						</Select>
 					</div>
 				</div>
 
