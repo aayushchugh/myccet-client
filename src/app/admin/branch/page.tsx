@@ -82,7 +82,8 @@ export default function TablwView() {
 	};
 	const handleUpdate = async (id: number) => {
 		try {
-			await apiService.put(`/branches/${id}`);
+			const updatedData = { title: editTitle };
+			await apiService.put(`/branches/${id}`, updatedData);
 
 			setData((prevData) =>
 				prevData.map((item) => (item.id === id ? { ...item, title: editTitle } : item)),

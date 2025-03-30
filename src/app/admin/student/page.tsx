@@ -28,11 +28,12 @@ interface TableRowData {
 	last_name?: string;
 	phone: number;
 	designation: string;
-	createdBy: string;
+	branch: any;
 }
 
 export default function AdminList() {
 	const [data, setData] = useState<TableRowData[]>([]);
+
 	const [currentPage, setCurrentPage] = useState(1);
 	const [search, setSearch] = useState("");
 	const [isLoading, setIsLoading] = useState(true);
@@ -42,14 +43,15 @@ export default function AdminList() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await apiService.get("/admin");
-				const responseData = response.data.payload;
+				const response = await apiService.get("/faculty");
+				const facultyData = response.data.payload;
+				console.log(facultyData);
 
-				if (!Array.isArray(responseData)) {
+				if (!Array.isArray(facultyData)) {
 					throw new Error("Invalid data format received.");
 				}
 
-				setData(responseData);
+				setData(facultyData);
 			} catch (err) {
 				setError("An error occurred while fetching data.");
 				console.error("Error fetching data:", err);
@@ -64,7 +66,7 @@ export default function AdminList() {
 	const filteredData = data.filter((row) =>
 		`${row.first_name} ${row.middle_name || ""} ${row.last_name || ""} ${row.email} ${
 			row.designation
-		}`
+		} ${row.branch}`
 			.toLowerCase()
 			.includes(search.toLowerCase()),
 	);
@@ -84,9 +86,9 @@ export default function AdminList() {
 
 	return (
 		<div className="w-full px-4">
-			<div className="flex justify-end">
-				<Link href={"/admin/create"}>
-					<Button className="w-auto right-0">Create Admin</Button>
+			<div className="flex justify-end mb-4">
+				<Link href={"/admin/faculty/create"}>
+					<Button className="w-auto right-0">Create Faculty</Button>
 				</Link>
 			</div>
 			<input
@@ -103,11 +105,10 @@ export default function AdminList() {
 			<Table className="w-full">
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[30%]">Registration Number</TableHead>
-						<TableHead className="w-[20%]">Name</TableHead>
-						<TableHead className="w-[25%]">Father Name</TableHead>
-						<TableHead className="w-[5%]">Semester</TableHead>
-						<TableHead className="w-[20%] text-end">Branch </TableHead>
+						<TableHead className="w-[40%]">Registration Number</TableHead>
+						<TableHead className="w-[30%]">Name</TableHead>
+						<TableHead className="w-[20%]">Designation</TableHead>
+						<TableHead className="w-[10%]">Branch</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
@@ -115,20 +116,23 @@ export default function AdminList() {
 						currentRows.map((row) => (
 							<TableRow key={row.id}>
 								<TableCell>
-									<Link href={`/admin/${row.id}`}>{row.email}</Link>
+									<Link href={`/admin/faculty/${row.id}`}>{row.email}</Link>
 								</TableCell>
 								<TableCell>
-									<Link href={`/admin/${row.id}`}>
+									<Link href={`/admin/faculty/${row.id}`}>
 										{`${row.first_name} ${row.middle_name || ""} ${
 											row.last_name || ""
 										}`.trim()}
 									</Link>
 								</TableCell>
 								<TableCell>
-									<Link href={`/admin/${row.id}`}>{row.designation}</Link>
+									<Link href={`/admin/faculty/${row.id}`}>{row.designation}</Link>
 								</TableCell>
+
 								<TableCell>
-									<Link href={`/admin/${row.id}`}> {row.createdBy}</Link>
+									<Link href={`/admin/faculty/${row.id}`}>
+										{row.branch.title}
+									</Link>
 								</TableCell>
 							</TableRow>
 						))
