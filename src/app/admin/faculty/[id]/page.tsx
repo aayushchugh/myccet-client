@@ -241,40 +241,29 @@ export default function UserDetails() {
 					</div>
 
 					<div>
-						<Label htmlFor="designation">Designation</Label>
-						<input
-							className="w-full p-2 border rounded-md"
-							{...register("designation", { required: "Designation is required" })}
-							defaultValue={user?.designation || ""}
-						/>
-						{errors.designation && (
-							<p className="text-red-500">{errors.designation.message}</p>
-						)}
-					</div>
-					<div>
-						<Label htmlFor="designation">Designation</Label>
-						<Select onValueChange={(value) => setValue("designation", value)}>
+						<Label required htmlFor="designation">
+							Designation
+						</Label>
+						<Select
+							onValueChange={(value) => {
+								setValue("designation", value);
+							}}
+						>
 							<SelectTrigger error={errors?.designation?.message}>
 								<SelectValue
-									placeholder={
-										branches.find((branch) => branch.id === user?.branch_id)
-											?.title || "Select Branch"
-									}
-									{...register("branch_id", { required: "Branch is required" })}
+									placeholder={"Select designation"}
+									{...register("designation", {
+										required: "Designation is required",
+									})}
 								/>
 							</SelectTrigger>
 
 							<SelectContent>
-								{branches.map((branch) => (
-									<SelectItem key={branch.id} value={branch.id.toString()}>
-										{branch.title}
-									</SelectItem>
-								))}
+								<SelectItem value="hod">HOD</SelectItem>
+								<SelectItem value="tutor">Tutor</SelectItem>
+								<SelectItem value="lecturer">Teacher</SelectItem>
 							</SelectContent>
 						</Select>
-						{errors.designation && (
-							<p className="text-red-500">{errors.designation.message}</p>
-						)}
 					</div>
 
 					{/* Branch Dropdown */}
