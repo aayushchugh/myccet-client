@@ -95,7 +95,7 @@ export default function UserDetails() {
 
 			await apiService.put(`/admin/${user.id}`, updatedUser);
 			toast.success("User updated successfully");
-			router.push("/admin/faculty"); // Redirect after save
+			router.push("/admin/view"); // Redirect after save
 		} catch (error) {
 			console.error("Error updating user:", error);
 			toast.error("Failed to update user data."); // Error toast
