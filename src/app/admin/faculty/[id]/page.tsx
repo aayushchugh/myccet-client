@@ -45,7 +45,7 @@ export default function UserDetails() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [branches, setBranches] = useState<Branch[]>([]);
-	const [designation, setDesignation] = useState<Branch[]>([]);
+
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
 	const {
