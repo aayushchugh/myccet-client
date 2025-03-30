@@ -35,7 +35,7 @@ export default function TeacherRegistrationForm() {
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
 		setStartDateError(null);
 		setEndDateError(null);
-
+		console.log("button pressed");
 		if (!startDate) {
 			setStartDateError("Start date is required.");
 		}
