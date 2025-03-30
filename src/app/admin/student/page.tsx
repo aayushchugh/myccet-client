@@ -22,12 +22,14 @@ import {
 
 interface TableRowData {
 	id: number;
+	registration_number: number;
 	email: string;
 	first_name: string;
 	middle_name?: string;
 	last_name?: string;
 	phone: number;
-	designation: string;
+	father_name: string;
+	current_semester: string;
 	branch: any;
 }
 
@@ -43,7 +45,7 @@ export default function AdminList() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await apiService.get("/faculty");
+				const response = await apiService.get("/students/");
 				const facultyData = response.data.payload;
 				console.log(facultyData);
 
@@ -65,8 +67,8 @@ export default function AdminList() {
 
 	const filteredData = data.filter((row) =>
 		`${row.first_name} ${row.middle_name || ""} ${row.last_name || ""} ${row.email} ${
-			row.designation
-		} ${row.branch}`
+			row.father_name
+		} ${row.branch} ${row.registration_number} ${row.current_semester}`
 			.toLowerCase()
 			.includes(search.toLowerCase()),
 	);
@@ -105,10 +107,13 @@ export default function AdminList() {
 			<Table className="w-full">
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[40%]">Registration Number</TableHead>
-						<TableHead className="w-[30%]">Name</TableHead>
-						<TableHead className="w-[20%]">Designation</TableHead>
-						<TableHead className="w-[10%]">Branch</TableHead>
+						<TableHead className="w-[10%]">Registration Number</TableHead>
+						<TableHead className="w-[15%]">Name</TableHead>
+						<TableHead className="w-[15%]">Father Name</TableHead>
+						<TableHead className="w-[25%]">Email</TableHead>
+						<TableHead className="w-[10%] text-center">Branch</TableHead>
+						<TableHead className="w-[5%] text-center">Semester</TableHead>
+						<TableHead className="w-[20%] text-center">Phone</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
@@ -116,7 +121,9 @@ export default function AdminList() {
 						currentRows.map((row) => (
 							<TableRow key={row.id}>
 								<TableCell>
-									<Link href={`/admin/faculty/${row.id}`}>{row.email}</Link>
+									<Link href={`/admin/faculty/${row.id}`}>
+										{row.registration_number}
+									</Link>
 								</TableCell>
 								<TableCell>
 									<Link href={`/admin/faculty/${row.id}`}>
@@ -126,13 +133,22 @@ export default function AdminList() {
 									</Link>
 								</TableCell>
 								<TableCell>
-									<Link href={`/admin/faculty/${row.id}`}>{row.designation}</Link>
+									<Link href={`/admin/faculty/${row.id}`}>{row.father_name}</Link>
 								</TableCell>
 
 								<TableCell>
+									<Link href={`/admin/faculty/${row.id}`}>{row.email}</Link>
+								</TableCell>
+								<TableCell className="text-center">
+									<Link href={`/admin/faculty/${row.id}`}>{row.branch}</Link>
+								</TableCell>
+								<TableCell className="text-center">
 									<Link href={`/admin/faculty/${row.id}`}>
-										{row.branch.title}
+										{row.current_semester}
 									</Link>
+								</TableCell>
+								<TableCell className="text-center">
+									<Link href={`/admin/faculty/${row.id}`}>{row.phone}</Link>
 								</TableCell>
 							</TableRow>
 						))
