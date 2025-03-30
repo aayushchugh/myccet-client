@@ -251,6 +251,31 @@ export default function UserDetails() {
 							<p className="text-red-500">{errors.designation.message}</p>
 						)}
 					</div>
+					<div>
+						<Label htmlFor="designation">Designation</Label>
+						<Select onValueChange={(value) => setValue("designation", value)}>
+							<SelectTrigger error={errors?.designation?.message}>
+								<SelectValue
+									placeholder={
+										branches.find((branch) => branch.id === user?.branch_id)
+											?.title || "Select Branch"
+									}
+									{...register("branch_id", { required: "Branch is required" })}
+								/>
+							</SelectTrigger>
+
+							<SelectContent>
+								{branches.map((branch) => (
+									<SelectItem key={branch.id} value={branch.id.toString()}>
+										{branch.title}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+						{errors.designation && (
+							<p className="text-red-500">{errors.designation.message}</p>
+						)}
+					</div>
 
 					{/* Branch Dropdown */}
 					<div>
