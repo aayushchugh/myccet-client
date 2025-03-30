@@ -45,6 +45,7 @@ export default function UserDetails() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [branches, setBranches] = useState<Branch[]>([]);
+	const [designation, setDesignation] = useState<Branch[]>([]);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
 	const {
@@ -251,7 +252,7 @@ export default function UserDetails() {
 						>
 							<SelectTrigger error={errors?.designation?.message}>
 								<SelectValue
-									placeholder={"Select designation"}
+									placeholder={user?.designation || "Select Branch"}
 									{...register("designation", {
 										required: "Designation is required",
 									})}
