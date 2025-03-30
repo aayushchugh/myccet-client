@@ -16,6 +16,8 @@ import { useRouter } from "next/navigation";
 
 interface FormInput {
 	title: string;
+	branch_id: number;
+	subject_ids: string;
 }
 
 export default function TeacherRegistrationForm() {
@@ -49,6 +51,8 @@ export default function TeacherRegistrationForm() {
 		try {
 			const formattedData = {
 				title: data.title,
+				branch_id: data.branch_id,
+				semster_ids: data.subject_ids,
 				start_date: format(startDate, "yyyy-MM-dd"),
 				end_date: format(endDate, "yyyy-MM-dd"),
 			};
@@ -78,6 +82,30 @@ export default function TeacherRegistrationForm() {
 						{...register("title", { required: "Title is required" })}
 					/>
 					{errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
+				</div>
+				<div className="grid grid-cols-2">
+					<div className="flex flex-col space-y-1.5 mr-2">
+						<Label htmlFor="subject_ids">Subject IDs</Label>
+						<Input
+							id="subject_ids"
+							placeholder="Enter title"
+							{...register("subject_ids", { required: "Subject id  is required" })}
+						/>
+						{errors.subject_ids && (
+							<p className="text-red-500 text-sm">{errors.subject_ids.message}</p>
+						)}
+					</div>
+					<div className="flex flex-col space-y-1.5 ml-2">
+						<Label htmlFor="branch_id">Branch Id</Label>
+						<Input
+							id="branch_id"
+							placeholder="Enter Branch id"
+							{...register("branch_id", { required: "Branch id is required" })}
+						/>
+						{errors.branch_id && (
+							<p className="text-red-500 text-sm">{errors.branch_id.message}</p>
+						)}
+					</div>
 				</div>
 				<div className="flex space-x-5">
 					<div className="flex flex-col space-y-1.5">

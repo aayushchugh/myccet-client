@@ -67,7 +67,7 @@ export function AppSidebar() {
 					setDesignation(userData.designation);
 				}
 			} catch (error) {
-				console.error("Rrror fetching user data", error);
+				console.error("Error fetching user data", error);
 				setUsername("Unknown User");
 				setDesignation("Unknown");
 			}
