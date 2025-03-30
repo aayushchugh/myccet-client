@@ -30,7 +30,7 @@ interface FormInput {
 	password: string;
 	category: string;
 	branch_id: number;
-	registeration_number: number;
+	registration_number: number;
 }
 
 export default function TeacherRegistrationForm() {
@@ -151,6 +151,21 @@ export default function TeacherRegistrationForm() {
 						</div>
 					</div>
 					<div className="flex flex-col space-y-1.5">
+						<Label required htmlFor="registration_number">
+							Registration Number
+						</Label>
+						<Input
+							id="registration_number"
+							type="number"
+							placeholder="Registration Number"
+							error={errors.registration_number?.message}
+							{...register("registration_number", {
+								required: "Registration number is required",
+								setValueAs: (v) => Number(v),
+							})}
+						/>
+					</div>
+					<div className="flex flex-col space-y-1.5">
 						<Label required htmlFor="email">
 							Email
 						</Label>
@@ -184,6 +199,32 @@ export default function TeacherRegistrationForm() {
 						/>
 					</div>
 					<div className="flex flex-col space-y-1.5">
+						<Label required htmlFor="father_name">
+							Father Name
+						</Label>
+						<Input
+							id="father_name"
+							placeholder="Father name"
+							error={errors.father_name?.message}
+							{...register("father_name", {
+								required: "Father name is required",
+							})}
+						/>
+					</div>
+					<div className="flex flex-col space-y-1.5">
+						<Label required htmlFor="mother_name">
+							First Name
+						</Label>
+						<Input
+							id="mother_name"
+							placeholder="Mother name Name"
+							error={errors.mother_name?.message}
+							{...register("mother_name", {
+								required: "Mother name name is required",
+							})}
+						/>
+					</div>
+					<div className="flex flex-col space-y-1.5">
 						<Label required htmlFor="password">
 							Password
 						</Label>
@@ -201,6 +242,7 @@ export default function TeacherRegistrationForm() {
 							})}
 						/>
 					</div>
+
 					<div className="grid grid-cols-2 gap-3">
 						<div>
 							<Label required htmlFor="designation">
@@ -251,6 +293,31 @@ export default function TeacherRegistrationForm() {
 											{branch.title}
 										</SelectItem>
 									))}
+								</SelectContent>
+							</Select>
+						</div>
+						<div>
+							<Label required htmlFor="category">
+								Category
+							</Label>
+							<Select
+								onValueChange={(value) => {
+									setValue("category", value);
+								}}
+							>
+								<SelectTrigger error={errors?.category?.message}>
+									<SelectValue
+										placeholder={"Select category"}
+										{...register("category", {
+											required: "category is required",
+										})}
+									/>
+								</SelectTrigger>
+
+								<SelectContent>
+									<SelectItem value="hod">1</SelectItem>
+									<SelectItem value="tutor">2</SelectItem>
+									<SelectItem value="lecturer">Teacher</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
