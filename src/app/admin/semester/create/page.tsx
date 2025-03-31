@@ -51,8 +51,8 @@ export default function TeacherRegistrationForm() {
 		try {
 			const formattedData = {
 				title: data.title,
-				branch_id: data.branch_id,
-				semster_ids: data.subject_ids,
+				branch_id: Number(data.branch_id),
+				subject_ids: data.subject_ids.split(",").map((id) => parseInt(id.trim())), // Convert to array of integers
 				start_date: format(startDate, "yyyy-MM-dd"),
 				end_date: format(endDate, "yyyy-MM-dd"),
 			};
