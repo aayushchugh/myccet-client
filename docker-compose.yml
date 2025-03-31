@@ -15,3 +15,5 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
+        volumes:
+            - ./.env:/app/.env:ro
