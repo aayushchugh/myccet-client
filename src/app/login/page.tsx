@@ -76,12 +76,12 @@ export default function LoginPage() {
 								type="email"
 								placeholder="Enter your email"
 								{...register("email", {
-									// required: "Email is required",
-									// pattern: {
-									// 	value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-									// 	message: "Enter a valid email address",
-									// },
-									// setValueAs: (value) => value.trim(),
+									required: "Email is required",
+									pattern: {
+										value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+										message: "Enter a valid email address",
+									},
+									setValueAs: (value) => value.trim(),
 								})}
 								className={errors.email ? "border-red-500" : ""}
 							/>
@@ -96,11 +96,11 @@ export default function LoginPage() {
 								type="password"
 								placeholder="Password"
 								{...register("password", {
-									// required: "Password is required",
-									// minLength: {
-									// 	value: 6,
-									// 	message: "Password must be at least 6 characters long",
-									// },
+									required: "Password is required",
+									minLength: {
+										value: 6,
+										message: "Password must be at least 6 characters long",
+									},
 								})}
 								className={errors.password ? "border-red-500" : ""}
 							/>
