@@ -1,10 +1,14 @@
 "use client";
 import * as React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+import { toast } from "sonner";
+import handleFormValidationErrors from "@/lib/handle-form-validation-errors";
+import { useRouter } from "next/navigation";
 import {
 	Select,
 	SelectContent,
@@ -12,103 +16,152 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-// import Link from "next/link";
+import apiService from "@/services/api-service";
 
 interface FormInput {
-	avatar: FileList;
-	firstName: string;
-	middleName: string;
-	lastName: string;
-	registration: string;
+	first_name: string;
+	middle_name: string;
+	last_name: string;
 	email: string;
-	phoneNumber: string;
-	fatherName: string;
-	motherName: string;
+	phone: number;
+	father_name: string;
+	mother_name: string;
+	current_semester_id: number;
+	password: string;
 	category: string;
-	branch: string;
-	semester: string;
-	courseType: string;
+	branch_id: number;
+	registration_number: number;
 }
 
 export default function TeacherRegistrationForm() {
+	const router = useRouter();
 	const {
 		register,
 		handleSubmit,
-
 		setValue,
-		formState: { errors },
+		setError,
+		formState: { errors, isSubmitting },
 	} = useForm<FormInput>();
-	const onSubmit: SubmitHandler<FormInput> = (data) => console.log(data);
 
+	const [branches, setBranches] = React.useState<{ id: number; title: string }[]>([]);
+
+	useEffect(() => {
+		const fetchBranches = async () => {
+			try {
+				const response = await apiService.get("/branches");
+
+				if (response) {
+					setBranches(response.data.payload);
+				} else {
+					console.error("Error fetching branches:");
+				}
+			} catch (error) {
+				console.error("Network error:", error);
+			}
+		};
+
+		fetchBranches();
+	}, []);
+
+	const onSubmit: SubmitHandler<FormInput> = async (data) => {
+		try {
+			await apiService.post("/students", data);
+
+			toast.success("Student Created!");
+			router.push("/admin/student");
+		} catch (error: any) {
+			console.error("❌ API Error:", error);
+
+			if (error.response) {
+				console.log(" Server Response:", error.response.data);
+
+				// Handle 409 Conflict errors
+				if (error.response.status === 409) {
+					const errorMessage =
+						error.response.data.message ||
+						"A conflict occurred. Please check your input.";
+					toast.error(errorMessage);
+
+					// Optionally, set form errors for specific fields
+					if (error.response.data.errors) {
+						handleFormValidationErrors(error.response.data.errors, setError);
+					}
+					return;
+				}
+
+				// Handle 401 Unauthorized errors
+				if (error.response.status === 401) {
+					toast.error("You are not authorized. Please log in again.");
+					localStorage.removeItem("token"); // Clear invalid token
+					router.push("/login"); // Redirect to login page
+					return;
+				}
+
+				// Handle form validation errors
+				if (error.response.status === 400 || error.response.status === 404) {
+					handleFormValidationErrors(error.response.data.errors, setError);
+				}
+
+				// Handle 500 errors
+				if (error.response.status === 500) {
+					toast.error("Server error. Please try again later.");
+				}
+			} else {
+				// Handle network errors or unexpected errors
+				toast.error("An unexpected error occurred. Please try again.");
+			}
+		}
+	};
 	return (
 		<form
 			onSubmit={handleSubmit(onSubmit)}
-			className="min-h-dvh flex flex-col justify-center items-center"
+			className="min-h-dvh flex flex-col w-full place-items-center"
 		>
-			<div className="grid gap-4 w-full max-w-3xl">
-				{/* Avatar Upload */}
-				<div className="flex flex-col space-y-1.5">
-					<Label required htmlFor="avatar">
-						Avatar
-					</Label>
-					<Input
-						id="avatar"
-						type="file"
-						accept="image/*"
-						{...register("avatar", {
-							required: "Avatar is required",
-							validate: (fileList) =>
-								fileList?.length > 0 || "Please upload an image",
-						})}
-					/>
-					{errors.avatar && <span className="text-red-500">{errors.avatar.message}</span>}
-				</div>
-				<div className="grid gap-4 w-full max-w-3xl">
+			<div>
+				<div className="grid gap-4 w-full ">
 					<div className="grid grid-cols-3 gap-4">
 						<div className="flex flex-col space-y-1.5">
-							<Label required htmlFor="firstName">
+							<Label required htmlFor="first_name">
 								First Name
 							</Label>
 							<Input
-								id="firstName"
+								id="first_name"
 								placeholder="First Name"
-								error={errors.firstName?.message}
-								{...register("firstName", { required: "First name is required" })}
+								error={errors.first_name?.message}
+								{...register("first_name", {
+									required: "First name is required",
+								})}
 							/>
 						</div>
 						<div className="flex flex-col space-y-1.5">
-							<Label htmlFor="middleName">Middle Name</Label>
+							<Label htmlFor="middle_name">Middle Name</Label>
 							<Input
-								id="middleName"
+								id="middle_name"
 								placeholder="Middle Name"
-								{...register("middleName")}
+								{...register("middle_name")}
 							/>
 						</div>
 						<div className="flex flex-col space-y-1.5">
-							<Label htmlFor="lastName">Last Name</Label>
+							<Label htmlFor="last_name">Last Name</Label>
 							<Input
 								id="lastName"
 								placeholder="Last Name"
-								error={errors.lastName?.message}
-								{...register("lastName")}
+								{...register("last_name")}
 							/>
 						</div>
 					</div>
 					<div className="flex flex-col space-y-1.5">
-						<Label required htmlFor="registration">
-							Registration number
+						<Label required htmlFor="registration_number">
+							Registration Number
 						</Label>
 						<Input
-							id="registration"
-							type="text"
-							placeholder="Enter your registration number"
-							error={errors.registration?.message}
-							{...register("registration", {
-								required: "registration number is required",
-								pattern: {
-									value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-									message: "Enter a valid registration number",
-								},
+							id="registration_number"
+							type="number"
+							placeholder="Registration Number"
+							error={errors.registration_number?.message}
+							{...register("registration_number", {
+								required: "Registration number is required",
+								setValueAs: (v) => Number(v),
 							})}
 						/>
 					</div>
@@ -130,46 +183,120 @@ export default function TeacherRegistrationForm() {
 							})}
 						/>
 					</div>
-
 					<div className="flex flex-col space-y-1.5">
-						<Label required htmlFor="phoneNumber">
+						<Label required htmlFor="phone">
 							Phone Number
 						</Label>
 						<Input
-							id="phoneNumber"
+							id="phone"
 							type="tel"
 							placeholder="Phone Number"
-							error={errors.phoneNumber?.message}
-							{...register("phoneNumber", {
+							error={errors.phone?.message}
+							{...register("phone", {
 								required: "Phone number is required",
+								setValueAs: (v) => Number(v),
 							})}
 						/>
 					</div>
 					<div className="flex flex-col space-y-1.5">
-						<Label required htmlFor="fatherName">
-							Fathers Name
+						<Label required htmlFor="father_name">
+							Father Name
 						</Label>
 						<Input
-							id="fatherName"
-							placeholder="Fathers Name"
-							error={errors.fatherName?.message}
-							{...register("fatherName", { required: "Role is required" })}
+							id="father_name"
+							placeholder="Father name"
+							error={errors.father_name?.message}
+							{...register("father_name", {
+								required: "Father name is required",
+							})}
 						/>
 					</div>
 					<div className="flex flex-col space-y-1.5">
-						<Label required htmlFor="motherName">
-							Mothers Name
+						<Label required htmlFor="mother_name">
+							Mother Name
 						</Label>
 						<Input
-							id="motherName"
-							placeholder="mother Name"
-							error={errors.motherName?.message}
-							{...register("motherName", { required: "Role is required" })}
+							id="mother_name"
+							placeholder="Mother name Name"
+							error={errors.mother_name?.message}
+							{...register("mother_name", {
+								required: "Mother name name is required",
+							})}
+						/>
+					</div>
+					<div className="flex flex-col space-y-1.5">
+						<Label required htmlFor="password">
+							Password
+						</Label>
+						<Input
+							id="password"
+							type="password"
+							placeholder="Password"
+							error={errors.password?.message}
+							{...register("password", {
+								required: "Password is required",
+								minLength: {
+									value: 6,
+									message: "Password must be at least 6 characters long",
+								},
+							})}
 						/>
 					</div>
 
-					<div className="grid grid-cols-4 gap-2">
-						<div className="">
+					<div className="grid grid-cols-2 gap-3">
+						<div>
+							<Label required htmlFor="designation">
+								Semester
+							</Label>
+							<Select
+								onValueChange={(value) => {
+									setValue("current_semester_id", Number(value));
+								}}
+							>
+								<SelectTrigger error={errors?.current_semester_id?.message}>
+									<SelectValue
+										placeholder={"Select semester"}
+										{...register("current_semester_id", {
+											required: "Semester is required",
+										})}
+									/>
+								</SelectTrigger>
+
+								<SelectContent>
+									<SelectItem value="1">1</SelectItem>
+									<SelectItem value="2">2</SelectItem>
+									<SelectItem value="3">1</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+						<div>
+							<Label required htmlFor="branch">
+								Branch
+							</Label>
+							<Select
+								onValueChange={(value) => {
+									setValue("branch_id", Number(value));
+								}}
+							>
+								<SelectTrigger error={errors?.branch_id?.message}>
+									<SelectValue
+										placeholder={"Select Branch"}
+										{...register("branch_id", {
+											required: "Branch is required",
+										})}
+									/>
+								</SelectTrigger>
+
+								<SelectContent>
+									{branches.map((branch) => (
+										<SelectItem key={branch.title} value={branch.id.toString()}>
+											{branch.title}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+						<div>
 							<Label required htmlFor="category">
 								Category
 							</Label>
@@ -180,112 +307,26 @@ export default function TeacherRegistrationForm() {
 							>
 								<SelectTrigger error={errors?.category?.message}>
 									<SelectValue
-										placeholder={"Select Category"}
+										placeholder={"Select category"}
 										{...register("category", {
-											required: "Category is required",
+											required: "category is required",
 										})}
 									/>
 								</SelectTrigger>
 
 								<SelectContent>
-									<SelectItem value="GEN">General</SelectItem>
-									<SelectItem value="SC">SC (Scheduled Caste)</SelectItem>
-									<SelectItem value="ST">ST (Scheduled Tribe)</SelectItem>
-									<SelectItem value="OBC">OBC (Other Backward Caste)</SelectItem>
-								</SelectContent>
-							</Select>
-						</div>
-
-						<div>
-							<Label required htmlFor="semester">
-								Semester
-							</Label>
-							<Select
-								onValueChange={(value) => {
-									setValue("semester", value);
-								}}
-							>
-								<SelectTrigger error={errors?.semester?.message}>
-									<SelectValue
-										placeholder={"Select Semester"}
-										{...register("semester", {
-											required: "Semester is required",
-										})}
-									/>
-								</SelectTrigger>
-
-								<SelectContent>
-									<SelectItem value="1">1</SelectItem>
-									<SelectItem value="2">2</SelectItem>
-									<SelectItem value="3">3</SelectItem>
-									<SelectItem value="4">4</SelectItem>
-									<SelectItem value="5">5</SelectItem>
-									<SelectItem value="6">6</SelectItem>
-									<SelectItem value="7">7</SelectItem>
-									<SelectItem value="8">8</SelectItem>
-								</SelectContent>
-							</Select>
-						</div>
-
-						<div>
-							<Label required htmlFor="Branch">
-								Branch
-							</Label>
-							<Select
-								onValueChange={(value) => {
-									setValue("branch", value);
-								}}
-							>
-								<SelectTrigger error={errors?.branch?.message}>
-									<SelectValue
-										placeholder={"Select Branch"}
-										{...register("branch", { required: "Branch is required" })}
-									/>
-								</SelectTrigger>
-
-								<SelectContent>
-									<SelectItem value="CSE">CSE</SelectItem>
-									<SelectItem value="ECE">ECE</SelectItem>
-									<SelectItem value="EE">EE</SelectItem>
-									<SelectItem value="ME">ME</SelectItem>
-									<SelectItem value="PE">PE</SelectItem>
-									<SelectItem value="AA">AA</SelectItem>
-									<SelectItem value="CE">CE</SelectItem>
-								</SelectContent>
-							</Select>
-						</div>
-
-						<div>
-							<Label required htmlFor="courseType">
-								Course Type
-							</Label>
-							<Select
-								onValueChange={(value) => {
-									setValue("courseType", value);
-								}}
-							>
-								<SelectTrigger error={errors?.courseType?.message}>
-									<SelectValue
-										placeholder={"Select Course Type"}
-										{...register("courseType", {
-											required: "Course Type is required",
-										})}
-									/>
-								</SelectTrigger>
-
-								<SelectContent>
-									<SelectItem value="full">Full Time Diploma</SelectItem>
-									<SelectItem value="part">Part Time Diploma</SelectItem>
+									<SelectItem value="hod">1</SelectItem>
+									<SelectItem value="tutor">2</SelectItem>
+									<SelectItem value="lecturer">Teacher</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
 					</div>
 				</div>
 				<div className="flex justify-center mt-4">
-					<Button type="submit">Register</Button>
-					{/* <Link href={"/admin"}>
-					<Button>Register</Button>
-				</Link> */}
+					<Button type="submit" disabled={isSubmitting}>
+						{isSubmitting ? "Submitting..." : "Create Faculty"}
+					</Button>
 				</div>
 			</div>
 		</form>

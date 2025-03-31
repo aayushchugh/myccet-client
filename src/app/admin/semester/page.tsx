@@ -99,13 +99,13 @@ export default function TableView() {
 		<div className="w-full px-4">
 			<div className="flex justify-end">
 				<Link href={"/admin/semester/create"}>
-					<Button className="w-auto right-0">Register Student</Button>
+					<Button className="w-auto right-0">Create Semester</Button>
 				</Link>
 			</div>
 			<Table className="w-full">
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[70%]">Semester Name</TableHead>
+						<TableHead className="w-[70%]">Semester</TableHead>
 						<TableHead className="w-[5%] text-center"></TableHead>
 						<TableHead className="w-[5%] text-center"></TableHead>
 						<TableHead className="w-[5%] text-center"></TableHead>
