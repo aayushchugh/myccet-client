@@ -213,7 +213,7 @@ export default function TeacherRegistrationForm() {
 					</div>
 					<div className="flex flex-col space-y-1.5">
 						<Label required htmlFor="mother_name">
-							First Name
+							Mother Name
 						</Label>
 						<Input
 							id="mother_name"
@@ -263,9 +263,9 @@ export default function TeacherRegistrationForm() {
 								</SelectTrigger>
 
 								<SelectContent>
-									<SelectItem value="hod">1</SelectItem>
-									<SelectItem value="tutor">2</SelectItem>
-									<SelectItem value="lecturer">Teacher</SelectItem>
+									<SelectItem value="1">1</SelectItem>
+									<SelectItem value="2">2</SelectItem>
+									<SelectItem value="3">1</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>

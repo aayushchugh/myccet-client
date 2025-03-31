@@ -89,7 +89,7 @@ export default function AdminList() {
 	return (
 		<div className="w-full px-4">
 			<div className="flex justify-end mb-4">
-				<Link href={"/admin/faculty/create"}>
+				<Link href={"/admin/student/create"}>
 					<Button className="w-auto right-0">Register Student</Button>
 				</Link>
 			</div>
