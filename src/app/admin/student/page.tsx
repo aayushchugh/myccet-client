@@ -121,34 +121,34 @@ export default function AdminList() {
 						currentRows.map((row) => (
 							<TableRow key={row.id}>
 								<TableCell>
-									<Link href={`/admin/faculty/${row.id}`}>
+									<Link href={`/admin/student/${row.id}`}>
 										{row.registration_number}
 									</Link>
 								</TableCell>
 								<TableCell>
-									<Link href={`/admin/faculty/${row.id}`}>
+									<Link href={`/admin/student/${row.id}`}>
 										{`${row.first_name} ${row.middle_name || ""} ${
 											row.last_name || ""
 										}`.trim()}
 									</Link>
 								</TableCell>
 								<TableCell>
-									<Link href={`/admin/faculty/${row.id}`}>{row.father_name}</Link>
+									<Link href={`/admin/student/${row.id}`}>{row.father_name}</Link>
 								</TableCell>
 
 								<TableCell>
-									<Link href={`/admin/faculty/${row.id}`}>{row.email}</Link>
+									<Link href={`/admin/student/${row.id}`}>{row.email}</Link>
 								</TableCell>
 								<TableCell className="text-center">
-									<Link href={`/admin/faculty/${row.id}`}>{row.branch}</Link>
+									<Link href={`/admin/student/${row.id}`}>{row.branch}</Link>
 								</TableCell>
 								<TableCell className="text-center">
-									<Link href={`/admin/faculty/${row.id}`}>
+									<Link href={`/admin/student/${row.id}`}>
 										{row.current_semester}
 									</Link>
 								</TableCell>
 								<TableCell className="text-center">
-									<Link href={`/admin/faculty/${row.id}`}>{row.phone}</Link>
+									<Link href={`/admin/student/${row.id}`}>{row.phone}</Link>
 								</TableCell>
 							</TableRow>
 						))

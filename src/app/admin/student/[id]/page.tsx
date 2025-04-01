@@ -24,16 +24,26 @@ import {
 
 interface User {
 	id: number;
-	email: string;
+	registration_number: string;
+	father_name: string;
 	first_name: string;
-	middle_name?: string; // Optional
-	last_name?: string; // Optional
-	phone: string;
-	designation: string;
+	middle_name: string;
+	last_name: string;
+	mother_name: string;
+	category: string;
+	phone: number;
 	branch_id: number;
+	branch: any;
+	semester: any;
+	semester_id: number;
+	email: string;
 }
 
 interface Branch {
+	id: number;
+	title: string;
+}
+interface Semester {
 	id: number;
 	title: string;
 }
@@ -45,7 +55,7 @@ export default function UserDetails() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [branches, setBranches] = useState<Branch[]>([]);
-
+	const [semesters, setSemesters] = useState<Branch[]>([]);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
 	const {
@@ -55,13 +65,19 @@ export default function UserDetails() {
 		formState: { errors },
 	} = useForm({
 		defaultValues: {
-			email: "",
+			registration_number: "",
+			father_name: "",
 			first_name: "",
 			middle_name: "",
 			last_name: "",
-			phone: "",
-			designation: "",
+			mother_name: "",
+			category: "",
 			branch_id: "",
+			branch: "",
+			semester: "",
+			semester_id: "",
+			phone: "",
+			email: "",
 		},
 	});
 
@@ -70,25 +86,16 @@ export default function UserDetails() {
 
 		const fetchUser = async () => {
 			try {
-				const response = await apiService.get(`/faculty/${id}`);
+				const response = await apiService.get(`/students/${id}`);
 				if (response.data && response.data.payload) {
 					const userData = response.data.payload;
 					setUser(userData);
+					console.log(userData);
 
 					// Set form values
 					Object.keys(userData).forEach((key) => {
 						if (key in userData) {
-							setValue(
-								key as
-									| "first_name"
-									| "middle_name"
-									| "last_name"
-									| "email"
-									| "phone"
-									| "designation"
-									| "branch_id",
-								userData[key],
-							);
+							setValue(key as any, userData[key]);
 						}
 					});
 				} else {
@@ -115,9 +122,23 @@ export default function UserDetails() {
 				toast.error("Failed to load branches.");
 			}
 		};
+		const fetchSemesters = async () => {
+			try {
+				const response = await apiService.get("/semesters");
+				if (response.data && response.data.payload) {
+					setSemesters(response.data.payload);
+				} else {
+					console.error("Invalid semester format");
+				}
+			} catch (error) {
+				console.error("Network error:", error);
+				toast.error("Failed to load semester.");
+			}
+		};
 
 		fetchUser();
 		fetchBranches();
+		fetchSemesters();
 	}, [id, setValue]);
 
 	const handleUpdate = async (data: any) => {
@@ -127,13 +148,14 @@ export default function UserDetails() {
 				...user,
 				...data,
 				branch_id: Number(data.branch_id),
+				semester_id: Number(data.semester_id),
 			};
 
-			await apiService.put(`/faculty/${user.id}`, updatedUser);
-			toast.success("User updated successfully");
-			router.push("/admin/faculty"); // Redirect after save
+			await apiService.put(`/students/${user.id}`, updatedUser);
+			toast.success("Student updated successfully");
+			router.push("/admin/student"); // Redirect after save
 		} catch (error) {
-			console.error("Error updating user:", error);
+			console.error("Error updating Student:", error);
 			toast.error("Failed to update user.");
 		}
 	};
@@ -141,9 +163,9 @@ export default function UserDetails() {
 		if (!user) return;
 
 		try {
-			await apiService.delete(`/faculty/${user.id}`);
-			toast.success("User deleted successfully");
-			router.push("/admin/faculty"); // Redirect after delete
+			await apiService.delete(`/students/${user.id}`);
+			toast.success("Student deleted successfully");
+			router.push("/admin/student"); // Redirect after delete
 		} catch (error) {
 			console.error("Error deleting user:", error);
 			toast.error("Failed to delete user.");
@@ -154,7 +176,7 @@ export default function UserDetails() {
 
 	const handleCancelEdit = () => {
 		toast.info("Edit cancelled");
-		router.push("/admin/faculty"); // Redirect after cancel
+		router.push("/admin/student"); // Redirect after cancel
 	};
 
 	if (isLoading) return <div>Loading...</div>;
@@ -188,7 +210,18 @@ export default function UserDetails() {
 			</div>
 			<form onSubmit={handleSubmit(handleUpdate)}>
 				<div className="space-y-4">
-					{/* Required Fields */}
+					<div>
+						<Label htmlFor="registration_number">Registration Number</Label>
+						<input
+							className="w-full p-2 border rounded-md"
+							{...register("registration_number", {
+								required: "Registration number is required",
+							})}
+						/>
+						{errors.registration_number && (
+							<p className="text-red-500">{errors.registration_number.message}</p>
+						)}
+					</div>
 					<div>
 						<Label htmlFor="email">Email</Label>
 						<input
@@ -197,6 +230,15 @@ export default function UserDetails() {
 							defaultValue={user?.email || ""}
 						/>
 						{errors.email && <p className="text-red-500">{errors.email.message}</p>}
+					</div>
+					<div>
+						<Label htmlFor="phone">Phone</Label>
+						<input
+							className="w-full p-2 border rounded-md"
+							{...register("phone", { required: "Phone is required" })}
+							defaultValue={user?.phone || ""}
+						/>
+						{errors.phone && <p className="text-red-500">{errors.phone.message}</p>}
 					</div>
 
 					<div>
@@ -210,7 +252,6 @@ export default function UserDetails() {
 							<p className="text-red-500">{errors.first_name.message}</p>
 						)}
 					</div>
-
 					{/* Optional Fields */}
 					<div>
 						<Label htmlFor="middle_name">Middle Name</Label>
@@ -230,54 +271,63 @@ export default function UserDetails() {
 						/>
 					</div>
 
-					{/* Required Fields */}
 					<div>
-						<Label htmlFor="phone">Phone</Label>
+						<Label htmlFor="father_name">Father's Name</Label>
 						<input
 							className="w-full p-2 border rounded-md"
-							{...register("phone", { required: "Phone is required" })}
-							defaultValue={user?.phone || ""}
+							{...register("father_name", { required: "Father's name is required" })}
 						/>
-						{errors.phone && <p className="text-red-500">{errors.phone.message}</p>}
+						{errors.father_name && (
+							<p className="text-red-500">{errors.father_name.message}</p>
+						)}
 					</div>
 
 					<div>
-						<Label required htmlFor="designation">
-							Designation
+						<Label htmlFor="mother_name">Mother's Name</Label>
+						<input
+							className="w-full p-2 border rounded-md"
+							{...register("mother_name", { required: "Mother's name is required" })}
+						/>
+						{errors.mother_name && (
+							<p className="text-red-500">{errors.mother_name.message}</p>
+						)}
+					</div>
+
+					<div>
+						<Label required htmlFor="category">
+							Category
 						</Label>
 						<Select
 							onValueChange={(value) => {
-								setValue("designation", value);
+								setValue("category", value);
 							}}
 						>
-							<SelectTrigger error={errors?.designation?.message}>
+							<SelectTrigger error={errors?.category?.message}>
 								<SelectValue
-									placeholder={user?.designation || "Select Branch"}
-									{...register("designation", {
-										required: "Designation is required",
+									placeholder={user?.category || "Select Branch"}
+									{...register("category", {
+										required: "Category is required",
 									})}
 								/>
 							</SelectTrigger>
 
 							<SelectContent>
-								<SelectItem value="hod">HOD</SelectItem>
-								<SelectItem value="tutor">Tutor</SelectItem>
-								<SelectItem value="lecturer">Teacher</SelectItem>
+								<SelectItem value="hod">General</SelectItem>
+								<SelectItem value="tutor">Scheduled Caste</SelectItem>
+								<SelectItem value="lecturer">Scheduled Tribe</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
 
-					{/* Branch Dropdown */}
 					<div>
 						<Label htmlFor="branch">Branch</Label>
 						<Select onValueChange={(value) => setValue("branch_id", value)}>
 							<SelectTrigger error={errors?.branch_id?.message}>
 								<SelectValue
-									placeholder={
-										branches.find((branch) => branch.id === user?.branch_id)
-											?.title || "Select Branch"
-									}
-									{...register("branch_id", { required: "Branch is required" })}
+									placeholder={user?.branch.title || "Select Branch"}
+									{...register("branch", {
+										required: "Branch is required",
+									})}
 								/>
 							</SelectTrigger>
 
@@ -291,6 +341,30 @@ export default function UserDetails() {
 						</Select>
 						{errors.branch_id && (
 							<p className="text-red-500">{errors.branch_id.message}</p>
+						)}
+					</div>
+					<div>
+						<Label htmlFor="semester">Semester</Label>
+						<Select onValueChange={(value) => setValue("semester_id", value)}>
+							<SelectTrigger error={errors?.semester_id?.message}>
+								<SelectValue
+									placeholder={user?.semester.title || "Select Semester"}
+									{...register("semester", {
+										required: "Semester is required",
+									})}
+								/>
+							</SelectTrigger>
+
+							<SelectContent>
+								{semesters.map((semester) => (
+									<SelectItem key={semester.id} value={semester.id.toString()}>
+										{semester.title}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+						{errors.semester_id && (
+							<p className="text-red-500">{errors.semester_id.message}</p>
 						)}
 					</div>
 				</div>
