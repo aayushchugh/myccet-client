@@ -28,7 +28,7 @@ interface TableRowData {
 	last_name?: string;
 	phone: number;
 	designation: string;
-	branch: any;
+	branch: string;
 }
 
 export default function AdminList() {
@@ -130,9 +130,7 @@ export default function AdminList() {
 								</TableCell>
 
 								<TableCell>
-									<Link href={`/admin/faculty/${row.id}`}>
-										{row.branch.title}
-									</Link>
+									<Link href={`/admin/faculty/${row.id}`}>{row.branch}</Link>
 								</TableCell>
 							</TableRow>
 						))
