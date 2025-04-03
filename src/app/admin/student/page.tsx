@@ -29,7 +29,7 @@ interface TableRowData {
 	last_name?: string;
 	phone: number;
 	father_name: string;
-	current_semester: string;
+	semester: any;
 	branch: any;
 }
 
@@ -68,7 +68,7 @@ export default function AdminList() {
 	const filteredData = data.filter((row) =>
 		`${row.first_name} ${row.middle_name || ""} ${row.last_name || ""} ${row.email} ${
 			row.father_name
-		} ${row.branch} ${row.registration_number} ${row.current_semester}`
+		} ${row.branch} ${row.registration_number} ${row.semester}`
 			.toLowerCase()
 			.includes(search.toLowerCase()),
 	);
@@ -140,11 +140,13 @@ export default function AdminList() {
 									<Link href={`/admin/student/${row.id}`}>{row.email}</Link>
 								</TableCell>
 								<TableCell className="text-center">
-									<Link href={`/admin/student/${row.id}`}>{row.branch}</Link>
+									<Link href={`/admin/student/${row.id}`}>
+										{row.branch.title}
+									</Link>
 								</TableCell>
 								<TableCell className="text-center">
 									<Link href={`/admin/student/${row.id}`}>
-										{row.current_semester}
+										{row.semester.title}
 									</Link>
 								</TableCell>
 								<TableCell className="text-center">

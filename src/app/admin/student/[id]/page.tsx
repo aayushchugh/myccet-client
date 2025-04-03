@@ -24,7 +24,7 @@ import {
 
 interface User {
 	id: number;
-	registration_number: string;
+	registration_number: number;
 	father_name: string;
 	first_name: string;
 	middle_name: string;
@@ -65,18 +65,18 @@ export default function UserDetails() {
 		formState: { errors },
 	} = useForm({
 		defaultValues: {
-			registration_number: "",
+			registration_number: 0,
 			father_name: "",
 			first_name: "",
 			middle_name: "",
 			last_name: "",
 			mother_name: "",
 			category: "",
-			branch_id: "",
+			branch_id: 0,
 			branch: "",
 			semester: "",
-			semester_id: "",
-			phone: "",
+			semester_id: 0,
+			phone: 0,
 			email: "",
 		},
 	});
@@ -90,7 +90,10 @@ export default function UserDetails() {
 				if (response.data && response.data.payload) {
 					const userData = response.data.payload;
 					setUser(userData);
-					console.log(userData);
+					setValue("branch_id", userData.branch?.id || 0);
+					setValue("branch", userData.branch?.title || "");
+					setValue("semester_id", userData.semester?.id || 0);
+					setValue("semester", userData.semester?.title || "");
 
 					// Set form values
 					Object.keys(userData).forEach((key) => {
@@ -147,8 +150,9 @@ export default function UserDetails() {
 			const updatedUser = {
 				...user,
 				...data,
-				branch_id: Number(data.branch_id),
-				semester_id: Number(data.semester_id),
+				registration_number: Number(data.registration_number) || 0, // Convert to number
+				branch_id: Number(data.branch_id) || 0, // Convert to number
+				semester_id: Number(data.semester_id) || 0,
 			};
 
 			await apiService.put(`/students/${user.id}`, updatedUser);
@@ -321,7 +325,8 @@ export default function UserDetails() {
 
 					<div>
 						<Label htmlFor="branch">Branch</Label>
-						<Select onValueChange={(value) => setValue("branch_id", value)}>
+						<Select onValueChange={(value) => setValue("branch_id", Number(value))}>
+							tsx Copy Edit
 							<SelectTrigger error={errors?.branch_id?.message}>
 								<SelectValue
 									placeholder={user?.branch.title || "Select Branch"}
@@ -330,7 +335,6 @@ export default function UserDetails() {
 									})}
 								/>
 							</SelectTrigger>
-
 							<SelectContent>
 								{branches.map((branch) => (
 									<SelectItem key={branch.id} value={branch.id.toString()}>
@@ -345,7 +349,7 @@ export default function UserDetails() {
 					</div>
 					<div>
 						<Label htmlFor="semester">Semester</Label>
-						<Select onValueChange={(value) => setValue("semester_id", value)}>
+						<Select onValueChange={(value) => setValue("semester_id", Number(value))}>
 							<SelectTrigger error={errors?.semester_id?.message}>
 								<SelectValue
 									placeholder={user?.semester.title || "Select Semester"}
