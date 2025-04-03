@@ -31,6 +31,7 @@ interface User {
 	phone: string;
 	designation: string;
 	branch_id: number;
+	branch: string;
 }
 
 interface Branch {
@@ -62,6 +63,7 @@ export default function UserDetails() {
 			phone: "",
 			designation: "",
 			branch_id: "",
+			branch: "",
 		},
 	});
 
@@ -86,7 +88,8 @@ export default function UserDetails() {
 									| "email"
 									| "phone"
 									| "designation"
-									| "branch_id",
+									| "branch_id"
+									| "branch",
 								userData[key],
 							);
 						}
@@ -273,10 +276,7 @@ export default function UserDetails() {
 						<Select onValueChange={(value) => setValue("branch_id", value)}>
 							<SelectTrigger error={errors?.branch_id?.message}>
 								<SelectValue
-									placeholder={
-										branches.find((branch) => branch.id === user?.branch_id)
-											?.title || "Select Branch"
-									}
+									placeholder={user?.branch || "Select Branch"}
 									{...register("branch_id", { required: "Branch is required" })}
 								/>
 							</SelectTrigger>

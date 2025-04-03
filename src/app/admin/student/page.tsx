@@ -29,7 +29,7 @@ interface TableRowData {
 	last_name?: string;
 	phone: number;
 	father_name: string;
-	semester: string;
+	semester: any;
 	branch: any;
 }
 
@@ -140,10 +140,14 @@ export default function AdminList() {
 									<Link href={`/admin/student/${row.id}`}>{row.email}</Link>
 								</TableCell>
 								<TableCell className="text-center">
-									<Link href={`/admin/student/${row.id}`}>{row.branch}</Link>
+									<Link href={`/admin/student/${row.id}`}>
+										{row.branch.title}
+									</Link>
 								</TableCell>
 								<TableCell className="text-center">
-									<Link href={`/admin/student/${row.id}`}>{row.semester}</Link>
+									<Link href={`/admin/student/${row.id}`}>
+										{row.semester.title}
+									</Link>
 								</TableCell>
 								<TableCell className="text-center">
 									<Link href={`/admin/student/${row.id}`}>{row.phone}</Link>
