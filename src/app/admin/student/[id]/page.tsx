@@ -24,7 +24,7 @@ import {
 
 interface User {
 	id: number;
-	registration_number: string;
+	registration_number: number;
 	father_name: string;
 	first_name: string;
 	middle_name: string;
@@ -65,7 +65,7 @@ export default function UserDetails() {
 		formState: { errors },
 	} = useForm({
 		defaultValues: {
-			registration_number: "",
+			registration_number: 0,
 			father_name: "",
 			first_name: "",
 			middle_name: "",
@@ -76,7 +76,7 @@ export default function UserDetails() {
 			branch: "",
 			semester: "",
 			semester_id: "",
-			phone: "",
+			phone: 0,
 			email: "",
 		},
 	});
@@ -90,7 +90,6 @@ export default function UserDetails() {
 				if (response.data && response.data.payload) {
 					const userData = response.data.payload;
 					setUser(userData);
-					console.log(userData);
 
 					// Set form values
 					Object.keys(userData).forEach((key) => {

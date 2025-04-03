@@ -31,7 +31,7 @@ interface User {
 	phone: string;
 	designation: string;
 	branch_id: number;
-	branch: string;
+	branch: any;
 }
 
 interface Branch {
@@ -62,7 +62,7 @@ export default function UserDetails() {
 			last_name: "",
 			phone: "",
 			designation: "",
-			branch_id: "",
+			branch_id: 0,
 			branch: "",
 		},
 	});
@@ -76,6 +76,8 @@ export default function UserDetails() {
 				if (response.data && response.data.payload) {
 					const userData = response.data.payload;
 					setUser(userData);
+					setValue("branch_id", userData.branch?.id || 0);
+					setValue("branch", userData.branch?.title || "");
 
 					// Set form values
 					Object.keys(userData).forEach((key) => {
@@ -273,10 +275,10 @@ export default function UserDetails() {
 					{/* Branch Dropdown */}
 					<div>
 						<Label htmlFor="branch">Branch</Label>
-						<Select onValueChange={(value) => setValue("branch_id", value)}>
-							<SelectTrigger error={errors?.branch_id?.message}>
+						<Select onValueChange={(value) => setValue("branch_id", Number(value))}>
+							<SelectTrigger>
 								<SelectValue
-									placeholder={user?.branch || "Select Branch"}
+									placeholder={user?.branch.title || "Select Branch"}
 									{...register("branch_id", { required: "Branch is required" })}
 								/>
 							</SelectTrigger>
@@ -289,9 +291,6 @@ export default function UserDetails() {
 								))}
 							</SelectContent>
 						</Select>
-						{errors.branch_id && (
-							<p className="text-red-500">{errors.branch_id.message}</p>
-						)}
 					</div>
 				</div>
 
