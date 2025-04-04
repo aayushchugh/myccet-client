@@ -12,6 +12,8 @@ import { useRouter } from "next/navigation"; // Import useRouter for redirecting
 interface FormInput {
 	title: string;
 	code: string;
+	internalMarks: number;
+	externalMarks: number;
 }
 
 export default function TeacherRegistrationForm() {
@@ -113,9 +115,39 @@ export default function TeacherRegistrationForm() {
 					{errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
 				</div>
 
+				<div className="flex flex-col space-y-1.5">
+					<Label htmlFor="internal_marks">
+						Internal Marks <span className="text-red-500">*</span>
+					</Label>
+					<Input
+						id="internal_marks"
+						type="number"
+						placeholder="Enter Internal Marks"
+						{...register("internalMarks", { required: "Internal marks are required" })}
+					/>
+					{errors.internalMarks && (
+						<p className="text-red-500 text-sm">{errors.internalMarks.message}</p>
+					)}
+				</div>
+
+				<div className="flex flex-col space-y-1.5">
+					<Label htmlFor="external_marks">
+						External Marks <span className="text-red-500">*</span>
+					</Label>
+					<Input
+						id="external_marks"
+						type="number"
+						placeholder="Enter External Marks"
+						{...register("externalMarks", { required: "External marks are required" })}
+					/>
+					{errors.externalMarks && (
+						<p className="text-red-500 text-sm">{errors.externalMarks.message}</p>
+					)}
+				</div>
+
 				<div className="flex justify-center mt-4">
 					<Button type="submit" disabled={isSubmitting}>
-						{isSubmitting ? "Submitting..." : "Create Admin"}
+						{isSubmitting ? "Submitting..." : "Create Subject"}
 					</Button>
 				</div>
 			</div>

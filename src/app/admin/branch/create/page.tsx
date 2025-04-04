@@ -62,7 +62,7 @@ export default function TeacherRegistrationForm() {
 
 			<div className="flex justify-center mt-4">
 				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? "Submitting..." : "Create Admin"}
+					{isSubmitting ? "Submitting..." : "Create Branch"}
 				</Button>
 			</div>
 		</form>
