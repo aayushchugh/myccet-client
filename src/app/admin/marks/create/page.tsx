@@ -11,6 +11,7 @@ interface Subject {
 	title: string;
 	internalMarks: number;
 	externalMarks: number;
+	status: string;
 }
 
 export default function SubjectMarksForm() {
@@ -44,6 +45,7 @@ export default function SubjectMarksForm() {
 						<th className="border border-black px-4 py-2">Subject Name</th>
 						<th className="border border-black px-4 py-2">Internal Marks</th>
 						<th className="border border-black px-4 py-2">External Marks</th>
+						<th className="border border-black px-4 py-2">Status (P/F)</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -107,12 +109,22 @@ export default function SubjectMarksForm() {
 									</p>
 								)}
 							</td>
+							<td className="border border-black px-4 py-2">
+								<Input
+									type="string"
+									placeholder="status"
+									{...register(`subjects.${index}.status`, {
+										required: "Required",
+										valueAsNumber: true,
+									})}
+								/>
+							</td>
 						</tr>
 					))}
 				</tbody>
 			</table>
 			<Button type="submit" disabled={isSubmitting} className="mt-4">
-				{isSubmitting ? "Submitting..." : "Save Subjects"}
+				{isSubmitting ? "Submitting..." : " create marksheet"}
 			</Button>
 		</form>
 	);
