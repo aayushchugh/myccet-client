@@ -44,6 +44,7 @@ export default function BatchRegister() {
 	const [endDate, setEndDate] = React.useState<Date | undefined>();
 	const [startDateError, setStartDateError] = React.useState<string | null>(null);
 	const [endDateError, setEndDateError] = React.useState<string | null>(null);
+    
 
 	useEffect(() => {
 		const fetchBranches = async () => {

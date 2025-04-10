@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -40,6 +41,7 @@ interface FormValues {
 }
 
 export default function SemesterForm() {
+	const { id } = useParams();
 	const { register, control, setValue, handleSubmit, watch } = useForm<FormValues>({
 		defaultValues: { semesters: [] },
 	});
