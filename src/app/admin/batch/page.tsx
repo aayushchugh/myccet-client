@@ -63,19 +63,13 @@ export default function BatchRegister() {
 		fetchBranches();
 	}, []);
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
-		// Validation for missing dates
 		if (!startDate) {
 			setStartDateError("Start date is required");
 			return;
-		} else {
-			setStartDateError(null);
 		}
-
 		if (!endDate) {
 			setEndDateError("End date is required");
 			return;
-		} else {
-			setEndDateError(null);
 		}
 
 		const payload = {
@@ -83,19 +77,26 @@ export default function BatchRegister() {
 			start_year: startDate.toISOString().split("T")[0],
 			end_year: endDate.toISOString().split("T")[0],
 		};
-
 		try {
-			await apiService.post("/batch", payload);
+			const res = await apiService.post("/batch", payload);
+			console.log("POST success response:", res.data);
+
+			const batchList = await apiService.get("/batch");
+			console.log("All Batches:", batchList.data.payload);
+
+			const latest = batchList.data.payload.at(-1);
+			const batchId = latest?.id;
+
+			if (!batchId) {
+				toast.error("Failed to get batch ID.");
+				return;
+			}
 
 			toast.success("Batch Created!");
-			router.push(`/admin/batch/${id}`);
+			router.push(`/admin/batch/${batchId}`);
 		} catch (error: any) {
-			if (error.response?.data?.errors) {
-				handleFormValidationErrors(error.response.data.errors, setError);
-			} else {
-				toast.error("Something went wrong!");
-				console.error(error);
-			}
+			console.error("POST Error:", error);
+			toast.error("Something went wrong!");
 		}
 	};
 
