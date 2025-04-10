@@ -36,7 +36,7 @@ interface FormValues {
 		semesterId: number;
 		startDate?: Date;
 		endDate?: Date;
-		subjects: number[];
+		subjects: (number | undefined)[];
 	}[];
 }
 
@@ -53,15 +53,16 @@ export default function SemesterForm() {
 		control,
 		name: "semesters",
 	});
-
 	useEffect(() => {
+		if (!id) return;
+
 		const fetchBatch = async () => {
 			try {
-				const res = await apiService.get("/batch/1");
+				const res = await apiService.get(`/batch/${id}`);
 				const batchSemesters = res.data.payload.semesters;
 				setAllSemesters(batchSemesters);
 
-				batchSemesters.forEach((sem: Semester, index: number) => {
+				batchSemesters.forEach((sem: Semester) => {
 					append({
 						semesterId: sem.id,
 						startDate: sem.start_date ? new Date(sem.start_date) : undefined,
@@ -85,7 +86,7 @@ export default function SemesterForm() {
 
 		fetchBatch();
 		fetchSubjects();
-	}, [append]);
+	}, [append, id]);
 
 	const onSubmit = (data: FormValues) => {
 		console.log("Submitted Data:", data);
@@ -93,100 +94,128 @@ export default function SemesterForm() {
 
 	return (
 		<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-			{fields.map((field, index) => (
-				<div key={field.id} className="border p-4 rounded-md space-y-4">
-					<h3 className="text-lg font-bold">
-						Semester{" "}
-						{allSemesters.find((s) => s.id === field.semesterId)?.title || index + 1}
-					</h3>
+			{fields.map((field, index) => {
+				const selectedSubjects = watch(`semesters.${index}.subjects`) || [];
 
-					<div className="flex gap-4">
-						<div className="space-y-1">
-							<Label>Start Date</Label>
-							<Popover>
-								<PopoverTrigger asChild>
-									<Button variant="outline" className={cn("w-[200px] text-left")}>
-										<CalendarIcon className="mr-2 h-4 w-4" />
-										{watch(`semesters.${index}.startDate`)
-											? format(watch(`semesters.${index}.startDate`)!, "PPP")
-											: "Pick date"}
-									</Button>
-								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0" align="start">
-									<Calendar
-										mode="single"
-										selected={watch(`semesters.${index}.startDate`)}
-										onSelect={(date) =>
-											setValue(`semesters.${index}.startDate`, date)
-										}
-										initialFocus
-									/>
-								</PopoverContent>
-							</Popover>
+				return (
+					<div key={field.id} className="border p-4 rounded-md space-y-4">
+						<h3 className="text-lg font-bold">
+							Semester{" "}
+							{allSemesters.find((s) => s.id === field.semesterId)?.title ||
+								index + 1}
+						</h3>
+
+						{/* Dates */}
+						<div className="flex gap-4">
+							{/* Start Date */}
+							<div className="space-y-1">
+								<Label>Start Date</Label>
+								<Popover>
+									<PopoverTrigger asChild>
+										<Button
+											variant="outline"
+											className={cn("w-[200px] text-left")}
+										>
+											<CalendarIcon className="mr-2 h-4 w-4" />
+											{watch(`semesters.${index}.startDate`)
+												? format(
+														watch(`semesters.${index}.startDate`)!,
+														"PPP",
+												  )
+												: "Pick date"}
+										</Button>
+									</PopoverTrigger>
+									<PopoverContent className="w-auto p-0" align="start">
+										<Calendar
+											mode="single"
+											selected={watch(`semesters.${index}.startDate`)}
+											onSelect={(date) =>
+												setValue(`semesters.${index}.startDate`, date)
+											}
+											initialFocus
+										/>
+									</PopoverContent>
+								</Popover>
+							</div>
+
+							{/* End Date */}
+							<div className="space-y-1">
+								<Label>End Date</Label>
+								<Popover>
+									<PopoverTrigger asChild>
+										<Button
+											variant="outline"
+											className={cn("w-[200px] text-left")}
+										>
+											<CalendarIcon className="mr-2 h-4 w-4" />
+											{watch(`semesters.${index}.endDate`)
+												? format(
+														watch(`semesters.${index}.endDate`)!,
+														"PPP",
+												  )
+												: "Pick date"}
+										</Button>
+									</PopoverTrigger>
+									<PopoverContent className="w-auto p-0" align="start">
+										<Calendar
+											mode="single"
+											selected={watch(`semesters.${index}.endDate`)}
+											onSelect={(date) =>
+												setValue(`semesters.${index}.endDate`, date)
+											}
+											initialFocus
+										/>
+									</PopoverContent>
+								</Popover>
+							</div>
 						</div>
 
-						<div className="space-y-1">
-							<Label>End Date</Label>
-							<Popover>
-								<PopoverTrigger asChild>
-									<Button variant="outline" className={cn("w-[200px] text-left")}>
-										<CalendarIcon className="mr-2 h-4 w-4" />
-										{watch(`semesters.${index}.endDate`)
-											? format(watch(`semesters.${index}.endDate`)!, "PPP")
-											: "Pick date"}
-									</Button>
-								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0" align="start">
-									<Calendar
-										mode="single"
-										selected={watch(`semesters.${index}.endDate`)}
-										onSelect={(date) =>
-											setValue(`semesters.${index}.endDate`, date)
-										}
-										initialFocus
-									/>
-								</PopoverContent>
-							</Popover>
-						</div>
-					</div>
-
-					<div className="space-y-2">
-						<Label>Subjects</Label>
-						{watch(`semesters.${index}.subjects`)?.map((_, subIndex) => (
-							<Select
-								key={subIndex}
-								onValueChange={(value) => {
-									const updated = [
-										...(watch(`semesters.${index}.subjects`) || []),
-									];
-									updated[subIndex] = Number(value);
-									setValue(`semesters.${index}.subjects`, updated);
+						{/* Subjects */}
+						<div className="space-y-2">
+							<Label>Subjects</Label>
+							{selectedSubjects.map((subject, subIndex) => (
+								<Select
+									key={`sem-${index}-sub-${subIndex}`}
+									onValueChange={(value) => {
+										const updated = [...selectedSubjects];
+										updated[subIndex] = Number(value);
+										setValue(`semesters.${index}.subjects`, updated);
+									}}
+									value={subject?.toString()}
+								>
+									<SelectTrigger>
+										<SelectValue
+											placeholder={`Select Subject ${subIndex + 1}`}
+										/>
+									</SelectTrigger>
+									<SelectContent>
+										{subjects.map((subject) => (
+											<SelectItem
+												key={subject.id}
+												value={subject.id.toString()}
+											>
+												{subject.title}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							))}
+							<Button
+								type="button"
+								variant="outline"
+								onClick={() => {
+									setValue(`semesters.${index}.subjects`, [
+										...selectedSubjects,
+										undefined,
+									]);
 								}}
 							>
-								<SelectTrigger>
-									<SelectValue placeholder={`Select Subject ${subIndex + 1}`} />
-								</SelectTrigger>
-								<SelectContent>
-									{subjects.map((subject) => (
-										<SelectItem key={subject.id} value={subject.id.toString()}>
-											{subject.title}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						))}
-						<Button
-							type="button"
-							onClick={() => {
-								const current = watch(`semesters.${index}.subjects`) || [];
-								setValue(`semesters.${index}.subjects`, [...current, 0]);
-							}}
-						>
-							+ Add Subject
-						</Button>
+								+ Add Subject
+							</Button>
+						</div>
 					</div>
-				</div>
-			))}
+				);
+			})}
 
 			<Button type="submit">Next →</Button>
 		</form>
