@@ -1,14 +1,21 @@
 "use client";
-
-import React, { useEffect, useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import * as React from "react";
+import { useEffect } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
 import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
+import apiService from "@/services/api-service"; // Import your apiService
+import handleFormValidationErrors from "@/lib/handle-form-validation-errors"; // Ensure this utility exists
+import { toast } from "sonner"; // Import toast for displaying error messages
+import { useRouter } from "next/navigation"; // Import useRouter for redirecting
 import {
 	Select,
 	SelectContent,
@@ -16,156 +23,162 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import apiService from "@/services/api-service";
-
-interface Subject {
-	id: number;
-	title: string;
+interface FormInput {
+	branch_id: number;
+	type: string;
 }
 
-interface Semester {
-	id: number;
-	title: string;
-}
-
-interface FormValues {
-	semesters: {
-		semesterId: number;
-		startDate?: Date;
-		endDate?: Date;
-		subjects: number[];
-	}[];
-}
-
-export default function SemesterForm() {
-	const { register, control, setValue, handleSubmit, watch } = useForm<FormValues>({
-		defaultValues: { semesters: [] },
-	});
-
-	const [allSemesters, setAllSemesters] = useState<Semester[]>([]);
-	const [subjects, setSubjects] = useState<Subject[]>([]);
-	const [selectedBranch, setSelectedBranch] = useState<number | null>(null);
-
-	const { fields, append } = useFieldArray({
-		control,
-		name: "semesters",
-	});
+export default function BatchRegister() {
+	const router = useRouter();
+	const {
+		register,
+		handleSubmit,
+		setError,
+		setValue,
+		formState: { errors, isSubmitting },
+	} = useForm<FormInput>();
+	const [branches, setBranches] = React.useState<{ id: number; title: string }[]>([]);
+	const [startDate, setStartDate] = React.useState<Date | undefined>();
+	const [endDate, setEndDate] = React.useState<Date | undefined>();
+	const [startDateError, setStartDateError] = React.useState<string | null>(null);
+	const [endDateError, setEndDateError] = React.useState<string | null>(null);
 
 	useEffect(() => {
-		const fetchSemesters = async () => {
-			const res = await apiService.get("/semesters");
-			setAllSemesters(res.data.payload);
+		const fetchBranches = async () => {
+			try {
+				const response = await apiService.get("/branches");
 
-			// Initialize semester fields
-			res.data.payload.forEach((sem: Semester) => {
-				append({ semesterId: sem.id, subjects: [] });
-			});
+				if (response) {
+					setBranches(response.data.payload);
+				} else {
+					console.error("Error fetching branches:");
+				}
+			} catch (error) {
+				console.error("Network error:", error);
+			}
 		};
-		fetchSemesters();
-	}, [append]);
 
-	const onSubmit = (data: FormValues) => {
-		console.log("Submitted Data:", data);
+		fetchBranches();
+	}, []);
+	const onSubmit: SubmitHandler<FormInput> = async (data) => {
+		try {
+			// Send request with token using apiService
+			await apiService.post("/batch", data);
+
+			toast.success("batch Created!");
+			1;
+			router.push("/admin/semester/batch");
+		} catch (error: any) {
+			// Handle form validation errors
+			if (error.response.data.errors) {
+				handleFormValidationErrors(error.response.data.errors, setError);
+			}
+		}
 	};
-
 	return (
-		<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-			{fields.map((field, index) => (
-				<div key={field.id} className="border p-4 rounded-md space-y-4">
-					<h3 className="text-lg font-bold">
-						Semester{" "}
-						{allSemesters.find((s) => s.id === field.semesterId)?.title || index + 1}
-					</h3>
-
-					<div className="flex gap-4">
-						<div className="space-y-1">
-							<Label>Start Date</Label>
-							<Popover>
-								<PopoverTrigger asChild>
-									<Button variant="outline" className={cn("w-[200px] text-left")}>
-										<CalendarIcon className="mr-2 h-4 w-4" />
-										{watch(`semesters.${index}.startDate`)
-											? format(watch(`semesters.${index}.startDate`)!, "PPP")
-											: "Pick date"}
-									</Button>
-								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0" align="start">
-									<Calendar
-										mode="single"
-										selected={watch(`semesters.${index}.startDate`)}
-										onSelect={(date) =>
-											setValue(`semesters.${index}.startDate`, date)
-										}
-										initialFocus
-									/>
-								</PopoverContent>
-							</Popover>
-						</div>
-
-						<div className="space-y-1">
-							<Label>End Date</Label>
-							<Popover>
-								<PopoverTrigger asChild>
-									<Button variant="outline" className={cn("w-[200px] text-left")}>
-										<CalendarIcon className="mr-2 h-4 w-4" />
-										{watch(`semesters.${index}.endDate`)
-											? format(watch(`semesters.${index}.endDate`)!, "PPP")
-											: "Pick date"}
-									</Button>
-								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0" align="start">
-									<Calendar
-										mode="single"
-										selected={watch(`semesters.${index}.endDate`)}
-										onSelect={(date) =>
-											setValue(`semesters.${index}.endDate`, date)
-										}
-										initialFocus
-									/>
-								</PopoverContent>
-							</Popover>
-						</div>
-					</div>
-
-					<div className="space-y-2">
-						<Label>Subjects</Label>
-						{watch(`semesters.${index}.subjects`)?.map((_, subIndex) => (
-							<Select
-								key={subIndex}
-								onValueChange={(value) => {
-									const updatedSubjects = [
-										...(watch(`semesters.${index}.subjects`) || []),
-									];
-									updatedSubjects[subIndex] = Number(value);
-									setValue(`semesters.${index}.subjects`, updatedSubjects);
-								}}
+		<form
+			onSubmit={handleSubmit(onSubmit)}
+			className="min-h-dvh flex flex-col w-full place-items-center"
+		>
+			<div className="grid gap-4 w-full max-w-md">
+				<div className="flex flex-col space-y-1.5">
+					<Label htmlFor="startDate">Start Date</Label>
+					<Popover>
+						<PopoverTrigger asChild>
+							<Button
+								variant="outline"
+								className={cn(
+									"w-[240px] text-left",
+									!startDate && "text-muted-foreground",
+								)}
 							>
-								<SelectTrigger>
-									<SelectValue placeholder={`Select Subject ${subIndex + 1}`} />
-								</SelectTrigger>
-								<SelectContent>
-									{subjects.map((subject) => (
-										<SelectItem key={subject.id} value={subject.id.toString()}>
-											{subject.title}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						))}
-						<Button
-							type="button"
-							onClick={() => {
-								const current = watch(`semesters.${index}.subjects`) || [];
-								setValue(`semesters.${index}.subjects`, [...current, 0]);
-							}}
-						>
-							+ Add Subject
-						</Button>
-					</div>
+								<CalendarIcon />
+								{startDate ? format(startDate, "PPP") : "Pick a date"}
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent className="w-auto p-0" align="start">
+							<Calendar
+								mode="single"
+								selected={startDate}
+								onSelect={setStartDate}
+								initialFocus
+							/>
+						</PopoverContent>
+					</Popover>
+					{startDateError && <p className="text-red-500 text-sm">{startDateError}</p>}
 				</div>
-			))}
+				<div className="flex flex-col space-y-1.5">
+					<Label htmlFor="endDate">End Date</Label>
+					<Popover>
+						<PopoverTrigger asChild>
+							<Button
+								variant="outline"
+								className={cn(
+									"w-[240px] text-left",
+									!endDate && "text-muted-foreground",
+								)}
+							>
+								<CalendarIcon />
+								{endDate ? format(endDate, "PPP") : "Pick a date"}
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent className="w-auto p-0" align="start">
+							<Calendar
+								mode="single"
+								selected={endDate}
+								onSelect={setEndDate}
+								initialFocus
+							/>
+						</PopoverContent>
+					</Popover>
+					{endDateError && <p className="text-red-500 text-sm">{endDateError}</p>}
+				</div>
+				<div className="flex flex-col space-y-1.5 ">
+					<Label htmlFor="branch_id">Course Type </Label>
+					<Input
+						id="type"
+						placeholder="Enter course type"
+						{...register("type", { required: "course type id is required" })}
+					/>
+					{errors.branch_id && (
+						<p className="text-red-500 text-sm">{errors.branch_id.message}</p>
+					)}
+				</div>
 
-			<Button type="submit">Next →</Button>
+				<div>
+					<Label required htmlFor="branch">
+						Branch
+					</Label>
+					<Select
+						onValueChange={(value) => {
+							setValue("branch_id", Number(value));
+						}}
+					>
+						<SelectTrigger error={errors?.branch_id?.message}>
+							<SelectValue
+								placeholder={"Select Branch"}
+								{...register("branch_id", {
+									required: "Branch is required",
+								})}
+							/>
+						</SelectTrigger>
+
+						<SelectContent>
+							{branches.map((branch) => (
+								<SelectItem key={branch.title} value={branch.id.toString()}>
+									{branch.title}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
+
+				<div className="flex justify-center mt-4">
+					<Button type="submit" disabled={isSubmitting}>
+						{isSubmitting ? "Submitting..." : "Create Branch"}
+					</Button>
+				</div>
+			</div>
 		</form>
 	);
 }
