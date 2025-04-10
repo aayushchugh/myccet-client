@@ -84,7 +84,7 @@ export default function SemesterForm() {
 		};
 
 		const appendSemesters = (semesters: Semester[]) => {
-			reset({ semesters: [] }); // 🧹 clear first to be extra safe
+			reset({ semesters: [] });
 			semesters.forEach((sem) => {
 				append({
 					semesterId: sem.id,
