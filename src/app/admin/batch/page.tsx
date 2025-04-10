@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import { useEffect } from "react";
+import { useParams } from "next/navigation";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,7 @@ interface FormInput {
 
 export default function BatchRegister() {
 	const router = useRouter();
+	const { id } = useParams();
 	const {
 		register,
 		handleSubmit,
@@ -61,20 +63,42 @@ export default function BatchRegister() {
 		fetchBranches();
 	}, []);
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
-		try {
-			// Send request with token using apiService
-			await apiService.post("/batch", data);
+		// Validation for missing dates
+		if (!startDate) {
+			setStartDateError("Start date is required");
+			return;
+		} else {
+			setStartDateError(null);
+		}
 
-			toast.success("batch Created!");
-			1;
-			router.push("/admin/batch/[id]");
+		if (!endDate) {
+			setEndDateError("End date is required");
+			return;
+		} else {
+			setEndDateError(null);
+		}
+
+		const payload = {
+			...data,
+			start_year: startDate.toISOString().split("T")[0],
+			end_year: endDate.toISOString().split("T")[0],
+		};
+
+		try {
+			await apiService.post("/batch", payload);
+
+			toast.success("Batch Created!");
+			router.push(`/admin/batch/${id}`);
 		} catch (error: any) {
-			// Handle form validation errors
-			if (error.response.data.errors) {
+			if (error.response?.data?.errors) {
 				handleFormValidationErrors(error.response.data.errors, setError);
+			} else {
+				toast.error("Something went wrong!");
+				console.error(error);
 			}
 		}
 	};
+
 	return (
 		<form
 			onSubmit={handleSubmit(onSubmit)}
