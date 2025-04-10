@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
@@ -42,7 +43,7 @@ interface FormValues {
 
 export default function SemesterForm() {
 	const { id } = useParams();
-	const { register, control, setValue, handleSubmit, watch } = useForm<FormValues>({
+	const { register, control, setValue, handleSubmit, watch, reset } = useForm<FormValues>({
 		defaultValues: { semesters: [] },
 	});
 
@@ -53,40 +54,49 @@ export default function SemesterForm() {
 		control,
 		name: "semesters",
 	});
-	useEffect(() => {
-		if (!id) return;
 
-		const fetchBatch = async () => {
+	const hasAppended = useRef(false);
+
+	useEffect(() => {
+		if (!id || hasAppended.current) return;
+
+		const fetchBatchAndSubjects = async () => {
 			try {
 				const res = await apiService.get(`/batch/${id}`);
+				console.log("Batch response:", res.data);
+
 				const batchSemesters = res.data.payload.semesters;
 				setAllSemesters(batchSemesters);
 
-				batchSemesters.forEach((sem: Semester) => {
-					append({
-						semesterId: sem.id,
-						startDate: sem.start_date ? new Date(sem.start_date) : undefined,
-						endDate: sem.end_date ? new Date(sem.end_date) : undefined,
-						subjects: [],
-					});
-				});
+				appendSemesters(batchSemesters);
+				hasAppended.current = true;
 			} catch (error) {
 				console.error("Error fetching batch data:", error);
 			}
-		};
 
-		const fetchSubjects = async () => {
 			try {
-				const res = await apiService.get("/subjects");
-				setSubjects(res.data.payload);
+				const subRes = await apiService.get("/subjects");
+				console.log("Subjects fetched:", subRes.data.payload);
+				setSubjects(subRes.data.payload);
 			} catch (error) {
 				console.error("Error fetching subjects:", error);
 			}
 		};
 
-		fetchBatch();
-		fetchSubjects();
-	}, [append, id]);
+		const appendSemesters = (semesters: Semester[]) => {
+			reset({ semesters: [] }); // 🧹 clear first to be extra safe
+			semesters.forEach((sem) => {
+				append({
+					semesterId: sem.id,
+					startDate: sem.start_date ? new Date(sem.start_date) : undefined,
+					endDate: sem.end_date ? new Date(sem.end_date) : undefined,
+					subjects: [],
+				});
+			});
+		};
+
+		fetchBatchAndSubjects();
+	}, [id, append, reset]);
 
 	const onSubmit = (data: FormValues) => {
 		console.log("Submitted Data:", data);
