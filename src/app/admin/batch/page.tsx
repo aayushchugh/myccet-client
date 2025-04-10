@@ -67,7 +67,7 @@ export default function BatchRegister() {
 
 			toast.success("batch Created!");
 			1;
-			router.push("/admin/semester/batch");
+			router.push("/admin/batch/[id]");
 		} catch (error: any) {
 			// Handle form validation errors
 			if (error.response.data.errors) {

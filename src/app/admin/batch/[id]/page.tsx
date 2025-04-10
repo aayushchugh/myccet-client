@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,8 @@ interface Subject {
 interface Semester {
 	id: number;
 	title: string;
+	start_date: string | null;
+	end_date: string | null;
 }
 
 interface FormValues {
@@ -43,7 +46,6 @@ export default function SemesterForm() {
 
 	const [allSemesters, setAllSemesters] = useState<Semester[]>([]);
 	const [subjects, setSubjects] = useState<Subject[]>([]);
-	const [selectedBranch, setSelectedBranch] = useState<number | null>(null);
 
 	const { fields, append } = useFieldArray({
 		control,
@@ -51,16 +53,36 @@ export default function SemesterForm() {
 	});
 
 	useEffect(() => {
-		const fetchSemesters = async () => {
-			const res = await apiService.get("/semesters");
-			setAllSemesters(res.data.payload);
+		const fetchBatch = async () => {
+			try {
+				const res = await apiService.get("/batch/1");
+				const batchSemesters = res.data.payload.semesters;
+				setAllSemesters(batchSemesters);
 
-			// Initialize semester fields
-			res.data.payload.forEach((sem: Semester) => {
-				append({ semesterId: sem.id, subjects: [] });
-			});
+				batchSemesters.forEach((sem: Semester, index: number) => {
+					append({
+						semesterId: sem.id,
+						startDate: sem.start_date ? new Date(sem.start_date) : undefined,
+						endDate: sem.end_date ? new Date(sem.end_date) : undefined,
+						subjects: [],
+					});
+				});
+			} catch (error) {
+				console.error("Error fetching batch data:", error);
+			}
 		};
-		fetchSemesters();
+
+		const fetchSubjects = async () => {
+			try {
+				const res = await apiService.get("/subjects");
+				setSubjects(res.data.payload);
+			} catch (error) {
+				console.error("Error fetching subjects:", error);
+			}
+		};
+
+		fetchBatch();
+		fetchSubjects();
 	}, [append]);
 
 	const onSubmit = (data: FormValues) => {
@@ -132,11 +154,11 @@ export default function SemesterForm() {
 							<Select
 								key={subIndex}
 								onValueChange={(value) => {
-									const updatedSubjects = [
+									const updated = [
 										...(watch(`semesters.${index}.subjects`) || []),
 									];
-									updatedSubjects[subIndex] = Number(value);
-									setValue(`semesters.${index}.subjects`, updatedSubjects);
+									updated[subIndex] = Number(value);
+									setValue(`semesters.${index}.subjects`, updated);
 								}}
 							>
 								<SelectTrigger>
