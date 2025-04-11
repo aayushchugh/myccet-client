@@ -23,8 +23,8 @@ import {
 import apiService from "@/services/api-service";
 
 interface TableRowData {
-	startDate: string;
-	endDate: string;
+	start_year: string;
+	end_year: string;
 	branch: string;
 }
 
@@ -61,7 +61,7 @@ export default function TableView() {
 	const handleDelete = async (startDate: string) => {
 		try {
 			await apiService.delete(`/batch/${startDate}`);
-			setData((prevData) => prevData.filter((item) => item.startDate !== startDate));
+			setData((prevData) => prevData.filter((item) => item.start_year !== startDate));
 			toast.success("Subject deleted successfully");
 		} catch (error) {
 			console.error("Error deleting subject:", error);
@@ -70,8 +70,8 @@ export default function TableView() {
 	};
 
 	const handleEdit = (row: TableRowData) => {
-		setEditingRow(row.startDate);
-		setEditEndDate(row.endDate);
+		setEditingRow(row.start_year);
+		setEditEndDate(row.end_year);
 	};
 
 	const handleUpdate = async (startDate: string) => {
@@ -79,7 +79,7 @@ export default function TableView() {
 			await apiService.put(`/subjects/${startDate}`, { endDate: editEndDate });
 			setData((prevData) =>
 				prevData.map((item) =>
-					item.startDate === startDate ? { ...item, endDate: editEndDate } : item,
+					item.start_year === startDate ? { ...item, endDate: editEndDate } : item,
 				),
 			);
 			toast.success("Subject updated successfully");
@@ -101,7 +101,7 @@ export default function TableView() {
 	return (
 		<div className="w-full px-4">
 			<div className="flex justify-end mb-4">
-				<Link href={"/admin/subject/create"}>
+				<Link href={"/admin/batch"}>
 					<Button className="w-auto">Create Batch</Button>
 				</Link>
 			</div>
@@ -118,23 +118,23 @@ export default function TableView() {
 				</TableHeader>
 				<TableBody>
 					{currentRows.map((row) => (
-						<TableRow key={row.startDate}>
-							<TableCell className="font-medium">{row.startDate}</TableCell>
+						<TableRow key={row.start_year}>
+							<TableCell className="font-medium">{row.start_year}</TableCell>
 							<TableCell>
-								{editingRow === row.startDate ? (
+								{editingRow === row.start_year ? (
 									<input
 										type="text"
 										value={editEndDate}
 										onChange={(e) => setEditEndDate(e.target.value)}
 										onKeyDown={(e) => {
-											if (e.key === "Enter") handleUpdate(row.startDate);
+											if (e.key === "Enter") handleUpdate(row.start_year);
 											if (e.key === "Escape") handleCancelEdit();
 										}}
 										autoFocus
 										className="border rounded px-2 py-1 w-full"
 									/>
 								) : (
-									row.endDate
+									row.end_year
 								)}
 							</TableCell>
 							<TableCell className="text-center">{row.branch}</TableCell>
@@ -142,12 +142,12 @@ export default function TableView() {
 								<Copy size={16} className="cursor-pointer" />
 							</TableCell>
 							<TableCell>
-								{editingRow === row.startDate ? (
+								{editingRow === row.start_year ? (
 									<div className="flex gap-2">
 										<Check
 											size={16}
 											className="cursor-pointer text-green-600"
-											onClick={() => handleUpdate(row.startDate)}
+											onClick={() => handleUpdate(row.start_year)}
 										/>
 										<X
 											size={16}
@@ -167,7 +167,7 @@ export default function TableView() {
 								<Trash2
 									size={16}
 									className="cursor-pointer text-red-600"
-									onClick={() => handleDelete(row.startDate)}
+									onClick={() => handleDelete(row.start_year)}
 								/>
 							</TableCell>
 						</TableRow>
