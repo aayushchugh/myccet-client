@@ -36,6 +36,14 @@ export default function TableView() {
 	const [editingRow, setEditingRow] = useState<string | null>(null);
 	const [editEndDate, setEditEndDate] = useState("");
 	const rowsPerPage = 17;
+	const formatDate = (DateString: string) => {
+		const date = new Date(DateString);
+		if (isNaN(date.getTime())) return DateString;
+		const year = date.getFullYear();
+		const month = String(date.getMonth() + 1).padStart(2, "0");
+		const day = String(date.getDate()).padStart(2, "0");
+		return `${year}-${month}-${day}`;
+	};
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -119,7 +127,9 @@ export default function TableView() {
 				<TableBody>
 					{currentRows.map((row) => (
 						<TableRow key={row.start_year}>
-							<TableCell className="font-medium">{row.start_year}</TableCell>
+							<TableCell className="font-medium">
+								{formatDate(row.start_year)}
+							</TableCell>
 							<TableCell>
 								{editingRow === row.start_year ? (
 									<input
@@ -134,7 +144,7 @@ export default function TableView() {
 										className="border rounded px-2 py-1 w-full"
 									/>
 								) : (
-									row.end_year
+									formatDate(row.end_year)
 								)}
 							</TableCell>
 							<TableCell className="text-center">{row.branch}</TableCell>
