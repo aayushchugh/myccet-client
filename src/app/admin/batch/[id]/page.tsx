@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
-import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
@@ -42,6 +42,7 @@ interface FormValues {
 }
 
 export default function SemesterForm() {
+	const router = useRouter();
 	const { id } = useParams();
 	const { register, control, setValue, handleSubmit, watch, reset } = useForm<FormValues>({
 		defaultValues: { semesters: [] },
@@ -49,6 +50,7 @@ export default function SemesterForm() {
 
 	const [allSemesters, setAllSemesters] = useState<Semester[]>([]);
 	const [subjects, setSubjects] = useState<Subject[]>([]);
+	const [loading, setLoading] = useState(true);
 
 	const { fields, append } = useFieldArray({
 		control,
@@ -60,46 +62,71 @@ export default function SemesterForm() {
 	useEffect(() => {
 		if (!id || hasAppended.current) return;
 
-		const fetchBatchAndSubjects = async () => {
+		const fetchAndInitSemesters = async () => {
 			try {
+				// Step 1: Fetch batch
 				const res = await apiService.get(`/batch/${id}`);
-				console.log("Batch response:", res.data);
+				let semesters = res.data?.payload?.semesters || [];
 
-				const batchSemesters = res.data.payload.semesters;
-				setAllSemesters(batchSemesters);
+				// Step 2: If semesters not found, initialize
+				if (semesters.length === 0) {
+					console.log("Semesters not found. Initializing via /detail...");
+					await apiService.post(`/batch/${id}/detail`);
 
-				appendSemesters(batchSemesters);
+					// Step 3: Fetch again after initializing
+					const updatedRes = await apiService.get(`/batch/${id}`);
+					semesters = updatedRes.data?.payload?.semesters || [];
+				}
+
+				// Step 4: Set state and form values
+				setAllSemesters(semesters);
+				reset({ semesters: [] });
+
+				semesters.forEach((sem: Semester) => {
+					append({
+						semesterId: sem.id,
+						startDate: sem.start_date ? new Date(sem.start_date) : undefined,
+						endDate: sem.end_date ? new Date(sem.end_date) : undefined,
+						subjects: [],
+					});
+				});
+
 				hasAppended.current = true;
 			} catch (error) {
-				console.error("Error fetching batch data:", error);
+				console.error("Error fetching or initializing semesters:", error);
 			}
 
+			// Always try to fetch subjects
 			try {
 				const subRes = await apiService.get("/subjects");
-				console.log("Subjects fetched:", subRes.data.payload);
 				setSubjects(subRes.data.payload);
 			} catch (error) {
 				console.error("Error fetching subjects:", error);
 			}
 		};
 
-		const appendSemesters = (semesters: Semester[]) => {
-			reset({ semesters: [] });
-			semesters.forEach((sem) => {
-				append({
-					semesterId: sem.id,
-					startDate: sem.start_date ? new Date(sem.start_date) : undefined,
-					endDate: sem.end_date ? new Date(sem.end_date) : undefined,
-					subjects: [],
-				});
-			});
-		};
-
-		fetchBatchAndSubjects();
+		fetchAndInitSemesters();
 	}, [id, append, reset]);
 
-	const onSubmit = (data: FormValues) => {
-		console.log("Submitted Data:", data);
+	const onSubmit = async (data: FormValues) => {
+		console.log("Form Data:", data);
+
+		const formattedSemesters = data.semesters.map((sem) => ({
+			id: sem.semesterId,
+			start_date: sem.startDate?.toISOString().split("T")[0],
+			end_date: sem.endDate?.toISOString().split("T")[0],
+			subject_ids: sem.subjects.filter(Boolean),
+		}));
+
+		try {
+			const response = await apiService.post(`/batch/${id}/semester`, {
+				semesters: formattedSemesters,
+			});
+			console.log("Semester data saved:", response.data);
+			// Add redirect/success message if needed
+		} catch (error) {
+			console.error("Failed to save semesters:", error);
+		}
 	};
 
 	return (
@@ -213,12 +240,12 @@ export default function SemesterForm() {
 							<Button
 								type="button"
 								variant="outline"
-								onClick={() => {
+								onClick={() =>
 									setValue(`semesters.${index}.subjects`, [
 										...selectedSubjects,
 										undefined,
-									]);
-								}}
+									])
+								}
 							>
 								+ Add Subject
 							</Button>
@@ -227,7 +254,8 @@ export default function SemesterForm() {
 				);
 			})}
 
-			<Button type="submit">Next →</Button>
+			{/* <Button type="submit">Next →</Button> */}
+			<Button type="submit">save</Button>
 		</form>
 	);
 }
