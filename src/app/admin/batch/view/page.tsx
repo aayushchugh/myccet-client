@@ -36,13 +36,12 @@ export default function TableView() {
 	const [editingRow, setEditingRow] = useState<string | null>(null);
 	const [editEndDate, setEditEndDate] = useState("");
 	const rowsPerPage = 17;
+
 	const formatDate = (DateString: string) => {
 		const date = new Date(DateString);
 		if (isNaN(date.getTime())) return DateString;
 		const year = date.getFullYear();
-		const month = String(date.getMonth() + 1).padStart(2, "0");
-		const day = String(date.getDate()).padStart(2, "0");
-		return `${year}-${month}-${day}`;
+		return `${year}`;
 	};
 
 	useEffect(() => {
@@ -87,7 +86,7 @@ export default function TableView() {
 			await apiService.put(`/subjects/${startDate}`, { endDate: editEndDate });
 			setData((prevData) =>
 				prevData.map((item) =>
-					item.start_year === startDate ? { ...item, endDate: editEndDate } : item,
+					item.start_year === startDate ? { ...item, end_year: editEndDate } : item,
 				),
 			);
 			toast.success("Subject updated successfully");
@@ -116,8 +115,7 @@ export default function TableView() {
 			<Table className="w-full">
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[20%]">Start Date</TableHead>
-						<TableHead className="w-[40%]">End Date</TableHead>
+						<TableHead className="w-[40%]">Title</TableHead>
 						<TableHead className="w-[20%] text-center">Branch</TableHead>
 						<TableHead className="w-[5%] text-center"></TableHead>
 						<TableHead className="w-[5%] text-center"></TableHead>
@@ -128,9 +126,7 @@ export default function TableView() {
 					{currentRows.map((row) => (
 						<TableRow key={row.start_year}>
 							<TableCell className="font-medium">
-								{formatDate(row.start_year)}
-							</TableCell>
-							<TableCell>
+								{formatDate(row.start_year)} -{" "}
 								{editingRow === row.start_year ? (
 									<input
 										type="text"
@@ -141,7 +137,7 @@ export default function TableView() {
 											if (e.key === "Escape") handleCancelEdit();
 										}}
 										autoFocus
-										className="border rounded px-2 py-1 w-full"
+										className="border rounded px-2 py-1 w-[100px] ml-1"
 									/>
 								) : (
 									formatDate(row.end_year)
