@@ -97,6 +97,26 @@ export default function SemesterForm() {
 
 		fetchBatchAndSubjects();
 	}, [id, append, reset]);
+	const onSave = async (data: FormValues) => {
+		try {
+			const payload = {
+				semesters: data.semesters.map((sem) => ({
+					id: sem.semesterId,
+					start_date: sem.startDate?.toISOString().split("T")[0] || null,
+					end_date: sem.endDate?.toISOString().split("T")[0] || null,
+					subject_ids: sem.subjects.filter((s) => s !== undefined) as number[],
+				})),
+			};
+
+			const response = await apiService.post(`/batch/${id}/details`, payload);
+			console.log("Saved successfully:", response.data);
+
+			alert("Data saved successfully!");
+		} catch (error) {
+			console.error("Error saving semester data:", error);
+			alert("Failed to save data.");
+		}
+	};
 
 	const onSubmit = (data: FormValues) => {
 		console.log("Submitted Data:", data);
@@ -226,8 +246,12 @@ export default function SemesterForm() {
 					</div>
 				);
 			})}
-
-			<Button type="submit">Next →</Button>
+			<div className="flex gap-4">
+				<Button type="submit">Next →</Button>
+				<Button type="button" variant="secondary" onClick={handleSubmit(onSave)}>
+					Save
+				</Button>
+			</div>
 		</form>
 	);
 }
