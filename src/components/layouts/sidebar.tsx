@@ -1,6 +1,14 @@
 "use client";
 
-import { NotebookPen, GraduationCap, UserRoundPen, Shield, Album, ListTree } from "lucide-react";
+import {
+	NotebookPen,
+	GraduationCap,
+	UserRoundPen,
+	Shield,
+	Album,
+	ListTree,
+	Tag,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import {
@@ -49,8 +57,8 @@ const items = [
 	},
 	{
 		title: "Batch",
-		url: "/admin/batch/view",
-		icon: Album,
+		url: "/admin/batch",
+		icon: Tag,
 	},
 ];
 

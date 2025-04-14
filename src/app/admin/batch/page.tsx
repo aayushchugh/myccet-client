@@ -1,209 +1,216 @@
 "use client";
-import * as React from "react";
-import { useEffect } from "react";
-import { useParams } from "next/navigation";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-
-import { Label } from "@/components/ui/label";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-
-import apiService from "@/services/api-service"; // Import your apiService
-import handleFormValidationErrors from "@/lib/handle-form-validation-errors"; // Ensure this utility exists
-import { toast } from "sonner"; // Import toast for displaying error messages
-import { useRouter } from "next/navigation"; // Import useRouter for redirecting
+import { useState, useEffect } from "react";
+import { Trash2, Pencil, Copy, Check, X } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui";
+import Link from "next/link";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-interface FormInput {
-	branch_id: number;
-	type: string;
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import {
+	Pagination,
+	PaginationContent,
+	PaginationItem,
+	PaginationLink,
+	PaginationNext,
+	PaginationPrevious,
+} from "@/components/ui/pagination";
+import apiService from "@/services/api-service";
+
+interface TableRowData {
+	start_year: string;
+	end_year: string;
+	branch: string;
 }
 
-export default function BatchRegister() {
-	const router = useRouter();
-	const { id } = useParams();
-	const {
-		register,
-		handleSubmit,
-		setError,
-		setValue,
-		formState: { errors, isSubmitting },
-	} = useForm<FormInput>();
-	const [branches, setBranches] = React.useState<{ id: number; title: string }[]>([]);
-	const [startDate, setStartDate] = React.useState<Date | undefined>();
-	const [endDate, setEndDate] = React.useState<Date | undefined>();
-	const [startDateError, setStartDateError] = React.useState<string | null>(null);
-	const [endDateError, setEndDateError] = React.useState<string | null>(null);
+export default function TableView() {
+	const [data, setData] = useState<TableRowData[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const [currentPage, setCurrentPage] = useState(1);
+	const [editingRow, setEditingRow] = useState<string | null>(null);
+	const [editEndDate, setEditEndDate] = useState("");
+	const rowsPerPage = 17;
+
+	const formatDate = (DateString: string) => {
+		const date = new Date(DateString);
+		if (isNaN(date.getTime())) return DateString;
+		const year = date.getFullYear();
+		return `${year}`;
+	};
 
 	useEffect(() => {
-		const fetchBranches = async () => {
+		const fetchData = async () => {
 			try {
-				const response = await apiService.get("/branches");
-
-				if (response) {
-					setBranches(response.data.payload);
-				} else {
-					console.error("Error fetching branches:");
-				}
+				const response = await apiService.get("batch", {});
+				const responseData = response.data.payload;
+				if (!Array.isArray(responseData)) throw new Error("Invalid data format");
+				setData(responseData);
 			} catch (error) {
-				console.error("Network error:", error);
+				setError("An error occurred while fetching data.");
+				console.error("Error fetching data:", error);
+			} finally {
+				setIsLoading(false);
 			}
 		};
-
-		fetchBranches();
+		fetchData();
 	}, []);
-	const onSubmit: SubmitHandler<FormInput> = async (data) => {
-		if (!startDate) {
-			setStartDateError("Start date is required");
-			return;
-		}
-		if (!endDate) {
-			setEndDateError("End date is required");
-			return;
-		}
 
-		const payload = {
-			...data,
-			start_year: startDate.toISOString().split("T")[0],
-			end_year: endDate.toISOString().split("T")[0],
-		};
+	const totalPages = Math.ceil(data.length / rowsPerPage);
+	const currentRows = data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+	const handlePageChange = (page: number) => setCurrentPage(page);
+
+	const handleDelete = async (startDate: string) => {
 		try {
-			const res = await apiService.post("/batch", payload);
-			console.log("POST success response:", res.data);
-
-			const batchList = await apiService.get("/batch");
-			console.log("All Batches:", batchList.data.payload);
-
-			const latest = batchList.data.payload.at(-1);
-			const batchId = latest?.id;
-
-			if (!batchId) {
-				toast.error("Failed to get batch ID.");
-				return;
-			}
-
-			toast.success("Batch Created!");
-			router.push(`/admin/batch/${batchId}`);
-		} catch (error: any) {
-			console.error("POST Error:", error);
-			toast.error("Something went wrong!");
+			await apiService.delete(`/batch/${startDate}`);
+			setData((prevData) => prevData.filter((item) => item.start_year !== startDate));
+			toast.success("Subject deleted successfully");
+		} catch (error) {
+			console.error("Error deleting subject:", error);
+			toast.error("Failed to delete the subject");
 		}
 	};
 
+	const handleEdit = (row: TableRowData) => {
+		setEditingRow(row.start_year);
+		setEditEndDate(row.end_year);
+	};
+
+	const handleUpdate = async (startDate: string) => {
+		try {
+			await apiService.put(`/subjects/${startDate}`, { endDate: editEndDate });
+			setData((prevData) =>
+				prevData.map((item) =>
+					item.start_year === startDate ? { ...item, end_year: editEndDate } : item,
+				),
+			);
+			toast.success("Subject updated successfully");
+			setEditingRow(null);
+		} catch (error) {
+			console.error("Error updating subject:", error);
+			toast.error("Failed to update the subject");
+		}
+	};
+
+	const handleCancelEdit = () => {
+		setEditingRow(null);
+		setEditEndDate("");
+	};
+
+	if (isLoading) return <div>Loading...</div>;
+	if (error) return <div className="text-red-500">{error}</div>;
+
 	return (
-		<form
-			onSubmit={handleSubmit(onSubmit)}
-			className="min-h-dvh flex flex-col w-full place-items-center"
-		>
-			<div className="grid gap-4 w-full max-w-md">
-				<div className="flex flex-col space-y-1.5">
-					<Label htmlFor="startDate">Start Date</Label>
-					<Popover>
-						<PopoverTrigger asChild>
-							<Button
-								variant="outline"
-								className={cn(
-									"w-[240px] text-left",
-									!startDate && "text-muted-foreground",
-								)}
-							>
-								<CalendarIcon />
-								{startDate ? format(startDate, "PPP") : "Pick a date"}
-							</Button>
-						</PopoverTrigger>
-						<PopoverContent className="w-auto p-0" align="start">
-							<Calendar
-								mode="single"
-								selected={startDate}
-								onSelect={setStartDate}
-								initialFocus
-							/>
-						</PopoverContent>
-					</Popover>
-					{startDateError && <p className="text-red-500 text-sm">{startDateError}</p>}
-				</div>
-				<div className="flex flex-col space-y-1.5">
-					<Label htmlFor="endDate">End Date</Label>
-					<Popover>
-						<PopoverTrigger asChild>
-							<Button
-								variant="outline"
-								className={cn(
-									"w-[240px] text-left",
-									!endDate && "text-muted-foreground",
-								)}
-							>
-								<CalendarIcon />
-								{endDate ? format(endDate, "PPP") : "Pick a date"}
-							</Button>
-						</PopoverTrigger>
-						<PopoverContent className="w-auto p-0" align="start">
-							<Calendar
-								mode="single"
-								selected={endDate}
-								onSelect={setEndDate}
-								initialFocus
-							/>
-						</PopoverContent>
-					</Popover>
-					{endDateError && <p className="text-red-500 text-sm">{endDateError}</p>}
-				</div>
-				<div className="flex flex-col space-y-1.5 ">
-					<Label htmlFor="branch_id">Course Type </Label>
-					<Input
-						id="type"
-						placeholder="Enter course type"
-						{...register("type", { required: "course type id is required" })}
-					/>
-					{errors.branch_id && (
-						<p className="text-red-500 text-sm">{errors.branch_id.message}</p>
-					)}
-				</div>
-
-				<div>
-					<Label required htmlFor="branch">
-						Branch
-					</Label>
-					<Select
-						onValueChange={(value) => {
-							setValue("branch_id", Number(value));
-						}}
-					>
-						<SelectTrigger error={errors?.branch_id?.message}>
-							<SelectValue
-								placeholder={"Select Branch"}
-								{...register("branch_id", {
-									required: "Branch is required",
-								})}
-							/>
-						</SelectTrigger>
-
-						<SelectContent>
-							{branches.map((branch) => (
-								<SelectItem key={branch.title} value={branch.id.toString()}>
-									{branch.title}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				</div>
-
-				<div className="flex justify-center mt-4">
-					<Button type="submit" disabled={isSubmitting}>
-						{isSubmitting ? "Submitting..." : "Create Branch"}
-					</Button>
-				</div>
+		<div className="w-full px-4">
+			<div className="flex justify-end mb-4">
+				<Link href={"/admin/batch/create"}>
+					<Button className="w-auto">Create Batch</Button>
+				</Link>
 			</div>
-		</form>
+			<Table className="w-full">
+				<TableHeader>
+					<TableRow>
+						<TableHead className="w-[40%]">Title</TableHead>
+						<TableHead className="w-[20%] text-center">Branch</TableHead>
+						<TableHead className="w-[5%] text-center"></TableHead>
+						<TableHead className="w-[5%] text-center"></TableHead>
+						<TableHead className="w-[5%] text-center"></TableHead>
+					</TableRow>
+				</TableHeader>
+				<TableBody>
+					{currentRows.map((row) => (
+						<TableRow key={row.start_year}>
+							<TableCell className="font-medium">
+								{formatDate(row.start_year)} -{" "}
+								{editingRow === row.start_year ? (
+									<input
+										type="text"
+										value={editEndDate}
+										onChange={(e) => setEditEndDate(e.target.value)}
+										onKeyDown={(e) => {
+											if (e.key === "Enter") handleUpdate(row.start_year);
+											if (e.key === "Escape") handleCancelEdit();
+										}}
+										autoFocus
+										className="border rounded px-2 py-1 w-[100px] ml-1"
+									/>
+								) : (
+									formatDate(row.end_year)
+								)}
+							</TableCell>
+							<TableCell className="text-center">{row.branch}</TableCell>
+							<TableCell>
+								<Copy size={16} className="cursor-pointer" />
+							</TableCell>
+							<TableCell>
+								{editingRow === row.start_year ? (
+									<div className="flex gap-2">
+										<Check
+											size={16}
+											className="cursor-pointer text-green-600"
+											onClick={() => handleUpdate(row.start_year)}
+										/>
+										<X
+											size={16}
+											className="cursor-pointer text-red-600"
+											onClick={handleCancelEdit}
+										/>
+									</div>
+								) : (
+									<Pencil
+										size={16}
+										className="cursor-pointer"
+										onClick={() => handleEdit(row)}
+									/>
+								)}
+							</TableCell>
+							<TableCell>
+								<Trash2
+									size={16}
+									className="cursor-pointer text-red-600"
+									onClick={() => handleDelete(row.start_year)}
+								/>
+							</TableCell>
+						</TableRow>
+					))}
+				</TableBody>
+			</Table>
+			<div className="mt-10">
+				<Pagination>
+					<PaginationContent>
+						<PaginationItem>
+							<PaginationPrevious
+								href="#"
+								onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+							/>
+						</PaginationItem>
+						{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+							<PaginationItem key={page}>
+								<PaginationLink
+									href="#"
+									isActive={page === currentPage}
+									onClick={() => handlePageChange(page)}
+								>
+									{page}
+								</PaginationLink>
+							</PaginationItem>
+						))}
+						<PaginationItem>
+							<PaginationNext
+								href="#"
+								onClick={() =>
+									handlePageChange(Math.min(currentPage + 1, totalPages))
+								}
+							/>
+						</PaginationItem>
+					</PaginationContent>
+				</Pagination>
+			</div>
+		</div>
 	);
 }
