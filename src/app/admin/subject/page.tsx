@@ -24,7 +24,7 @@ import apiService from "@/services/api-service";
 
 interface TableRowData {
 	id: number;
-	id: number;
+	code: number;
 	title: string;
 	internal_marks: number;
 	external_marks: number;
