@@ -12,8 +12,10 @@ import { useRouter } from "next/navigation"; // Import useRouter for redirecting
 interface FormInput {
 	title: string;
 	code: string;
-	internalMarks: number;
-	externalMarks: number;
+	internal_marks: number;
+	external_marks: number;
+	internal_passing_marks: number;
+	external_passing_marks: number;
 }
 
 export default function TeacherRegistrationForm() {
@@ -123,10 +125,13 @@ export default function TeacherRegistrationForm() {
 						id="internal_marks"
 						type="number"
 						placeholder="Enter Internal Marks"
-						{...register("internalMarks", { required: "Internal marks are required" })}
+						{...register("internal_marks", {
+							required: "Internal marks are required",
+							valueAsNumber: true,
+						})}
 					/>
-					{errors.internalMarks && (
-						<p className="text-red-500 text-sm">{errors.internalMarks.message}</p>
+					{errors.internal_marks && (
+						<p className="text-red-500 text-sm">{errors.internal_marks.message}</p>
 					)}
 				</div>
 
@@ -138,10 +143,53 @@ export default function TeacherRegistrationForm() {
 						id="external_marks"
 						type="number"
 						placeholder="Enter External Marks"
-						{...register("externalMarks", { required: "External marks are required" })}
+						{...register("external_marks", {
+							required: "External marks are required",
+							valueAsNumber: true,
+						})}
 					/>
-					{errors.externalMarks && (
-						<p className="text-red-500 text-sm">{errors.externalMarks.message}</p>
+					{errors.external_marks && (
+						<p className="text-red-500 text-sm">{errors.external_marks.message}</p>
+					)}
+				</div>
+				<div className="flex flex-col space-y-1.5">
+					<Label htmlFor="internal_passing_marks">
+						Internal Passing Marks <span className="text-red-500">*</span>
+					</Label>
+					<Input
+						id="internal_passing_marks"
+						type="number"
+						placeholder="Enter Internal Passing Marks"
+						{...register("internal_passing_marks", {
+							required: "Internal passing marks are required",
+							valueAsNumber: true,
+						})}
+					/>
+					{errors.internal_passing_marks && (
+						<p className="text-red-500 text-sm">
+							{errors.internal_passing_marks.message}
+						</p>
+					)}
+				</div>
+
+				<div className="flex flex-col space-y-1.5">
+					<Label htmlFor="external_passing_marks">
+						External Passing Marks <span className="text-red-500">*</span>
+					</Label>
+					<Input
+						id="external_passing_marks"
+						type="number"
+						placeholder="Enter External Passing Marks"
+						{...register("external_passing_marks", {
+							required: "External passing marks are required",
+
+							valueAsNumber: true,
+						})}
+					/>
+					{errors.external_passing_marks && (
+						<p className="text-red-500 text-sm">
+							{errors.external_passing_marks.message}
+						</p>
 					)}
 				</div>
 

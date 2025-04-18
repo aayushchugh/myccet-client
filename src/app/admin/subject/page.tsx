@@ -23,8 +23,11 @@ import {
 import apiService from "@/services/api-service";
 
 interface TableRowData {
-	code: number;
+	id: number;
+	id: number;
 	title: string;
+	internal_marks: number;
+	external_marks: number;
 }
 
 export default function TableView() {
@@ -34,6 +37,10 @@ export default function TableView() {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [editingRow, setEditingRow] = useState<number | null>(null);
 	const [editTitle, setEditTitle] = useState("");
+	const [code, setCode] = useState("");
+	const [editInternalMarks, setEditInternalMarks] = useState<number | null>(null);
+	const [editExternalMarks, setEditExternalMarks] = useState<number | null>(null);
+
 	const rowsPerPage = 17;
 
 	useEffect(() => {
@@ -60,7 +67,7 @@ export default function TableView() {
 	const handleDelete = async (code: number) => {
 		try {
 			await apiService.delete(`/subjects/${code}`);
-			setData((prevData) => prevData.filter((item) => item.code !== code));
+			setData((prevData) => prevData.filter((item) => item.id !== code));
 			toast.success("Subject deleted successfully");
 		} catch (error) {
 			console.error("Error deleting subject:", error);
@@ -69,18 +76,37 @@ export default function TableView() {
 	};
 
 	const handleEdit = (row: TableRowData) => {
-		setEditingRow(row.code);
+		setEditingRow(row.id);
 		setEditTitle(row.title);
+		setEditInternalMarks(row.internal_marks);
+		setEditExternalMarks(row.external_marks);
+		setCode(row.id.toString());
 	};
 
-	const handleUpdate = async (code: number) => {
+	const handleUpdate = async (id: number) => {
 		try {
-			await apiService.put(`/subjects/${code}`, { title: editTitle });
+			await apiService.put(`/subjects/${id}`, {
+				title: editTitle,
+				code,
+				internal_marks: editInternalMarks,
+				external_marks: editExternalMarks,
+			});
 			setData((prevData) =>
-				prevData.map((item) => (item.code === code ? { ...item, title: editTitle } : item)),
+				prevData.map((item) =>
+					item.id === id
+						? {
+								...item,
+								title: editTitle,
+								internal_marks: editInternalMarks ?? item.internal_marks,
+								external_marks: editExternalMarks ?? item.external_marks,
+						  }
+						: item,
+				),
 			);
 			toast.success("Subject updated successfully");
 			setEditingRow(null);
+			setEditInternalMarks(null);
+			setEditExternalMarks(null);
 		} catch (error) {
 			console.error("Error updating subject:", error);
 			toast.error("Failed to update the subject");
@@ -90,6 +116,8 @@ export default function TableView() {
 	const handleCancelEdit = () => {
 		setEditingRow(null);
 		setEditTitle("");
+		setEditInternalMarks(null);
+		setEditExternalMarks(null);
 	};
 
 	if (isLoading) return <div>Loading...</div>;
@@ -106,7 +134,9 @@ export default function TableView() {
 				<TableHeader>
 					<TableRow>
 						<TableHead className="w-[15%]">Subject Code</TableHead>
-						<TableHead className="w-[70%]">Subject Name</TableHead>
+						<TableHead className="w-[30%]">Subject Name</TableHead>
+						<TableHead className="w-[20%]">Internal Marks</TableHead>
+						<TableHead className="w-[20%]">External Marks</TableHead>
 						<TableHead className="w-[5%] text-center"></TableHead>
 						<TableHead className="w-[5%] text-center"></TableHead>
 						<TableHead className="w-[5%] text-center"></TableHead>
@@ -114,15 +144,15 @@ export default function TableView() {
 				</TableHeader>
 				<TableBody>
 					{currentRows.map((row) => (
-						<TableRow key={row.code}>
-							<TableCell className="font-medium">{row.code}</TableCell>
+						<TableRow key={row.id}>
+							<TableCell className="font-medium">{row.id}</TableCell>
 							<TableCell>
-								{editingRow === row.code ? (
+								{editingRow === row.id ? (
 									<input
 										value={editTitle}
 										onChange={(e) => setEditTitle(e.target.value)}
 										onKeyDown={(e) => {
-											if (e.key === "Enter") handleUpdate(row.code);
+											if (e.key === "Enter") handleUpdate(row.id);
 											if (e.key === "Escape") handleCancelEdit();
 										}}
 										autoFocus
@@ -133,15 +163,53 @@ export default function TableView() {
 								)}
 							</TableCell>
 							<TableCell>
+								{editingRow === row.id ? (
+									<input
+										type="number"
+										value={editInternalMarks ?? ""}
+										onChange={(e) =>
+											setEditInternalMarks(parseInt(e.target.value) || 0)
+										}
+										onKeyDown={(e) => {
+											if (e.key === "Enter") handleUpdate(row.id);
+											if (e.key === "Escape") handleCancelEdit();
+										}}
+										autoFocus
+										className="border rounded px-2 py-1 w-full"
+									/>
+								) : (
+									row.internal_marks
+								)}
+							</TableCell>
+							<TableCell>
+								{editingRow === row.id ? (
+									<input
+										type="number"
+										value={editExternalMarks ?? ""}
+										onChange={(e) =>
+											setEditExternalMarks(parseInt(e.target.value) || 0)
+										}
+										onKeyDown={(e) => {
+											if (e.key === "Enter") handleUpdate(row.id);
+											if (e.key === "Escape") handleCancelEdit();
+										}}
+										autoFocus
+										className="border rounded px-2 py-1 w-full"
+									/>
+								) : (
+									row.external_marks
+								)}
+							</TableCell>
+							<TableCell>
 								<Copy size={16} className="cursor-pointer" />
 							</TableCell>
 							<TableCell>
-								{editingRow === row.code ? (
+								{editingRow === row.id ? (
 									<div className="flex gap-2">
 										<Check
 											size={16}
 											className="cursor-pointer text-green-600"
-											onClick={() => handleUpdate(row.code)}
+											onClick={() => handleUpdate(row.id)}
 										/>
 										<X
 											size={16}
@@ -161,7 +229,7 @@ export default function TableView() {
 								<Trash2
 									size={16}
 									className="cursor-pointer text-red-600"
-									onClick={() => handleDelete(row.code)}
+									onClick={() => handleDelete(row.id)}
 								/>
 							</TableCell>
 						</TableRow>
