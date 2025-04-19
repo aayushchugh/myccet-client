@@ -31,6 +31,7 @@ interface TableRowData {
 	father_name: string;
 	semester: any;
 	branch: any;
+	batch: any;
 }
 
 export default function AdminList() {

@@ -30,7 +30,9 @@ interface FormInput {
 	password: string;
 	category: string;
 	branch_id: number;
+	batch_id: number;
 	registration_number: number;
+	batch: any;
 }
 
 export default function TeacherRegistrationForm() {
@@ -44,6 +46,16 @@ export default function TeacherRegistrationForm() {
 	} = useForm<FormInput>();
 
 	const [branches, setBranches] = React.useState<{ id: number; title: string }[]>([]);
+	const [batch, setBatch] = React.useState<
+		{ id: number; branch: string; type: string; start_year: any; end_year: any }[]
+	>([]);
+	const formatDate = (DateString: string) => {
+		const date = new Date(DateString);
+		if (isNaN(date.getTime())) return DateString;
+		const year = date.getFullYear();
+
+		return `${year}`;
+	};
 
 	useEffect(() => {
 		const fetchBranches = async () => {
@@ -59,8 +71,22 @@ export default function TeacherRegistrationForm() {
 				console.error("Network error:", error);
 			}
 		};
+		const fetchBatches = async () => {
+			try {
+				const response = await apiService.get("/batch");
+
+				if (response) {
+					setBatch(response.data.payload);
+				} else {
+					console.error("Error fetching branches:");
+				}
+			} catch (error) {
+				console.error("Network error:", error);
+			}
+		};
 
 		fetchBranches();
+		fetchBatches();
 	}, []);
 
 	const onSubmit: SubmitHandler<FormInput> = async (data) => {
@@ -112,6 +138,7 @@ export default function TeacherRegistrationForm() {
 			}
 		}
 	};
+
 	return (
 		<form
 			onSubmit={handleSubmit(onSubmit)}
@@ -243,6 +270,34 @@ export default function TeacherRegistrationForm() {
 						/>
 					</div>
 
+					<div>
+						<Label required htmlFor="batch">
+							Batch
+						</Label>
+						<Select
+							onValueChange={(value) => {
+								setValue("batch_id", Number(value));
+							}}
+						>
+							<SelectTrigger error={errors?.batch_id?.message}>
+								<SelectValue
+									placeholder={"Select Batch"}
+									{...register("batch_id", {
+										required: "Batch is required",
+									})}
+								/>
+							</SelectTrigger>
+
+							<SelectContent>
+								{batch.map((batch) => (
+									<SelectItem key={batch.branch} value={batch.id.toString()}>
+										{batch.branch} {formatDate(batch.start_year)}-
+										{formatDate(batch.end_year)} {batch.type}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
 					<div className="grid grid-cols-2 gap-3">
 						<div>
 							<Label required htmlFor="designation">
@@ -315,9 +370,11 @@ export default function TeacherRegistrationForm() {
 								</SelectTrigger>
 
 								<SelectContent>
-									<SelectItem value="hod">1</SelectItem>
-									<SelectItem value="tutor">2</SelectItem>
-									<SelectItem value="lecturer">Teacher</SelectItem>
+									<SelectItem value="General">General</SelectItem>
+									<SelectItem value="SC">Scheduled Caste</SelectItem>
+									<SelectItem value="ST">Scheduled Tribe</SelectItem>
+									<SelectItem value="OBC">Other Backward Classes</SelectItem>
+									<SelectItem value="EWS">Economic Wavier Scheme</SelectItem>{" "}
 								</SelectContent>
 							</Select>
 						</div>
