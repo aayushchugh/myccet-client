@@ -326,7 +326,6 @@ export default function UserDetails() {
 					<div>
 						<Label htmlFor="branch">Branch</Label>
 						<Select onValueChange={(value) => setValue("branch_id", Number(value))}>
-							tsx Copy Edit
 							<SelectTrigger error={errors?.branch_id?.message}>
 								<SelectValue
 									placeholder={user?.branch.title || "Select Branch"}
