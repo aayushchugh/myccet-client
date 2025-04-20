@@ -116,7 +116,7 @@ export default function TableView() {
 				<TableHeader>
 					<TableRow>
 						<TableHead className="w-[40%]">Title</TableHead>
-						<TableHead className="w-[20%] text-center">Batch</TableHead>
+						<TableHead className="w-[20%] text-center">Branch</TableHead>
 						<TableHead className="w-[5%] text-center"></TableHead>
 						<TableHead className="w-[5%] text-center"></TableHead>
 						<TableHead className="w-[5%] text-center"></TableHead>

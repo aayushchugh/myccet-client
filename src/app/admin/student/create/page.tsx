@@ -49,6 +49,9 @@ export default function TeacherRegistrationForm() {
 	const [batch, setBatch] = React.useState<
 		{ id: number; branch: string; type: string; start_year: any; end_year: any }[]
 	>([]);
+	const [semesters, setSemesters] = React.useState<
+		{ id: number; title: string; start_date: string; end_date: string }[]
+	>([]);
 	const formatDate = (DateString: string) => {
 		const date = new Date(DateString);
 		if (isNaN(date.getTime())) return DateString;
@@ -275,8 +278,18 @@ export default function TeacherRegistrationForm() {
 							Batch
 						</Label>
 						<Select
-							onValueChange={(value) => {
-								setValue("batch_id", Number(value));
+							onValueChange={async (value) => {
+								const batchId = Number(value);
+								setValue("batch_id", batchId);
+
+								try {
+									const response = await apiService.get(`/batch/${batchId}`);
+									const fetchedSemesters = response.data.payload.semesters || [];
+									setSemesters(fetchedSemesters);
+								} catch (error) {
+									console.error("Error fetching semesters:", error);
+									setSemesters([]);
+								}
 							}}
 						>
 							<SelectTrigger error={errors?.batch_id?.message}>
@@ -290,9 +303,9 @@ export default function TeacherRegistrationForm() {
 
 							<SelectContent>
 								{batch.map((batch) => (
-									<SelectItem key={batch.branch} value={batch.id.toString()}>
-										{batch.branch} {formatDate(batch.start_year)}-
-										{formatDate(batch.end_year)} {batch.type}
+									<SelectItem key={batch.type} value={batch.id.toString()}>
+										{formatDate(batch.start_year)}-{formatDate(batch.end_year)}{" "}
+										{batch.branch} {batch.type}
 									</SelectItem>
 								))}
 							</SelectContent>
@@ -318,9 +331,13 @@ export default function TeacherRegistrationForm() {
 								</SelectTrigger>
 
 								<SelectContent>
-									<SelectItem value="1">1</SelectItem>
-									<SelectItem value="2">2</SelectItem>
-									<SelectItem value="3">1</SelectItem>
+									{semesters.length > 0
+										? semesters.map((sem) => (
+												<SelectItem key={sem.id} value={sem.id.toString()}>
+													Semester {sem.title}
+												</SelectItem>
+										  ))
+										: null}
 								</SelectContent>
 							</Select>
 						</div>
