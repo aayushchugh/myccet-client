@@ -305,7 +305,7 @@ export default function TeacherRegistrationForm() {
 								{batch.map((batch) => (
 									<SelectItem key={batch.type} value={batch.id.toString()}>
 										{formatDate(batch.start_year)}-{formatDate(batch.end_year)}{" "}
-										{batch.type}
+										{batch.branch} {batch.type}
 									</SelectItem>
 								))}
 							</SelectContent>
