@@ -29,7 +29,7 @@ interface FormInput {
 	current_semester_id: number;
 	password: string;
 	category: string;
-	branch_id: number;
+
 	batch_id: number;
 	registration_number: number;
 	batch: any;
@@ -45,7 +45,6 @@ export default function TeacherRegistrationForm() {
 		formState: { errors, isSubmitting },
 	} = useForm<FormInput>();
 
-	const [branches, setBranches] = React.useState<{ id: number; title: string }[]>([]);
 	const [batch, setBatch] = React.useState<
 		{ id: number; branch: string; type: string; start_year: any; end_year: any }[]
 	>([]);
@@ -61,19 +60,6 @@ export default function TeacherRegistrationForm() {
 	};
 
 	useEffect(() => {
-		const fetchBranches = async () => {
-			try {
-				const response = await apiService.get("/branches");
-
-				if (response) {
-					setBranches(response.data.payload);
-				} else {
-					console.error("Error fetching branches:");
-				}
-			} catch (error) {
-				console.error("Network error:", error);
-			}
-		};
 		const fetchBatches = async () => {
 			try {
 				const response = await apiService.get("/batch");
@@ -88,7 +74,6 @@ export default function TeacherRegistrationForm() {
 			}
 		};
 
-		fetchBranches();
 		fetchBatches();
 	}, []);
 
@@ -341,33 +326,7 @@ export default function TeacherRegistrationForm() {
 								</SelectContent>
 							</Select>
 						</div>
-						<div>
-							<Label required htmlFor="branch">
-								Branch
-							</Label>
-							<Select
-								onValueChange={(value) => {
-									setValue("branch_id", Number(value));
-								}}
-							>
-								<SelectTrigger error={errors?.branch_id?.message}>
-									<SelectValue
-										placeholder={"Select Branch"}
-										{...register("branch_id", {
-											required: "Branch is required",
-										})}
-									/>
-								</SelectTrigger>
 
-								<SelectContent>
-									{branches.map((branch) => (
-										<SelectItem key={branch.title} value={branch.id.toString()}>
-											{branch.title}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
 						<div>
 							<Label required htmlFor="category">
 								Category
