@@ -23,6 +23,7 @@ import {
 import apiService from "@/services/api-service";
 
 interface TableRowData {
+	id: number;
 	start_year: string;
 	end_year: string;
 	branch: string;
@@ -33,7 +34,8 @@ export default function TableView() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [currentPage, setCurrentPage] = useState(1);
-	const [editingRow, setEditingRow] = useState<string | null>(null);
+	const [editingRow, setEditingRow] = useState<number | null>(null);
+	const [editStartDate, setEditStartDate] = useState("");
 	const [editEndDate, setEditEndDate] = useState("");
 	const rowsPerPage = 17;
 
@@ -65,40 +67,47 @@ export default function TableView() {
 	const currentRows = data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 	const handlePageChange = (page: number) => setCurrentPage(page);
 
-	const handleDelete = async (startDate: string) => {
+	const handleDelete = async (id: number) => {
 		try {
-			await apiService.delete(`/batch/${startDate}`);
-			setData((prevData) => prevData.filter((item) => item.start_year !== startDate));
-			toast.success("Subject deleted successfully");
+			await apiService.delete(`/batch/${id}`);
+
+			setData((prevData) => prevData.filter((item) => item.id !== id));
+			toast.success("Task deleted successfully");
 		} catch (error) {
-			console.error("Error deleting subject:", error);
-			toast.error("Failed to delete the subject");
+			console.error("Error deleting task:", error);
+			toast.error("Failed to delete the task");
 		}
 	};
 
 	const handleEdit = (row: TableRowData) => {
-		setEditingRow(row.start_year);
+		setEditingRow(row.id);
+		setEditStartDate(row.start_year);
 		setEditEndDate(row.end_year);
 	};
 
-	const handleUpdate = async (startDate: string) => {
+	const handleUpdate = async (id: number) => {
 		try {
-			await apiService.put(`/subjects/${startDate}`, { endDate: editEndDate });
+			const updatedData = { start_year: editStartDate, end_year: editEndDate };
+			await apiService.put(`/branches/${id}`, updatedData);
+
 			setData((prevData) =>
 				prevData.map((item) =>
-					item.start_year === startDate ? { ...item, end_year: editEndDate } : item,
+					item.id === id
+						? { ...item, start_year: editStartDate, end_year: editEndDate }
+						: item,
 				),
 			);
-			toast.success("Subject updated successfully");
+			toast.success("Task updated successfully");
 			setEditingRow(null);
 		} catch (error) {
-			console.error("Error updating subject:", error);
-			toast.error("Failed to update the subject");
+			console.error("Error updating task:", error);
+			toast.error("Failed to update the task");
 		}
 	};
 
 	const handleCancelEdit = () => {
 		setEditingRow(null);
+		setEditStartDate("");
 		setEditEndDate("");
 	};
 
@@ -124,16 +133,16 @@ export default function TableView() {
 				</TableHeader>
 				<TableBody>
 					{currentRows.map((row) => (
-						<TableRow key={row.start_year}>
+						<TableRow key={row.id}>
 							<TableCell className="font-medium">
-								{formatDate(row.start_year)} -{" "}
-								{editingRow === row.start_year ? (
+								{formatDate(row.id)} -{" "}
+								{editingRow === row.id ? (
 									<input
 										type="text"
 										value={editEndDate}
 										onChange={(e) => setEditEndDate(e.target.value)}
 										onKeyDown={(e) => {
-											if (e.key === "Enter") handleUpdate(row.start_year);
+											if (e.key === "Enter") handleUpdate(row.id);
 											if (e.key === "Escape") handleCancelEdit();
 										}}
 										autoFocus
@@ -148,12 +157,12 @@ export default function TableView() {
 								<Copy size={16} className="cursor-pointer" />
 							</TableCell>
 							<TableCell>
-								{editingRow === row.start_year ? (
+								{editingRow === row.id ? (
 									<div className="flex gap-2">
 										<Check
 											size={16}
 											className="cursor-pointer text-green-600"
-											onClick={() => handleUpdate(row.start_year)}
+											onClick={() => handleUpdate(row.id)}
 										/>
 										<X
 											size={16}
@@ -173,7 +182,7 @@ export default function TableView() {
 								<Trash2
 									size={16}
 									className="cursor-pointer text-red-600"
-									onClick={() => handleDelete(row.start_year)}
+									onClick={() => handleDelete(row.id)}
 								/>
 							</TableCell>
 						</TableRow>
