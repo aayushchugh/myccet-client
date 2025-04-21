@@ -23,7 +23,7 @@ import {
 import apiService from "@/services/api-service";
 
 interface TableRowData {
-	id: number;
+	id: any;
 	start_year: string;
 	end_year: string;
 	branch: string;
@@ -85,26 +85,6 @@ export default function TableView() {
 		setEditEndDate(row.end_year);
 	};
 
-	const handleUpdate = async (id: number) => {
-		try {
-			const updatedData = { start_year: editStartDate, end_year: editEndDate };
-			await apiService.put(`/branches/${id}`, updatedData);
-
-			setData((prevData) =>
-				prevData.map((item) =>
-					item.id === id
-						? { ...item, start_year: editStartDate, end_year: editEndDate }
-						: item,
-				),
-			);
-			toast.success("Task updated successfully");
-			setEditingRow(null);
-		} catch (error) {
-			console.error("Error updating task:", error);
-			toast.error("Failed to update the task");
-		}
-	};
-
 	const handleCancelEdit = () => {
 		setEditingRow(null);
 		setEditStartDate("");
@@ -134,50 +114,12 @@ export default function TableView() {
 				<TableBody>
 					{currentRows.map((row) => (
 						<TableRow key={row.id}>
-							<TableCell className="font-medium">
-								{formatDate(row.id)} -{" "}
-								{editingRow === row.id ? (
-									<input
-										type="text"
-										value={editEndDate}
-										onChange={(e) => setEditEndDate(e.target.value)}
-										onKeyDown={(e) => {
-											if (e.key === "Enter") handleUpdate(row.id);
-											if (e.key === "Escape") handleCancelEdit();
-										}}
-										autoFocus
-										className="border rounded px-2 py-1 w-[100px] ml-1"
-									/>
-								) : (
-									formatDate(row.end_year)
-								)}
-							</TableCell>
+							<TableCell className="font-medium">{formatDate(row.id)} - </TableCell>
 							<TableCell className="text-center">{row.branch}</TableCell>
 							<TableCell>
 								<Copy size={16} className="cursor-pointer" />
 							</TableCell>
-							<TableCell>
-								{editingRow === row.id ? (
-									<div className="flex gap-2">
-										<Check
-											size={16}
-											className="cursor-pointer text-green-600"
-											onClick={() => handleUpdate(row.id)}
-										/>
-										<X
-											size={16}
-											className="cursor-pointer text-red-600"
-											onClick={handleCancelEdit}
-										/>
-									</div>
-								) : (
-									<Pencil
-										size={16}
-										className="cursor-pointer"
-										onClick={() => handleEdit(row)}
-									/>
-								)}
-							</TableCell>
+
 							<TableCell>
 								<Trash2
 									size={16}

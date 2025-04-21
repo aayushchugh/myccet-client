@@ -85,17 +85,19 @@ export default function TableView() {
 
 	const handleUpdate = async (id: number) => {
 		try {
-			await apiService.put(`/subjects/${id}`, {
+			const updatedData = {
 				title: editTitle,
 				code,
 				internal_marks: editInternalMarks,
 				external_marks: editExternalMarks,
-			});
+			};
+			await apiService.put(`/subjects/${id}`, updatedData);
 			setData((prevData) =>
 				prevData.map((item) =>
 					item.id === id
 						? {
 								...item,
+
 								title: editTitle,
 								internal_marks: editInternalMarks ?? item.internal_marks,
 								external_marks: editExternalMarks ?? item.external_marks,
