@@ -247,9 +247,8 @@ export default function SemesterForm() {
 					</div>
 				);
 			})}
-			<div className="flex gap-4">
-				<Button type="submit">Next →</Button>
-				<Button type="button" variant="secondary" onClick={handleSubmit(onSave)}>
+			<div className="flex gap-4 mb-6 ">
+				<Button className="px-6 mb-6" type="submit" onClick={handleSubmit(onSave)}>
 					Save
 				</Button>
 			</div>
