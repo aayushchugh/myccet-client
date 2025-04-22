@@ -128,7 +128,7 @@ export default function SemesterForm() {
 				const selectedSubjects = watch(`semesters.${index}.subjects`) || [];
 
 				return (
-					<div key={field.id} className="border p-4 rounded-md space-y-4">
+					<div key={field.id} className=" border p-4 rounded-md space-y-4">
 						<h3 className="text-lg font-bold">
 							Semester{" "}
 							{allSemesters.find((s) => s.id === field.semesterId)?.title ||
@@ -136,10 +136,10 @@ export default function SemesterForm() {
 						</h3>
 
 						{/* Dates */}
-						<div className="flex gap-4">
+						<div className="flex">
 							{/* Start Date */}
-							<div className="space-y-1">
-								<Label>Start Date</Label>
+							<div className="flex flex-col mr-5">
+								<Label className=" mb-2">Start Date</Label>
 								<Popover>
 									<PopoverTrigger asChild>
 										<Button
@@ -169,8 +169,8 @@ export default function SemesterForm() {
 							</div>
 
 							{/* End Date */}
-							<div className="space-y-1">
-								<Label>End Date</Label>
+							<div className="flex flex-col ">
+								<Label className="mb-2">End Date</Label>
 								<Popover>
 									<PopoverTrigger asChild>
 										<Button
@@ -201,8 +201,8 @@ export default function SemesterForm() {
 						</div>
 
 						{/* Subjects */}
-						<div className="space-y-2">
-							<Label>Subjects</Label>
+						<div className="flex flex-col">
+							<Label className="mb-2">Subjects</Label>
 							{selectedSubjects.map((subject, subIndex) => (
 								<Select
 									key={`sem-${index}-sub-${subIndex}`}
@@ -213,7 +213,7 @@ export default function SemesterForm() {
 									}}
 									value={subject?.toString()}
 								>
-									<SelectTrigger>
+									<SelectTrigger className={cn("w-[200px] text-left mb-2")}>
 										<SelectValue
 											placeholder={`Select Subject ${subIndex + 1}`}
 										/>
@@ -231,6 +231,7 @@ export default function SemesterForm() {
 								</Select>
 							))}
 							<Button
+								className={cn("w-[200px] text-left")}
 								type="button"
 								variant="outline"
 								onClick={() => {
