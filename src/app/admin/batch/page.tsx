@@ -100,7 +100,9 @@ export default function TableView() {
 				<TableBody>
 					{currentRows.map((row) => (
 						<TableRow key={row.id}>
-							<TableCell className="font-medium">{formatDate(row.id)} -</TableCell>
+							<TableCell className="font-medium">
+								{formatDate(row.start_year)} - {formatDate(row.end_year)}
+							</TableCell>
 							<TableCell className="text-center">{row.branch}</TableCell>
 							<TableCell>
 								<Copy size={16} className="cursor-pointer" />
