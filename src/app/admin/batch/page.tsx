@@ -34,9 +34,7 @@ export default function TableView() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [currentPage, setCurrentPage] = useState(1);
-	const [editingRow, setEditingRow] = useState<number | null>(null);
-	const [editStartDate, setEditStartDate] = useState("");
-	const [editEndDate, setEditEndDate] = useState("");
+
 	const rowsPerPage = 17;
 
 	const formatDate = (DateString: string) => {
@@ -79,18 +77,6 @@ export default function TableView() {
 		}
 	};
 
-	const handleEdit = (row: TableRowData) => {
-		setEditingRow(row.id);
-		setEditStartDate(row.start_year);
-		setEditEndDate(row.end_year);
-	};
-
-	const handleCancelEdit = () => {
-		setEditingRow(null);
-		setEditStartDate("");
-		setEditEndDate("");
-	};
-
 	if (isLoading) return <div>Loading...</div>;
 	if (error) return <div className="text-red-500">{error}</div>;
 
@@ -104,8 +90,8 @@ export default function TableView() {
 			<Table className="w-full">
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[40%]">Title</TableHead>
-						<TableHead className="w-[20%] text-center">Batch</TableHead>
+						<TableHead className="w-[40%]">Batch</TableHead>
+						<TableHead className="w-[20%] text-center">Branch</TableHead>
 						<TableHead className="w-[5%] text-center"></TableHead>
 						<TableHead className="w-[5%] text-center"></TableHead>
 						<TableHead className="w-[5%] text-center"></TableHead>
@@ -114,7 +100,7 @@ export default function TableView() {
 				<TableBody>
 					{currentRows.map((row) => (
 						<TableRow key={row.id}>
-							<TableCell className="font-medium">{formatDate(row.id)} - </TableCell>
+							<TableCell className="font-medium">{formatDate(row.id)} -</TableCell>
 							<TableCell className="text-center">{row.branch}</TableCell>
 							<TableCell>
 								<Copy size={16} className="cursor-pointer" />
