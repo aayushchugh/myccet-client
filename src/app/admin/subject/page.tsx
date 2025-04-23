@@ -24,6 +24,7 @@ import apiService from "@/services/api-service";
 
 interface TableRowData {
 	code: number;
+	id: number;
 	title: string;
 	internal_marks: number;
 	external_marks: number;
@@ -86,14 +87,14 @@ export default function TableView() {
 		try {
 			const updatedData = {
 				title: editTitle,
-				code,
+				code: code,
 				internal_marks: editInternalMarks,
 				external_marks: editExternalMarks,
 			};
 			await apiService.put(`/subjects/${id}`, updatedData);
 			setData((prevData) =>
 				prevData.map((item) =>
-					item.code === id
+					item.id === id
 						? {
 								...item,
 
@@ -191,7 +192,7 @@ export default function TableView() {
 											setEditExternalMarks(parseInt(e.target.value) || 0)
 										}
 										onKeyDown={(e) => {
-											if (e.key === "Enter") handleUpdate(row.code);
+											if (e.key === "Enter") handleUpdate(row.id);
 											if (e.key === "Escape") handleCancelEdit();
 										}}
 										autoFocus
@@ -210,7 +211,7 @@ export default function TableView() {
 										<Check
 											size={16}
 											className="cursor-pointer text-green-600"
-											onClick={() => handleUpdate(row.code)}
+											onClick={() => handleUpdate(row.id)}
 										/>
 										<X
 											size={16}
