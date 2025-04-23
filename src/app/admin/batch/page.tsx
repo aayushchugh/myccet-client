@@ -101,9 +101,14 @@ export default function TableView() {
 					{currentRows.map((row) => (
 						<TableRow key={row.id}>
 							<TableCell className="font-medium">
-								{formatDate(row.start_year)} - {formatDate(row.end_year)}
+								<Link href={`/admin/batch/${row.id}`}>
+									{formatDate(row.start_year)} - {formatDate(row.end_year)}
+								</Link>
 							</TableCell>
-							<TableCell className="text-center">{row.branch}</TableCell>
+							<TableCell className="text-center">
+								{" "}
+								<Link href={`/admin/batch/${row.id}`}>{row.branch}</Link>
+							</TableCell>
 							<TableCell>
 								<Copy size={16} className="cursor-pointer" />
 							</TableCell>
