@@ -23,8 +23,8 @@ import {
 import apiService from "@/services/api-service";
 
 interface TableRowData {
-	id: number;
 	code: number;
+	id: number;
 	title: string;
 	internal_marks: number;
 	external_marks: number;
@@ -67,7 +67,7 @@ export default function TableView() {
 	const handleDelete = async (code: number) => {
 		try {
 			await apiService.delete(`/subjects/${code}`);
-			setData((prevData) => prevData.filter((item) => item.id !== code));
+			setData((prevData) => prevData.filter((item) => item.code !== code));
 			toast.success("Subject deleted successfully");
 		} catch (error) {
 			console.error("Error deleting subject:", error);
@@ -76,18 +76,18 @@ export default function TableView() {
 	};
 
 	const handleEdit = (row: TableRowData) => {
-		setEditingRow(row.id);
+		setEditingRow(row.code);
 		setEditTitle(row.title);
 		setEditInternalMarks(row.internal_marks);
 		setEditExternalMarks(row.external_marks);
-		setCode(row.id.toString());
+		setCode(row.code.toString());
 	};
 
 	const handleUpdate = async (id: number) => {
 		try {
 			const updatedData = {
 				title: editTitle,
-				code,
+				code: code,
 				internal_marks: editInternalMarks,
 				external_marks: editExternalMarks,
 			};
@@ -146,15 +146,15 @@ export default function TableView() {
 				</TableHeader>
 				<TableBody>
 					{currentRows.map((row) => (
-						<TableRow key={row.id}>
-							<TableCell className="font-medium">{row.id}</TableCell>
+						<TableRow key={row.code}>
+							<TableCell className="font-medium">{row.code}</TableCell>
 							<TableCell>
-								{editingRow === row.id ? (
+								{editingRow === row.code ? (
 									<input
 										value={editTitle}
 										onChange={(e) => setEditTitle(e.target.value)}
 										onKeyDown={(e) => {
-											if (e.key === "Enter") handleUpdate(row.id);
+											if (e.key === "Enter") handleUpdate(row.code);
 											if (e.key === "Escape") handleCancelEdit();
 										}}
 										autoFocus
@@ -165,7 +165,7 @@ export default function TableView() {
 								)}
 							</TableCell>
 							<TableCell>
-								{editingRow === row.id ? (
+								{editingRow === row.code ? (
 									<input
 										type="number"
 										value={editInternalMarks ?? ""}
@@ -173,7 +173,7 @@ export default function TableView() {
 											setEditInternalMarks(parseInt(e.target.value) || 0)
 										}
 										onKeyDown={(e) => {
-											if (e.key === "Enter") handleUpdate(row.id);
+											if (e.key === "Enter") handleUpdate(row.code);
 											if (e.key === "Escape") handleCancelEdit();
 										}}
 										autoFocus
@@ -184,7 +184,7 @@ export default function TableView() {
 								)}
 							</TableCell>
 							<TableCell>
-								{editingRow === row.id ? (
+								{editingRow === row.code ? (
 									<input
 										type="number"
 										value={editExternalMarks ?? ""}
@@ -206,7 +206,7 @@ export default function TableView() {
 								<Copy size={16} className="cursor-pointer" />
 							</TableCell>
 							<TableCell>
-								{editingRow === row.id ? (
+								{editingRow === row.code ? (
 									<div className="flex gap-2">
 										<Check
 											size={16}
@@ -231,7 +231,7 @@ export default function TableView() {
 								<Trash2
 									size={16}
 									className="cursor-pointer text-red-600"
-									onClick={() => handleDelete(row.id)}
+									onClick={() => handleDelete(row.code)}
 								/>
 							</TableCell>
 						</TableRow>
