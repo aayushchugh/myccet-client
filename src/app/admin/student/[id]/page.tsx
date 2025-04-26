@@ -32,21 +32,12 @@ interface User {
 	mother_name: string;
 	category: string;
 	phone: number;
-	branch_id: number;
-	branch: { id: number; title: string };
+
+	batch: { id: number; title: string; type: string };
 	semester: { id: number; title: string };
-	semester_id: number;
+	current_semester_id: number;
+	batch_id: number;
 	email: string;
-}
-
-interface Branch {
-	id: number;
-	title: string;
-}
-
-interface Semester {
-	id: number;
-	title: string;
 }
 
 export default function UserDetails() {
@@ -55,10 +46,32 @@ export default function UserDetails() {
 	const [user, setUser] = useState<User | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [branches, setBranches] = useState<Branch[]>([]);
+	const [batch, setBatch] = useState<
+		{ id: number; title: string; type: string; start_year: any; end_year: any }[]
+	>([]);
+	const [semesters, setSemesters] = useState<
+		{ id: number; title: string; start_date: string; end_date: string }[]
+	>([]);
+	const formatDate = (DateString: string) => {
+		const date = new Date(DateString);
+		if (isNaN(date.getTime())) return DateString;
+		const year = date.getFullYear();
+
+		return `${year}`;
+	};
+	const formatBatchInfo = (batch) => {
+		if (!batch) return "Select Batch";
+
+		const startYear = batch.start_year ? formatDate(batch.start_year) : "";
+		const endYear = batch.end_year ? formatDate(batch.end_year) : "";
+		const yearRange = startYear && endYear ? `${startYear}-${endYear}` : "";
+		const batchType = batch.type || "";
+		const branchName = batch.title || "";
+
+		return `${yearRange} ${batchType} ${branchName}`.trim();
+	};
+
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
-	const [semesters, setSemesters] = useState<Semester[]>([]);
-	const [currentSemesterTitle, setCurrentSemesterTitle] = useState("");
 
 	const {
 		register,
@@ -75,7 +88,7 @@ export default function UserDetails() {
 			last_name: "",
 			mother_name: "",
 			category: "",
-			branch_id: 0,
+			batch_id: 0,
 			branch: "",
 			semester: "",
 			semester_id: 0,
@@ -101,7 +114,7 @@ export default function UserDetails() {
 						setValue(key as any, value);
 					});
 
-					setValue("branch_id", userData.branch?.id || 0);
+					setValue("batch_id", userData.batch?.id || 0);
 					setValue("branch", userData.branch?.title || "");
 					setValue("semester_id", userData.semester?.id || 0);
 					setValue("semester", userData.semester?.title || "");
@@ -113,25 +126,22 @@ export default function UserDetails() {
 				setIsLoading(false);
 			}
 		};
+		const fetchBatches = async () => {
+			try {
+				const response = await apiService.get("/batch");
 
-		Promise.all([
-			fetchUser(),
-			apiService.get("/branches").then((res) => setBranches(res.data?.payload || [])),
-			apiService.get("/semesters").then((res) => setSemesters(res.data?.payload || [])),
-		]).catch((error) => {
-			console.error("Error loading data:", error);
-		});
-	}, [id, setValue]);
-
-	// Update semester title when semester ID changes
-	useEffect(() => {
-		if (semesterId) {
-			const selectedSemester = semesters.find((sem) => sem.id === semesterId);
-			if (selectedSemester) {
-				setCurrentSemesterTitle(selectedSemester.title);
+				if (response) {
+					setBatch(response.data.payload);
+				} else {
+					console.error("Error fetching branches:");
+				}
+			} catch (error) {
+				console.error("Network error:", error);
 			}
-		}
-	}, [semesterId, semesters]);
+		};
+		fetchUser();
+		fetchBatches();
+	}, [id, setValue]);
 
 	const handleUpdate = async (formData: any) => {
 		if (!user) return;
@@ -249,7 +259,11 @@ export default function UserDetails() {
 						<input
 							className="w-full p-2 border rounded-md"
 							{...register("middle_name")}
-							defaultValue={user?.middle_name || ""}
+							defaultValue={
+								user?.middle_name === null || user?.middle_name === "null"
+									? ""
+									: user?.middle_name || ""
+							}
 						/>
 					</div>
 
@@ -258,7 +272,11 @@ export default function UserDetails() {
 						<input
 							className="w-full p-2 border rounded-md"
 							{...register("last_name")}
-							defaultValue={user?.last_name || ""}
+							defaultValue={
+								user?.last_name === null || user?.last_name === "null"
+									? ""
+									: user?.last_name || ""
+							}
 						/>
 					</div>
 
@@ -307,47 +325,74 @@ export default function UserDetails() {
 					</div>
 
 					<div>
-						<Label htmlFor="branch">Branch</Label>
-						<Select onValueChange={(value) => setValue("branch_id", Number(value))}>
-							<SelectTrigger error={errors?.branch_id?.message}>
-								<SelectValue
-									placeholder={user?.branch.title || "Select Branch"}
-									{...register("branch", { required: "Branch is required" })}
-								/>
-							</SelectTrigger>
-							<SelectContent>
-								{branches.map((branch) => (
-									<SelectItem key={branch.id} value={branch.id.toString()}>
-										{branch.title}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-						{errors.branch_id && (
-							<p className="text-red-500">{errors.branch_id.message}</p>
-						)}
-					</div>
+						<Label required htmlFor="batch">
+							Batch
+						</Label>
+						<Select
+							onValueChange={async (value) => {
+								const batchId = Number(value);
+								setValue("batch_id", batchId);
 
-					<div>
-						<Label htmlFor="semester">Semester</Label>
-						<Select onValueChange={(value) => setValue("semester_id", Number(value))}>
-							<SelectTrigger error={errors?.semester_id?.message}>
+								try {
+									const response = await apiService.get(`/batch/${batchId}`);
+									const fetchedSemesters = response.data.payload.semesters || [];
+									setSemesters(fetchedSemesters);
+								} catch (error) {
+									console.error("Error fetching semesters:", error);
+									setSemesters([]);
+								}
+							}}
+						>
+							<SelectTrigger error={errors?.batch_id?.message}>
 								<SelectValue
-									placeholder={user?.semester.title || "Select Semester"}
-									{...register("semester", { required: "Semester is required" })}
+									placeholder={
+										user?.batch ? formatBatchInfo(user.batch) : "Select Batch"
+									}
+									{...register("batch_id", {
+										required: "Batch is required",
+									})}
 								/>
 							</SelectTrigger>
+
 							<SelectContent>
-								{semesters.map((semester) => (
-									<SelectItem key={semester.id} value={semester.id.toString()}>
-										{semester.title}
+								{batch.map((batch) => (
+									<SelectItem key={batch.type} value={batch.id.toString()}>
+										{formatBatchInfo(batch)}
 									</SelectItem>
 								))}
 							</SelectContent>
 						</Select>
-						{errors.semester_id && (
-							<p className="text-red-500">{errors.semester_id.message}</p>
-						)}
+					</div>
+					<div className="grid grid-cols-2 gap-3">
+						<div>
+							<Label required htmlFor="designation">
+								Semester
+							</Label>
+							<Select
+								onValueChange={(value) => {
+									setValue("semester_id", Number(value));
+								}}
+							>
+								<SelectTrigger error={errors?.semester_id?.message}>
+									<SelectValue
+										placeholder={user?.semester.title || "Select Semester"}
+										{...register("semester_id", {
+											required: "Semester is required",
+										})}
+									/>
+								</SelectTrigger>
+
+								<SelectContent>
+									{semesters.length > 0
+										? semesters.map((sem) => (
+												<SelectItem key={sem.id} value={sem.id.toString()}>
+													Semester {sem.title}
+												</SelectItem>
+										  ))
+										: null}
+								</SelectContent>
+							</Select>
+						</div>
 					</div>
 				</div>
 

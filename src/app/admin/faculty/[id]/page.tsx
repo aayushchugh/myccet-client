@@ -222,7 +222,11 @@ export default function UserDetails() {
 						<input
 							className="w-full p-2 border rounded-md"
 							{...register("middle_name")}
-							defaultValue={user?.middle_name || ""}
+							defaultValue={
+								user?.middle_name === null || user?.middle_name === "null"
+									? ""
+									: user?.middle_name || ""
+							}
 						/>
 					</div>
 
@@ -231,7 +235,11 @@ export default function UserDetails() {
 						<input
 							className="w-full p-2 border rounded-md"
 							{...register("last_name")}
-							defaultValue={user?.last_name || ""}
+							defaultValue={
+								user?.last_name === null || user?.last_name === "null"
+									? ""
+									: user?.last_name || ""
+							}
 						/>
 					</div>
 
