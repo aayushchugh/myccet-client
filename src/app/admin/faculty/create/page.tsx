@@ -19,7 +19,6 @@ import {
 import apiService from "@/services/api-service";
 
 interface FormInput {
-	avatar: FileList;
 	first_name: string;
 	middle_name: string;
 	last_name: string;
@@ -115,16 +114,6 @@ export default function TeacherRegistrationForm() {
 			className="min-h-dvh flex flex-col w-full place-items-center"
 		>
 			<div>
-				<div className="flex flex-col space-y-1.5 pb-3">
-					<Label htmlFor="avatar">Avatar</Label>
-					<Input
-						id="avatar"
-						type="file"
-						error={errors.avatar?.message}
-						{...register("avatar")}
-					/>
-				</div>
-
 				<div className="grid gap-4 w-full ">
 					<div className="grid grid-cols-3 gap-4">
 						<div className="flex flex-col space-y-1.5">

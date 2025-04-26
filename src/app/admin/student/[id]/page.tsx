@@ -217,6 +217,7 @@ export default function UserDetails() {
 						<input
 							className="w-full p-2 border rounded-md"
 							{...register("email", { required: "Email is required" })}
+							defaultValue={user?.email || ""}
 						/>
 						{errors.email && <p className="text-red-500">{errors.email.message}</p>}
 					</div>
@@ -226,6 +227,7 @@ export default function UserDetails() {
 						<input
 							className="w-full p-2 border rounded-md"
 							{...register("phone", { required: "Phone is required" })}
+							defaultValue={user?.phone || ""}
 						/>
 						{errors.phone && <p className="text-red-500">{errors.phone.message}</p>}
 					</div>
@@ -235,6 +237,7 @@ export default function UserDetails() {
 						<input
 							className="w-full p-2 border rounded-md"
 							{...register("first_name", { required: "First name is required" })}
+							defaultValue={user?.first_name || ""}
 						/>
 						{errors.first_name && (
 							<p className="text-red-500">{errors.first_name.message}</p>
@@ -246,6 +249,7 @@ export default function UserDetails() {
 						<input
 							className="w-full p-2 border rounded-md"
 							{...register("middle_name")}
+							defaultValue={user?.middle_name || ""}
 						/>
 					</div>
 
@@ -254,6 +258,7 @@ export default function UserDetails() {
 						<input
 							className="w-full p-2 border rounded-md"
 							{...register("last_name")}
+							defaultValue={user?.last_name || ""}
 						/>
 					</div>
 
@@ -286,7 +291,7 @@ export default function UserDetails() {
 						<Select onValueChange={(value) => setValue("category", value)}>
 							<SelectTrigger error={errors?.category?.message}>
 								<SelectValue
-									placeholder="Select Category"
+									placeholder={user?.category || "Select Category"}
 									{...register("category", { required: "Category is required" })}
 								/>
 							</SelectTrigger>
@@ -306,7 +311,7 @@ export default function UserDetails() {
 						<Select onValueChange={(value) => setValue("branch_id", Number(value))}>
 							<SelectTrigger error={errors?.branch_id?.message}>
 								<SelectValue
-									placeholder="Select Branch"
+									placeholder={user?.branch.title || "Select Branch"}
 									{...register("branch", { required: "Branch is required" })}
 								/>
 							</SelectTrigger>
@@ -328,7 +333,7 @@ export default function UserDetails() {
 						<Select onValueChange={(value) => setValue("semester_id", Number(value))}>
 							<SelectTrigger error={errors?.semester_id?.message}>
 								<SelectValue
-									placeholder="Select Semester"
+									placeholder={user?.semester.title || "Select Semester"}
 									{...register("semester", { required: "Semester is required" })}
 								/>
 							</SelectTrigger>
