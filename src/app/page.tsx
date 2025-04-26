@@ -19,11 +19,7 @@ export default function Home() {
 					</Typography>
 					<div className="flex items-center justify-evenly mt-6">
 						<Link href={"/login"}>
-							<Button>Faculty</Button>
-						</Link>
-
-						<Link href={"/login"}>
-							<Button>Admin</Button>
+							<Button className="px-16">Admin</Button>
 						</Link>
 					</div>
 				</CardContent>

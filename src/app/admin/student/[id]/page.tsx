@@ -32,20 +32,12 @@ interface User {
 	mother_name: string;
 	category: string;
 	phone: number;
-	branch_id: number;
-	branch: any;
-	semester: any;
-	semester_id: number;
-	email: string;
-}
 
-interface Branch {
-	id: number;
-	title: string;
-}
-interface Semester {
-	id: number;
-	title: string;
+	batch: { id: number; title: string; type: string };
+	semester: { id: number; title: string };
+	current_semester_id: number;
+	batch_id: number;
+	email: string;
 }
 
 export default function UserDetails() {
@@ -54,8 +46,31 @@ export default function UserDetails() {
 	const [user, setUser] = useState<User | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [branches, setBranches] = useState<Branch[]>([]);
-	const [semesters, setSemesters] = useState<Branch[]>([]);
+	const [batch, setBatch] = useState<
+		{ id: number; title: string; type: string; start_year: any; end_year: any }[]
+	>([]);
+	const [semesters, setSemesters] = useState<
+		{ id: number; title: string; start_date: string; end_date: string }[]
+	>([]);
+	const formatDate = (DateString: string) => {
+		const date = new Date(DateString);
+		if (isNaN(date.getTime())) return DateString;
+		const year = date.getFullYear();
+
+		return `${year}`;
+	};
+	const formatBatchInfo = (batch) => {
+		if (!batch) return "Select Batch";
+
+		const startYear = batch.start_year ? formatDate(batch.start_year) : "";
+		const endYear = batch.end_year ? formatDate(batch.end_year) : "";
+		const yearRange = startYear && endYear ? `${startYear}-${endYear}` : "";
+		const batchType = batch.type || "";
+		const branchName = batch.title || "";
+
+		return `${yearRange} ${batchType} ${branchName}`.trim();
+	};
+
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
 	const {
@@ -63,6 +78,7 @@ export default function UserDetails() {
 		setValue,
 		handleSubmit,
 		formState: { errors },
+		watch,
 	} = useForm({
 		defaultValues: {
 			registration_number: 0,
@@ -72,7 +88,7 @@ export default function UserDetails() {
 			last_name: "",
 			mother_name: "",
 			category: "",
-			branch_id: 0,
+			batch_id: 0,
 			branch: "",
 			semester: "",
 			semester_id: 0,
@@ -81,106 +97,84 @@ export default function UserDetails() {
 		},
 	});
 
+	const semesterId = watch("semester_id");
+
 	useEffect(() => {
 		if (!id) return;
 
 		const fetchUser = async () => {
 			try {
 				const response = await apiService.get(`/students/${id}`);
-				if (response.data && response.data.payload) {
+				if (response.data?.payload) {
 					const userData = response.data.payload;
 					setUser(userData);
-					setValue("branch_id", userData.branch?.id || 0);
+
+					// Set form values
+					Object.entries(userData).forEach(([key, value]) => {
+						setValue(key as any, value);
+					});
+
+					setValue("batch_id", userData.batch?.id || 0);
 					setValue("branch", userData.branch?.title || "");
 					setValue("semester_id", userData.semester?.id || 0);
 					setValue("semester", userData.semester?.title || "");
-
-					// Set form values
-					Object.keys(userData).forEach((key) => {
-						if (key in userData) {
-							setValue(key as any, userData[key]);
-						}
-					});
-				} else {
-					throw new Error("Invalid response format");
 				}
-			} catch {
+			} catch (error) {
 				setError("Failed to load user data.");
 				toast.error("Failed to load user data.");
 			} finally {
 				setIsLoading(false);
 			}
 		};
-
-		const fetchBranches = async () => {
+		const fetchBatches = async () => {
 			try {
-				const response = await apiService.get("/branches");
-				if (response.data && response.data.payload) {
-					setBranches(response.data.payload);
+				const response = await apiService.get("/batch");
+
+				if (response) {
+					setBatch(response.data.payload);
 				} else {
-					console.error("Invalid branches format");
+					console.error("Error fetching branches:");
 				}
 			} catch (error) {
 				console.error("Network error:", error);
-				toast.error("Failed to load branches.");
 			}
 		};
-		const fetchSemesters = async () => {
-			try {
-				const response = await apiService.get("/semesters");
-				if (response.data && response.data.payload) {
-					setSemesters(response.data.payload);
-				} else {
-					console.error("Invalid semester format");
-				}
-			} catch (error) {
-				console.error("Network error:", error);
-				toast.error("Failed to load semester.");
-			}
-		};
-
 		fetchUser();
-		fetchBranches();
-		fetchSemesters();
+		fetchBatches();
 	}, [id, setValue]);
 
-	const handleUpdate = async (data: any) => {
+	const handleUpdate = async (formData: any) => {
 		if (!user) return;
 		try {
 			const updatedUser = {
-				...user,
-				...data,
-				registration_number: Number(data.registration_number) || 0, // Convert to number
-				branch_id: Number(data.branch_id) || 0, // Convert to number
-				semester_id: Number(data.semester_id) || 0,
+				...formData,
+				registration_number: Number(formData.registration_number) || 0,
+				branch_id: Number(formData.branch_id) || 0,
+				semester_id: Number(formData.semester_id) || 0,
+				phone: Number(formData.phone) || 0,
 			};
 
 			await apiService.put(`/students/${user.id}`, updatedUser);
 			toast.success("Student updated successfully");
-			router.push("/admin/student"); // Redirect after save
+			router.push("/admin/student");
 		} catch (error) {
 			console.error("Error updating Student:", error);
-			toast.error("Failed to update user.");
+			toast.error("Failed to update student.");
 		}
 	};
+
 	const handleDelete = async () => {
 		if (!user) return;
-
 		try {
 			await apiService.delete(`/students/${user.id}`);
 			toast.success("Student deleted successfully");
-			router.push("/admin/student"); // Redirect after delete
+			router.push("/admin/student");
 		} catch (error) {
-			console.error("Error deleting user:", error);
-			toast.error("Failed to delete user.");
+			console.error("Error deleting student:", error);
+			toast.error("Failed to delete student.");
 		} finally {
-			setIsDialogOpen(false); // Close dialog
+			setIsDialogOpen(false);
 		}
-	};
-
-	const handleCancelEdit = () => {
-		toast.info("Edit cancelled");
-		router.push("/admin/student"); // Redirect after cancel
 	};
 
 	if (isLoading) return <div>Loading...</div>;
@@ -197,7 +191,7 @@ export default function UserDetails() {
 						<DialogHeader>
 							<DialogTitle>Confirm Deletion</DialogTitle>
 							<DialogDescription>
-								Are you sure you want to delete this user? This action cannot be
+								Are you sure you want to delete this student? This action cannot be
 								undone.
 							</DialogDescription>
 						</DialogHeader>
@@ -212,6 +206,7 @@ export default function UserDetails() {
 					</DialogContent>
 				</Dialog>
 			</div>
+
 			<form onSubmit={handleSubmit(handleUpdate)}>
 				<div className="space-y-4">
 					<div>
@@ -226,6 +221,7 @@ export default function UserDetails() {
 							<p className="text-red-500">{errors.registration_number.message}</p>
 						)}
 					</div>
+
 					<div>
 						<Label htmlFor="email">Email</Label>
 						<input
@@ -235,6 +231,7 @@ export default function UserDetails() {
 						/>
 						{errors.email && <p className="text-red-500">{errors.email.message}</p>}
 					</div>
+
 					<div>
 						<Label htmlFor="phone">Phone</Label>
 						<input
@@ -256,22 +253,30 @@ export default function UserDetails() {
 							<p className="text-red-500">{errors.first_name.message}</p>
 						)}
 					</div>
-					{/* Optional Fields */}
+
 					<div>
 						<Label htmlFor="middle_name">Middle Name</Label>
 						<input
 							className="w-full p-2 border rounded-md"
 							{...register("middle_name")}
-							defaultValue={user?.middle_name || ""}
+							defaultValue={
+								user?.middle_name === null || user?.middle_name === "null"
+									? ""
+									: user?.middle_name || ""
+							}
 						/>
 					</div>
 
 					<div>
-						<Label htmlFor="last_name">Last Name </Label>
+						<Label htmlFor="last_name">Last Name</Label>
 						<input
 							className="w-full p-2 border rounded-md"
 							{...register("last_name")}
-							defaultValue={user?.last_name || ""}
+							defaultValue={
+								user?.last_name === null || user?.last_name === "null"
+									? ""
+									: user?.last_name || ""
+							}
 						/>
 					</div>
 
@@ -301,79 +306,126 @@ export default function UserDetails() {
 						<Label required htmlFor="category">
 							Category
 						</Label>
-						<Select
-							onValueChange={(value) => {
-								setValue("category", value);
-							}}
-						>
+						<Select onValueChange={(value) => setValue("category", value)}>
 							<SelectTrigger error={errors?.category?.message}>
 								<SelectValue
-									placeholder={user?.category || "Select Branch"}
-									{...register("category", {
-										required: "Category is required",
-									})}
+									placeholder={user?.category || "Select Category"}
+									{...register("category", { required: "Category is required" })}
 								/>
 							</SelectTrigger>
-
 							<SelectContent>
-								<SelectItem value="hod">General</SelectItem>
-								<SelectItem value="tutor">Scheduled Caste</SelectItem>
-								<SelectItem value="lecturer">Scheduled Tribe</SelectItem>
+								<SelectItem value="general">General</SelectItem>
+								<SelectItem value="sc">Scheduled Caste</SelectItem>
+								<SelectItem value="st">Scheduled Tribe</SelectItem>
 							</SelectContent>
 						</Select>
+						{errors.category && (
+							<p className="text-red-500">{errors.category.message}</p>
+						)}
 					</div>
 
 					<div>
-						<Label htmlFor="branch">Branch</Label>
-						<Select onValueChange={(value) => setValue("branch_id", Number(value))}>
-							<SelectTrigger error={errors?.branch_id?.message}>
+						<Label required htmlFor="batch">
+							Batch
+						</Label>
+						<Select
+							onValueChange={async (value) => {
+								const batchId = Number(value);
+								setValue("batch_id", batchId);
+
+								try {
+									const response = await apiService.get(`/batch/${batchId}`);
+									const fetchedSemesters = response.data.payload.semesters || [];
+									setSemesters(fetchedSemesters);
+								} catch (error) {
+									console.error("Error fetching semesters:", error);
+									setSemesters([]);
+								}
+							}}
+						>
+							<SelectTrigger error={errors?.batch_id?.message}>
 								<SelectValue
-									placeholder={user?.branch.title || "Select Branch"}
-									{...register("branch", {
-										required: "Branch is required",
+									placeholder={
+										user?.batch ? formatBatchInfo(user.batch) : "Select Batch"
+									}
+									{...register("batch_id", {
+										required: "Batch is required",
 									})}
 								/>
 							</SelectTrigger>
+
 							<SelectContent>
-								{branches.map((branch) => (
-									<SelectItem key={branch.id} value={branch.id.toString()}>
-										{branch.title}
+								{batch.map((batch) => (
+									<SelectItem key={batch.type} value={batch.id.toString()}>
+										{formatBatchInfo(batch)}
 									</SelectItem>
 								))}
 							</SelectContent>
 						</Select>
-						{errors.branch_id && (
-							<p className="text-red-500">{errors.branch_id.message}</p>
-						)}
 					</div>
-					<div>
-						<Label htmlFor="semester">Semester</Label>
-						<Select onValueChange={(value) => setValue("semester_id", Number(value))}>
-							<SelectTrigger error={errors?.semester_id?.message}>
-								<SelectValue
-									placeholder={user?.semester.title || "Select Semester"}
-									{...register("semester", {
-										required: "Semester is required",
-									})}
-								/>
-							</SelectTrigger>
+					<div className="grid grid-cols-2 gap-3">
+						<div>
+							<Label required htmlFor="semester">
+								Semester
+							</Label>
+							<Select
+								onValueChange={(value) => {
+									setValue("semester_id", Number(value));
+								}}
+							>
+								<SelectTrigger error={errors?.semester_id?.message}>
+									<SelectValue
+										placeholder={user?.semester.title || "Select Semester"}
+										{...register("semester_id", {
+											required: "Semester is required",
+										})}
+									/>
+								</SelectTrigger>
 
-							<SelectContent>
-								{semesters.map((semester) => (
-									<SelectItem key={semester.id} value={semester.id.toString()}>
-										{semester.title}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-						{errors.semester_id && (
-							<p className="text-red-500">{errors.semester_id.message}</p>
-						)}
+								<SelectContent>
+									{semesters.length > 0
+										? semesters.map((sem) => (
+												<SelectItem key={sem.id} value={sem.id.toString()}>
+													Semester {sem.title}
+												</SelectItem>
+										  ))
+										: null}
+								</SelectContent>
+							</Select>
+						</div>
 					</div>
 				</div>
 
+				<div className="mt-4">
+					<Label required htmlFor="marks">
+						Marks
+					</Label>
+					<div className="flex flex-wrap gap-3 mt-2">
+						{semesters.length > 0 ? (
+							semesters.map((sem) => (
+								<Button
+									key={sem.id}
+									type="button"
+									variant="outline"
+									onClick={() => {
+										// Navigate to marks page or perform action
+										router.push(
+											`/admin/students/${id}/semester/${sem.id}/marks`,
+										);
+									}}
+								>
+									Semester {sem.title}
+								</Button>
+							))
+						) : (
+							<p className="text-sm text-gray-500">
+								Select a batch to view semesters
+							</p>
+						)}
+					</div>
+				</div>
 				<div className="flex gap-4 mt-6">
-					<Button type="button" onClick={handleCancelEdit}>
+					<Button type="button" onClick={() => router.push("/admin/student")}>
 						Go Back
 					</Button>
 					<Button type="submit">Save</Button>
