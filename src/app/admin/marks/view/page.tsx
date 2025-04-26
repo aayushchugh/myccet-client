@@ -1,54 +1,103 @@
 "use client";
+// components/student/StudentMarks.tsx
+import { useState, useEffect } from "react";
+import apiService from "@/services/api-service";
+import { toast } from "sonner";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
 
-import React from "react";
+interface Subject {
+	id: number;
+	title: string;
+	code: string;
+}
 
-const marksData = [
-	["Mathematics", "MATH101", 10, 50, 35, 50, 45, "Pass"],
-	["Physics", "PHY102", 20, 50, 25, 50, 45, "Pass"],
-	["Chemistry", "CHEM103", 15, 50, 30, 50, 45, "Pass"],
-	["Computer Science", "CS104", 40, 50, 45, 50, 85, "Pass"],
-];
+interface Mark {
+	id: number;
+	internal_marks: number;
+	external_marks: number;
+	total_marks: number;
+	is_pass: boolean;
+	subject: Subject;
+}
 
-const MarksTable = () => {
+interface StudentMarksProps {
+	studentId: string | number;
+	semesterId: number;
+	currentSemesterTitle: string;
+}
+
+export default function StudentMarks({
+	studentId,
+	semesterId,
+	currentSemesterTitle,
+}: StudentMarksProps) {
+	const [marks, setMarks] = useState<Mark[]>([]);
+	const [marksLoading, setMarksLoading] = useState(false);
+
+	useEffect(() => {
+		if (studentId && semesterId) {
+			fetchMarks();
+		}
+	}, [studentId, semesterId]);
+
+	const fetchMarks = async () => {
+		try {
+			setMarksLoading(true);
+			const response = await apiService.get(
+				`/students/${studentId}/semesters/${semesterId}/marks`,
+			);
+			setMarks(response.data?.payload?.data?.marks || []);
+		} catch (error) {
+			console.error("Error fetching marks:", error);
+			toast.error("Failed to fetch marks.");
+			setMarks([]);
+		} finally {
+			setMarksLoading(false);
+		}
+	};
+
 	return (
-		<div className="p-6">
-			<h2 className="text-xl font-semibold mb-4">Student Marks Report</h2>
-			<table className="w-full border border-gray-300">
-				<thead>
-					<tr className="bg-gray-200 text-left">
-						<th className="p-2 border">Subject</th>
-						<th className="p-2 border">Subject Code</th>
-						<th className="p-2 border">Internal Marks</th>
-						<th className="p-2 border">External Marks</th>
-						<th className="p-2 border">Total Marks</th>
-						<th className="p-2 border">Status (P/F)</th>
-					</tr>
-				</thead>
-				<tbody>
-					{marksData.map((row, index) => (
-						<tr key={index} className="text-center border-b">
-							<td className="p-2 border">{row[0]}</td>
-							<td className="p-2 border">{row[1]}</td>
-							<td className="p-2 border">
-								{row[2]}/{row[3]}
-							</td>
-							<td className="p-2 border">
-								{row[4]}/{row[5]}
-							</td>
-							<td className="p-2 border">{row[6]}</td>
-							<td
-								className={`p-2 border ${
-									row[7] === "Pass" ? "text-green-600" : "text-red-600"
-								}`}
-							>
-								{row[7]}
-							</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
+		<div className="border p-4 rounded-md space-y-4">
+			<p className="text-lg font-bold">Semester {currentSemesterTitle}</p>
+			{marksLoading ? (
+				<div>Loading marks data...</div>
+			) : marks.length > 0 ? (
+				<Table className="w-full">
+					<TableHeader>
+						<TableRow>
+							<TableHead>Subject</TableHead>
+							<TableHead>Code</TableHead>
+							<TableHead>Internal Marks</TableHead>
+							<TableHead>External Marks</TableHead>
+							<TableHead>Total Marks</TableHead>
+							<TableHead>Status</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{marks.map((mark) => (
+							<TableRow key={mark.id}>
+								<TableCell>{mark.subject.title}</TableCell>
+								<TableCell>{mark.subject.code}</TableCell>
+								<TableCell>{mark.internal_marks}</TableCell>
+								<TableCell>{mark.external_marks}</TableCell>
+								<TableCell>{mark.total_marks}</TableCell>
+								<TableCell>{mark.is_pass ? "Pass" : "Fail"}</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			) : (
+				<div className="text-gray-500 text-center py-4">
+					No marks data available for this semester
+				</div>
+			)}
 		</div>
 	);
-};
-
-export default MarksTable;
+}
