@@ -365,7 +365,7 @@ export default function UserDetails() {
 					</div>
 					<div className="grid grid-cols-2 gap-3">
 						<div>
-							<Label required htmlFor="designation">
+							<Label required htmlFor="semester">
 								Semester
 							</Label>
 							<Select
@@ -396,6 +396,34 @@ export default function UserDetails() {
 					</div>
 				</div>
 
+				<div className="mt-4">
+					<Label required htmlFor="marks">
+						Marks
+					</Label>
+					<div className="flex flex-wrap gap-3 mt-2">
+						{semesters.length > 0 ? (
+							semesters.map((sem) => (
+								<Button
+									key={sem.id}
+									type="button"
+									variant="outline"
+									onClick={() => {
+										// Navigate to marks page or perform action
+										router.push(
+											`/admin/students/${id}/semester/${sem.id}/marks`,
+										);
+									}}
+								>
+									Semester {sem.title}
+								</Button>
+							))
+						) : (
+							<p className="text-sm text-gray-500">
+								Select a batch to view semesters
+							</p>
+						)}
+					</div>
+				</div>
 				<div className="flex gap-4 mt-6">
 					<Button type="button" onClick={() => router.push("/admin/student")}>
 						Go Back
