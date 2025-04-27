@@ -70,7 +70,7 @@ export default function TableView() {
 			await apiService.delete(`/batch/${id}`);
 
 			setData((prevData) => prevData.filter((item) => item.id !== id));
-			toast.success("Task deleted successfully");
+			toast.success("Batch deleted successfully");
 		} catch (error) {
 			console.error("Error deleting task:", error);
 			toast.error("Failed to delete the task");

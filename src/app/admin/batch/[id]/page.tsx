@@ -51,6 +51,7 @@ export default function SemesterForm() {
 
 	const [allSemesters, setAllSemesters] = useState<Semester[]>([]);
 	const [subjects, setSubjects] = useState<Subject[]>([]);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 	const router = useRouter();
 	const { fields, append } = useFieldArray({
 		control,
@@ -74,6 +75,7 @@ export default function SemesterForm() {
 				hasAppended.current = true;
 			} catch (error) {
 				console.error("Error fetching batch data:", error);
+				toast.error("Failed to load batch data");
 			}
 
 			try {
@@ -82,6 +84,7 @@ export default function SemesterForm() {
 				setSubjects(subRes.data.payload);
 			} catch (error) {
 				console.error("Error fetching subjects:", error);
+				toast.error("Failed to load subjects");
 			}
 		};
 
@@ -99,8 +102,13 @@ export default function SemesterForm() {
 
 		fetchBatchAndSubjects();
 	}, [id, append, reset]);
-	const onSave = async (data: FormValues) => {
+
+	const onSubmit = async (data: FormValues) => {
+		if (isSubmitting) return;
+
 		try {
+			setIsSubmitting(true);
+
 			const payload = {
 				semesters: data.semesters.map((sem) => ({
 					id: sem.semesterId,
@@ -110,19 +118,18 @@ export default function SemesterForm() {
 				})),
 			};
 
+			console.log("Sending payload:", payload);
 			const response = await apiService.post(`/batch/${id}/details`, payload);
-			console.log("Saved successfully:", response.data);
+			console.log("Save response:", response.data);
 
 			toast.success("Batch updated successfully");
 			router.push("/admin/batch");
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Error saving semester data:", error);
-			toast.error("Failed to save data.");
+			toast.error(`Failed to save data: ${error.response?.data?.message || error.message}`);
+		} finally {
+			setIsSubmitting(false);
 		}
-	};
-
-	const onSubmit = (data: FormValues) => {
-		console.log("Submitted Data:", data);
 	};
 
 	return (
@@ -131,7 +138,7 @@ export default function SemesterForm() {
 				const selectedSubjects = watch(`semesters.${index}.subjects`) || [];
 
 				return (
-					<div key={field.id} className=" border p-4 rounded-md space-y-4">
+					<div key={field.id} className="border p-4 rounded-md space-y-4">
 						<h3 className="text-lg font-bold">
 							Semester{" "}
 							{allSemesters.find((s) => s.id === field.semesterId)?.title ||
@@ -142,7 +149,7 @@ export default function SemesterForm() {
 						<div className="flex">
 							{/* Start Date */}
 							<div className="flex flex-col mr-5">
-								<Label className=" mb-2">Start Date</Label>
+								<Label className="mb-2">Start Date</Label>
 								<Popover>
 									<PopoverTrigger asChild>
 										<Button
@@ -172,7 +179,7 @@ export default function SemesterForm() {
 							</div>
 
 							{/* End Date */}
-							<div className="flex flex-col ">
+							<div className="flex flex-col">
 								<Label className="mb-2">End Date</Label>
 								<Popover>
 									<PopoverTrigger asChild>
@@ -250,9 +257,9 @@ export default function SemesterForm() {
 					</div>
 				);
 			})}
-			<div className="flex gap-4 mb-6 ">
-				<Button className="px-6 mb-6" type="submit" onClick={handleSubmit(onSave)}>
-					Save
+			<div className="flex gap-4 mb-6">
+				<Button className="px-6 mb-6" type="submit" disabled={isSubmitting}>
+					{isSubmitting ? "Saving..." : "Save"}
 				</Button>
 			</div>
 		</form>
