@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import apiService from "@/services/api-service";
 import { toast } from "sonner";
-import { useParams } from "next/navigation";
-
+import { useParams, useRouter } from "next/navigation";
 import {
 	Table,
 	TableBody,
@@ -13,7 +12,16 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { subMinutes } from "date-fns";
+import { Button } from "@/components/ui";
+import { Input } from "@/components/ui/input";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface Student {
 	id: number;
@@ -49,14 +57,9 @@ interface MarksData {
 	subjects: Subject[];
 }
 
-interface StudentMarksProps {
-	studentId: string | number;
-	semesterId: number;
-	currentSemesterTitle: string;
-}
-
 export default function StudentMarks() {
 	const params = useParams();
+	const router = useRouter();
 
 	// Convert to appropriate types and provide fallbacks
 	const studentId = params?.id || "";
@@ -64,6 +67,10 @@ export default function StudentMarks() {
 
 	const [marksData, setMarksData] = useState<MarksData | null>(null);
 	const [marksLoading, setMarksLoading] = useState(false);
+	const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [internalMarks, setInternalMarks] = useState<number | null>(null);
+	const [externalMarks, setExternalMarks] = useState<number | null>(null);
 
 	useEffect(() => {
 		if (studentId && semesterId) {
@@ -79,7 +86,6 @@ export default function StudentMarks() {
 			const response = await apiService.get(
 				`/students/${studentId}/semesters/${semesterId}/marks`,
 			);
-			console.log("API Response:", response);
 
 			if (response.data?.payload?.data) {
 				setMarksData(response.data.payload.data);
@@ -96,18 +102,72 @@ export default function StudentMarks() {
 		}
 	};
 
+	const handleEdit = (subject: Subject) => {
+		setEditingSubject(subject);
+		setInternalMarks(subject.internal_marks);
+		setExternalMarks(subject.external_marks);
+		setIsDialogOpen(true);
+	};
+
+	const handleSave = async () => {
+		if (!editingSubject) return;
+
+		try {
+			// Calculate total marks based on internal and external marks
+			const totalMarks = (internalMarks || 0) + (externalMarks || 0);
+
+			// Determine pass/fail status
+			const internalPassed =
+				internalMarks !== null && internalMarks >= editingSubject.internal_passing_marks;
+			const externalPassed =
+				externalMarks !== null && externalMarks >= editingSubject.external_passing_marks;
+			const isPassed = internalPassed && externalPassed;
+
+			const updatedMarks = {
+				internal_marks: internalMarks,
+				external_marks: externalMarks,
+				total_marks: totalMarks,
+				is_pass: internalMarks !== null && externalMarks !== null ? isPassed : null,
+			};
+
+			await apiService.put(
+				`/students/${studentId}/semesters/${semesterId}/subjects/${editingSubject.id}/marks`,
+				updatedMarks,
+			);
+
+			toast.success("Marks updated successfully");
+			setIsDialogOpen(false);
+			fetchMarks(); // Refresh marks data
+		} catch (error) {
+			console.error("Error updating marks:", error);
+			toast.error("Failed to update marks.");
+		}
+	};
+
+	const handleCancel = () => {
+		setEditingSubject(null);
+		setInternalMarks(null);
+		setExternalMarks(null);
+		setIsDialogOpen(false);
+	};
+
+	const handleGoBack = () => {
+		router.push(`/admin/student/${studentId}`);
+	};
+
 	return (
 		<div className="border p-4 rounded-md space-y-4">
-			{marksData && (
-				<div className="mb-4">
-					<p className="text-lg font-bold">
-						Student: {marksData.student.first_name} {marksData.student.last_name}
-					</p>
-					<p>Semester: {marksData.semester.title}</p>
-				</div>
-			)}
-
-			{/* <p className="text-lg font-bold">Semester {currentSemesterTitle}</p> */}
+			<div className="flex justify-between items-center mb-4">
+				{marksData && (
+					<div>
+						<p className="text-lg font-bold">
+							Student: {marksData.student.first_name} {marksData.student.last_name}
+						</p>
+						<p>Semester: {marksData.semester.title}</p>
+					</div>
+				)}
+				<Button onClick={handleGoBack}>Go Back</Button>
+			</div>
 
 			{marksLoading ? (
 				<div>Loading marks data...</div>
@@ -121,6 +181,7 @@ export default function StudentMarks() {
 							<TableHead>External Marks</TableHead>
 							<TableHead>Total Marks</TableHead>
 							<TableHead>Status</TableHead>
+							<TableHead>Action</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
@@ -138,6 +199,11 @@ export default function StudentMarks() {
 										? "Pass"
 										: "Fail"}
 								</TableCell>
+								<TableCell>
+									<Button variant="outline" onClick={() => handleEdit(subject)}>
+										Edit
+									</Button>
+								</TableCell>
 							</TableRow>
 						))}
 					</TableBody>
@@ -147,6 +213,60 @@ export default function StudentMarks() {
 					No marks data available for this semester
 				</div>
 			)}
+
+			<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+				<DialogContent className="sm:max-w-[425px]">
+					<DialogHeader>
+						<DialogTitle>Edit Marks</DialogTitle>
+						<DialogDescription>
+							Update marks for {editingSubject?.title}
+						</DialogDescription>
+					</DialogHeader>
+
+					<div className="space-y-4 py-4">
+						<div className="space-y-2">
+							<label htmlFor="internal-marks" className="text-sm font-medium">
+								Internal Marks (Max: {editingSubject?.total_internal_marks},
+								Passing: {editingSubject?.internal_passing_marks})
+							</label>
+							<Input
+								id="internal-marks"
+								type="number"
+								min="0"
+								max={editingSubject?.total_internal_marks}
+								value={internalMarks === null ? "" : internalMarks}
+								onChange={(e) =>
+									setInternalMarks(e.target.value ? Number(e.target.value) : null)
+								}
+							/>
+						</div>
+
+						<div className="space-y-2">
+							<label htmlFor="external-marks" className="text-sm font-medium">
+								External Marks (Max: {editingSubject?.total_external_marks},
+								Passing: {editingSubject?.external_passing_marks})
+							</label>
+							<Input
+								id="external-marks"
+								type="number"
+								min="0"
+								max={editingSubject?.total_external_marks}
+								value={externalMarks === null ? "" : externalMarks}
+								onChange={(e) =>
+									setExternalMarks(e.target.value ? Number(e.target.value) : null)
+								}
+							/>
+						</div>
+					</div>
+
+					<div className="flex justify-end gap-4">
+						<Button variant="outline" onClick={handleCancel}>
+							Cancel
+						</Button>
+						<Button onClick={handleSave}>Save Changes</Button>
+					</div>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }

@@ -356,7 +356,7 @@ export default function UserDetails() {
 
 							<SelectContent>
 								{batch.map((batch) => (
-									<SelectItem key={batch.type} value={batch.id.toString()}>
+									<SelectItem key={batch.id} value={batch.id.toString()}>
 										{formatBatchInfo(batch)}
 									</SelectItem>
 								))}
