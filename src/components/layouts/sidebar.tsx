@@ -51,11 +51,6 @@ const items = [
 		icon: ListTree,
 	},
 	{
-		title: "Semester",
-		url: "/admin/semester",
-		icon: Album,
-	},
-	{
 		title: "Batch",
 		url: "/admin/batch",
 		icon: Tag,
