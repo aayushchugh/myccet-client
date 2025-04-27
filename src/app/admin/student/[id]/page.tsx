@@ -409,9 +409,7 @@ export default function UserDetails() {
 									variant="outline"
 									onClick={() => {
 										// Navigate to marks page or perform action
-										router.push(
-											`/admin/students/${id}/semester/${sem.id}/marks`,
-										);
+										router.push(`/admin/student/${id}/semester/${sem.id}`);
 									}}
 								>
 									Semester {sem.title}
