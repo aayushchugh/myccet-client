@@ -70,10 +70,10 @@ export default function TablwView() {
 			await apiService.delete(`/branches/${id}`);
 
 			setData((prevData) => prevData.filter((item) => item.id !== id));
-			toast.success("Task deleted successfully");
+			toast.success("Branch deleted successfully");
 		} catch (error) {
-			console.error("Error deleting task:", error);
-			toast.error("Failed to delete the task");
+			console.error("Error deleting Branch:", error);
+			toast.error("Failed to delete Branch");
 		}
 	};
 	const handleEdit = (row: TableRowData) => {
