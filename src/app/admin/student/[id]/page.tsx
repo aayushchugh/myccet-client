@@ -32,12 +32,19 @@ interface User {
 	mother_name: string;
 	category: string;
 	phone: number;
-
-	batch: { id: number; title: string; type: string };
+	batch: Batch;
 	semester: { id: number; title: string };
 	current_semester_id: number;
 	batch_id: number;
 	email: string;
+}
+
+interface Batch {
+	id: number;
+	title: string;
+	type: string;
+	start_year: string;
+	end_year: string;
 }
 
 export default function UserDetails() {
@@ -46,9 +53,7 @@ export default function UserDetails() {
 	const [user, setUser] = useState<User | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [batch, setBatch] = useState<
-		{ id: number; title: string; type: string; start_year: any; end_year: any }[]
-	>([]);
+	const [batch, setBatch] = useState<Batch[]>([]);
 	const [semesters, setSemesters] = useState<
 		{ id: number; title: string; start_date: string; end_date: string }[]
 	>([]);
@@ -59,7 +64,7 @@ export default function UserDetails() {
 
 		return `${year}`;
 	};
-	const formatBatchInfo = (batch) => {
+	const formatBatchInfo = (batch: Batch | null) => {
 		if (!batch) return "Select Batch";
 
 		const startYear = batch.start_year ? formatDate(batch.start_year) : "";
@@ -72,6 +77,7 @@ export default function UserDetails() {
 	};
 
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [isDownloading, setIsDownloading] = useState(false);
 
 	const {
 		register,
@@ -115,9 +121,23 @@ export default function UserDetails() {
 					});
 
 					setValue("batch_id", userData.batch?.id || 0);
-					setValue("branch", userData.branch?.title || "");
+					setValue("branch", userData.batch?.title || "");
 					setValue("semester_id", userData.semester?.id || 0);
 					setValue("semester", userData.semester?.title || "");
+
+					// Fetch semesters for the user's current batch
+					if (userData.batch?.id) {
+						try {
+							const semestersResponse = await apiService.get(
+								`/batch/${userData.batch.id}`,
+							);
+							const fetchedSemesters = semestersResponse.data.payload.semesters || [];
+							setSemesters(fetchedSemesters);
+						} catch (error) {
+							console.error("Error fetching semesters:", error);
+							setSemesters([]);
+						}
+					}
 				}
 			} catch (error) {
 				setError("Failed to load user data.");
@@ -180,6 +200,29 @@ export default function UserDetails() {
 	if (isLoading) return <div>Loading...</div>;
 	if (error) return <div className="text-red-500">{error}</div>;
 
+	const handleDownload = async () => {
+		setIsDownloading(true);
+		try {
+			const response = await apiService.get(`/students/${id}/certificate/provisional`, {
+				responseType: "blob",
+			});
+			if (response.data) {
+				const blob = new Blob([response.data], { type: "application/pdf" });
+				const url = window.URL.createObjectURL(new Blob([response.data]));
+				const a = document.createElement("a");
+				a.href = url;
+				a.download = `Provisional Certificate - ${user?.first_name} ${user?.last_name}.pdf`;
+				a.click();
+				toast.success("Certificate downloaded successfully");
+			}
+		} catch (error) {
+			console.error("Error downloading provisional certificate:", error);
+			toast.error("Failed to download certificate");
+		} finally {
+			setIsDownloading(false);
+		}
+	};
+
 	return (
 		<div className="p-6">
 			<div className="flex justify-end">
@@ -205,6 +248,36 @@ export default function UserDetails() {
 						</div>
 					</DialogContent>
 				</Dialog>
+
+				<Button className="ml-2" onClick={handleDownload} disabled={isDownloading}>
+					{isDownloading ? (
+						<>
+							<svg
+								className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+							>
+								<circle
+									className="opacity-25"
+									cx="12"
+									cy="12"
+									r="10"
+									stroke="currentColor"
+									strokeWidth="4"
+								></circle>
+								<path
+									className="opacity-75"
+									fill="currentColor"
+									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+								></path>
+							</svg>
+							Downloading...
+						</>
+					) : (
+						"Download Provisional Certificate"
+					)}
+				</Button>
 			</div>
 
 			<form onSubmit={handleSubmit(handleUpdate)}>
@@ -329,18 +402,9 @@ export default function UserDetails() {
 							Batch
 						</Label>
 						<Select
-							onValueChange={async (value) => {
+							onValueChange={(value) => {
 								const batchId = Number(value);
 								setValue("batch_id", batchId);
-
-								try {
-									const response = await apiService.get(`/batch/${batchId}`);
-									const fetchedSemesters = response.data.payload.semesters || [];
-									setSemesters(fetchedSemesters);
-								} catch (error) {
-									console.error("Error fetching semesters:", error);
-									setSemesters([]);
-								}
 							}}
 						>
 							<SelectTrigger error={errors?.batch_id?.message}>
