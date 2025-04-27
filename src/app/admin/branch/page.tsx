@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Trash2 } from "lucide-react";
 import { Pencil } from "lucide-react";
-import { Copy } from "lucide-react";
+
 import { toast } from "sonner";
 import { Check } from "lucide-react";
 import Link from "next/link";
@@ -134,11 +134,6 @@ export default function TablwView() {
 								)}
 							</TableCell>
 
-							<TableCell className="">
-								<div className="">
-									<Copy size={16} />
-								</div>
-							</TableCell>
 							<TableCell>
 								{editingRow === row.id ? (
 									<Check size={16} onClick={() => handleUpdate(row.id)} />

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Trash2, Pencil, Copy, Check, X } from "lucide-react";
+import { Trash2, Pencil, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui";
 import Link from "next/link";
@@ -202,9 +202,7 @@ export default function TableView() {
 									row.external_marks
 								)}
 							</TableCell>
-							<TableCell>
-								<Copy size={16} className="cursor-pointer" />
-							</TableCell>
+
 							<TableCell>
 								{editingRow === row.code ? (
 									<div className="flex gap-2">

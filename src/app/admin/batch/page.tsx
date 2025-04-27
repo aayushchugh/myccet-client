@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Trash2, Pencil, Copy, Check, X } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui";
 import Link from "next/link";
@@ -107,9 +107,6 @@ export default function TableView() {
 							<TableCell className="text-center">
 								{" "}
 								<Link href={`/admin/batch/${row.id}`}>{row.branch}</Link>
-							</TableCell>
-							<TableCell>
-								<Copy size={16} className="cursor-pointer" />
 							</TableCell>
 
 							<TableCell>
