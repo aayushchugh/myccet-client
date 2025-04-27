@@ -123,17 +123,18 @@ export default function StudentMarks() {
 				externalMarks !== null && externalMarks >= editingSubject.external_passing_marks;
 			const isPassed = internalPassed && externalPassed;
 
-			const updatedMarks = {
-				internal_marks: internalMarks,
-				external_marks: externalMarks,
-				total_marks: totalMarks,
-				is_pass: internalMarks !== null && externalMarks !== null ? isPassed : null,
+			const payload = {
+				semester_id: Number(semesterId),
+				marks: [
+					{
+						subject_id: editingSubject.id,
+						internal_marks: internalMarks,
+						external_marks: externalMarks,
+					},
+				],
 			};
 
-			await apiService.put(
-				`/students/${studentId}/semesters/${semesterId}/subjects/${editingSubject.id}/marks`,
-				updatedMarks,
-			);
+			await apiService.post(`/students/${studentId}/marks`, payload);
 
 			toast.success("Marks updated successfully");
 			setIsDialogOpen(false);
