@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
 import {
 	Select,
 	SelectContent,
@@ -49,7 +51,7 @@ export default function SemesterForm() {
 
 	const [allSemesters, setAllSemesters] = useState<Semester[]>([]);
 	const [subjects, setSubjects] = useState<Subject[]>([]);
-
+	const router = useRouter();
 	const { fields, append } = useFieldArray({
 		control,
 		name: "semesters",
@@ -111,10 +113,11 @@ export default function SemesterForm() {
 			const response = await apiService.post(`/batch/${id}/details`, payload);
 			console.log("Saved successfully:", response.data);
 
-			alert("Data saved successfully!");
+			toast.success("Batch updated successfully");
+			router.push("/admin/batch");
 		} catch (error) {
 			console.error("Error saving semester data:", error);
-			alert("Failed to save data.");
+			toast.error("Failed to save data.");
 		}
 	};
 
